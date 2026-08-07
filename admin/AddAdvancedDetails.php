@@ -51,7 +51,7 @@ $advancedPeriod = mysqli_fetch_assoc($advancedResult);
                                     </div>
                                     <div class="portlet-body form">
                                         <div class="alert alert-info">Advanced period: <strong><?php echo htmlspecialchars($advancedPeriod['strMonthYear'], ENT_QUOTES, 'UTF-8'); ?></strong> (<?php echo date('d-m-Y', strtotime($advancedPeriod['fromdate'])); ?> to <?php echo date('d-m-Y', strtotime($advancedPeriod['todate'])); ?>)</div>
-                                        <form id="searchForm" method="post">
+                                        <form id="searchForm" method="post" role="form">
                                             <input type="hidden" id="advancedId" value="<?php echo $advancedId; ?>">
                                             <div class="row">
                                                 <div class="form-group col-md-4"><label for="companyId">Company <span class="required">*</span></label>
@@ -64,8 +64,16 @@ $advancedPeriod = mysqli_fetch_assoc($advancedResult);
                                                     </select>
                                                 </div>
                                                 <div class="form-group col-md-4"><label for="advancedDate">Date <span class="required">*</span></label><input class="form-control" type="date" id="advancedDate" min="<?php echo $advancedPeriod['fromdate']; ?>" max="<?php echo $advancedPeriod['todate']; ?>" required><span class="help-block">Date must be between <?php echo date('d-m-Y', strtotime($advancedPeriod['fromdate'])); ?> and <?php echo date('d-m-Y', strtotime($advancedPeriod['todate'])); ?>.</span></div>
-                                                <div class="form-group col-md-4"><label for="employeeSearch">Employee</label><input class="form-control" type="text" id="employeeSearch" placeholder="Search employee name or code"></div>
-                                                <div class="form-group col-md-12"><button class="btn blue" type="submit"><i class="fa fa-search"></i> Search</button></div>
+                                            </div>
+                                            <hr>
+                                            <div class="row">
+                                                <div class="form-group col-md-4">
+                                                    <label for="employeeSearch"><strong>Search Employee</strong></label>
+                                                    <input class="form-control" type="text" id="employeeSearch" name="employeeSearch" placeholder="Enter employee name or code" autocomplete="off">
+                                                </div>
+                                                <div class="form-group col-md-4 margin-top-20">
+                                                    <button class="btn blue" type="submit" id="searchEmployeeButton"><i class="fa fa-search"></i> Search Employee</button>
+                                                </div>
                                             </div>
                                         </form>
                                         <div id="message"></div>
@@ -106,13 +114,23 @@ $advancedPeriod = mysqli_fetch_assoc($advancedResult);
                 showMessage('danger', xhr.responseText || 'Unable to search employees.');
             });
         });
+        $('#employeeSearch').on('keypress', function(event) {
+            if (event.which === 13) {
+                event.preventDefault();
+                $('#searchEmployeeButton').click();
+            }
+        });
 
         function addAdvancedDetail(employeeId, button) {
             var row = $(button).closest('tr');
             var amount = row.find('.advanced-amount').val();
             var bankId = row.find('.advanced-bank').val();
-            if (!amount || parseFloat(amount) <= 0 || !bankId) {
-                showMessage('danger', 'Enter a valid amount and select a bank.');
+            if (!amount || parseFloat(amount) <= 0) {
+                showMessage('danger', 'Enter a valid amount.');
+                return;
+            }
+            if (!bankId) {
+                showMessage('danger', 'Bank is not configured in the employee master.');
                 return;
             }
             $(button).prop('disabled', true);

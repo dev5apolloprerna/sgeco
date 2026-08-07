@@ -44,8 +44,9 @@ if ($_POST['action'] == 'ListUser') {
                         <td><?php echo htmlspecialchars($advanced['strMonthYear'], ENT_QUOTES, 'UTF-8'); ?></td>
                         <td><?php echo date('d-m-Y', strtotime($advanced['fromdate'])); ?></td>
                         <td><?php echo date('d-m-Y', strtotime($advanced['todate'])); ?></td>
-                        <td><a class="btn blue" href="AddAdvancedDetails.php?token=<?php echo (int) $advanced['iAdvancedMasterId']; ?>" title="Add advanced details" aria-label="Add advanced details"><i class="fa fa-plus"></i></a>
-                            <button type="button" class="btn blue" onclick="editAdvanced(<?php echo (int) $advanced['iAdvancedMasterId']; ?>)" title="Edit"><i class="fa fa-edit"></i></button>
+                        <td>
+                            <a class="btn blue" href="AddAdvancedDetails.php?token=<?php echo (int) $advanced['iAdvancedMasterId']; ?>" title="Add advanced details" aria-label="Add advanced details"><i class="fa fa-plus"></i></a> 
+                            <button type="button" class="btn blue" onclick="editAdvanced(<?php echo (int) $advanced['iAdvancedMasterId']; ?>)" title="Edit"><i class="fa fa-edit"></i></button> 
                             <button type="button" class="btn blue" onclick="deleteAdvanced(<?php echo (int) $advanced['iAdvancedMasterId']; ?>)" title="Delete"><i class="fa fa-trash-o"></i></button>
                         </td>
                     </tr><?php } ?>
