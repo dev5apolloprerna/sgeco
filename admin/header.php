@@ -3,6 +3,7 @@ $MasterEntry = array("State.php", "City.php", "Location.php", "ExcelFormMaster.p
 $salary = array("salarydetails.php", "salarymaster.php");
 $report = array("paypayment.php", "paidpayment.php");
 $reportHistory = array("MultiCompanyPaymentHistory.php", "CompanyPaymentHistory.php");
+$advanced = array("advancedmaster.php");
 ?>
 <div class="page-header">
     <div class="page-header-top">
@@ -152,6 +153,12 @@ $reportHistory = array("MultiCompanyPaymentHistory.php", "CompanyPaymentHistory.
                         ?>
                             <li class="menu-dropdown classic-menu-dropdown  <?php if (basename($_SERVER['REQUEST_URI']) == 'Employee.php') { echo 'active'; } ?>">
                                 <a href="<?php echo $web_url; ?>admin/Employee.php">Employee</a>
+                            </li>
+                        <?php }
+                            if((isset($row['isAdvancedEntry']) && $row['isAdvancedEntry'] == 1) || $_SESSION['AdminType'] == 1){
+                        ?>
+                            <li class="menu-dropdown classic-menu-dropdown <?php if (in_array(basename(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH)), $advanced)) { echo 'active'; } ?>">
+                                <a href="<?php echo $web_url; ?>admin/advancedmaster.php">Advanced</a>
                             </li>
                         <?php }
                             if((isset($row['isSalaryMenu']) && $row['isSalaryMenu'] == 1) || $_SESSION['AdminType'] == 1){

@@ -133,6 +133,7 @@ switch ($action) {
             "iUserId" => $_POST['id'],
             "isMasterMenu" => $_POST['isMasterMenu'],
             "isEmployeeEntry" => $_POST['isEmployeeEntry'],
+            "isAdvancedEntry" => isset($_POST['isAdvancedEntry']) ? $_POST['isAdvancedEntry'] : 0,
             "isSalaryMenu" => $_POST['isSalaryMenu'],
             "isReportMenu" => $_POST['isReportMenu'],
             "isBankReportMenu" => $_POST['isBankReportMenu'],

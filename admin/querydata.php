@@ -9,6 +9,16 @@ include 'password_hash.php';
 include '../PHPMailer-master/PHPMailerAutoload.php';
 
 $action = $_REQUEST['action'];
+
+function hasAdvancedAccess($dbconn) {
+    if ($_SESSION['AdminType'] == 1) {
+        return true;
+    }
+    $result = mysqli_query($dbconn, "SELECT isAdvancedEntry FROM user_rights WHERE iUserId='" . (int) $_SESSION['AdminId'] . "'");
+    $rights = mysqli_fetch_assoc($result);
+    return isset($rights['isAdvancedEntry']) && $rights['isAdvancedEntry'] == 1;
+}
+
 switch ($action) {
     case "UserProfileChangePassword":
         $hash_result = create_hash($_POST['oldpassword']);
@@ -2218,6 +2228,53 @@ switch ($action) {
           catch (Exception $e) {
             echo $e->getMessage(); //Boring error messages from anything else!
         }
+        break;
+        
+    case "AddAdvanced":
+        if (!hasAdvancedAccess($dbconn)) { http_response_code(403); echo '0'; break; }
+        $monthYear = trim($_POST['strMonthYour']);
+        $escapedMonthYear = mysqli_real_escape_string($dbconn, $monthYear);
+        $existing = mysqli_query($dbconn, "SELECT iAdvancedMasterId FROM advanced_master WHERE strMonthYour='" . $escapedMonthYear . "' AND isDelete=0");
+        if ($monthYear === '' || mysqli_num_rows($existing) > 0) {
+            echo $monthYear === '' ? '0' : '3';
+            break;
+        }
+        $data = array(
+            "strMonthYour" => $monthYear,
+            "strEntryDate" => date('d-m-Y H:i:s'),
+            "strIP" => $_SERVER['REMOTE_ADDR'],
+            "iEntryBy" => $_SESSION['AdminId'],
+            "EntryDate" => date('Y-m-d')
+        );
+        $result = $connect->insertrecord($dbconn, 'advanced_master', $data);
+        echo $result ? '1' : '0';
+        break;
+
+    case "GetAdvanced":
+        if (!hasAdvancedAccess($dbconn)) { http_response_code(403); echo '0'; break; }
+        $id = (int) $_REQUEST['ID'];
+        $result = mysqli_query($dbconn, "SELECT * FROM advanced_master WHERE iAdvancedMasterId=" . $id . " AND isDelete=0 AND istatus=1");
+        echo json_encode(mysqli_fetch_assoc($result));
+        break;
+
+    case "EditAdvanced":
+        if (!hasAdvancedAccess($dbconn)) { http_response_code(403); echo '0'; break; }
+        $id = (int) $_POST['iAdvancedMasterId'];
+        $monthYear = trim($_POST['strMonthYour']);
+        $escapedMonthYear = mysqli_real_escape_string($dbconn, $monthYear);
+        $existing = mysqli_query($dbconn, "SELECT iAdvancedMasterId FROM advanced_master WHERE strMonthYour='" . $escapedMonthYear . "' AND iAdvancedMasterId!=" . $id . " AND isDelete=0");
+        if ($id < 1 || $monthYear === '' || mysqli_num_rows($existing) > 0) {
+            echo $monthYear !== '' && mysqli_num_rows($existing) > 0 ? '3' : '0';
+            break;
+        }
+        $data = array(
+            "strMonthYour" => $monthYear,
+            "strIP" => $_SERVER['REMOTE_ADDR'],
+            "iUpdatedBy" => $_SESSION['AdminId'],
+            "UpdatedDate" => date('Y-m-d')
+        );
+        $result = $connect->updaterecord($dbconn, 'advanced_master', $data, ' where iAdvancedMasterId=' . $id);
+        echo $result ? '2' : '0';
         break;
     
     default:
