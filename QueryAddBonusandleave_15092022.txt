@@ -1,0 +1,5 @@
+ALTER TABLE `salarydetails`  ADD `iBonusAmt` DECIMAL(11,2) NOT NULL DEFAULT '0'  AFTER `national_holiday_payment`,  ADD `iLeaveAmt` DECIMAL(11,2) NOT NULL DEFAULT '0'  AFTER `iBonusAmt`;
+
+
+ALTER TABLE `companymaster`  ADD `strBonus` VARCHAR(50) NULL DEFAULT NULL  AFTER `MedicalAllowancePer`,  ADD `strLeave` VARCHAR(50) NULL DEFAULT NULL  AFTER `strBonus`;
+

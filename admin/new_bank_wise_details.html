@@ -1,0 +1,97 @@
+<html>
+    <table style="width : 1000px" cellspacing="0" cellpadding="5" border="0" bgcolor="#ffffff">
+        <tr>
+            <td align="left">
+                <div style="font-size: 12px; font-family: helvetica,arial,sans-serif;">
+                    <table width="100%" cellspacing="0" cellpadding="5" border="0" style="font-size: 18px; margin-top: 200px; color: #000;">
+                        <tr>
+                            <td style="text-align:right; font-weight : bold; font-size:20px;"><strong>Date : #date#</strong></td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight : bold; font-size:20px;"><strong>SUB : PAYMENT SHEET<br />
+                                SITE : #Company#<br /> <!-- #city# -->
+                                Month : #DisplayMonth# - #bankname# - Bank Payment</strong>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <table width="1700px" cellspacing="0" cellpadding="5" border="1" style="font-size: 18px; color: #000;">
+                                    <tr style="background-color: #ccc; font-size: 16px">
+                                        <td style="width: 60px;text-align: center;"><strong>Sr. No.</strong></td>
+                                        <td style="width: 220px;text-align: center;"><strong>Beneficiary Account Number</strong></td>
+                                        <td style="width: 110px;text-align: center;"><strong>Amount</strong></td>
+                                        <td style="text-align: center; #BankNameStyle#"><strong>Beneficiary Name</strong></td>
+                                        <td style="width: 100px;text-align: center; #bankstyle#"><strong>Beneficiary Address</strong></td>
+                                        <td style="width: 170px;text-align: center;"><strong>IFSC Code</strong></td>
+                                        <td style="width: 70px;text-align: center; #bankstyle#"><strong>Comm.</strong></td>
+                                        
+                                    </tr>
+                                    #banktr#
+                                    <tr style="background-color: #ccc; font-size: 16px">
+                                        <td style="text-align: center;" colspan="2"><strong>Total</strong></td>
+                                        <td style="text-align: right; font-size: 18px"><strong>#netamounttotal#</strong></td>
+                                        <td></td>
+                                        <td style="#bankstyle#"></td>
+                                        <td></td>
+                                        <td style="text-align: right; #bankstyle#"><strong>#BankComm#</strong></td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr><td>&nbsp;</td></tr>
+                    </table>
+                    <!--<table width="100%" cellspacing="0" cellpadding="5" border="0" style="font-size: 14px;padding: 20px 0 0 0;float: left; color: #000;"><tr><td style="font-weight : bold;padding: 30px 0 0 0 ;text-align: right; float: left; font-size:20px;">FOR, SHREE GANESH ENGINEERING CO.<br/><br/> <br/><br/>                              
+                                HITESH.K.SHAH (PARTNER)                            
+                            </td>
+                    <!--<td style=" font-size:15px; margin-top: -50px"><strong>#date#</strong></td>-->
+                    <!--</tr>
+                </table> -->
+                    <table width="100%" cellspacing="0" cellpadding="5" border="0" style="font-size: 14px;padding: 20px 0 0 0;float: left; color: #000;">
+                        <tr>
+                            <td style="font-weight : bold;padding: 30px 0 0 0 ;text-align: right; float: left; font-size:20px;">FOR, SHREE GANESH ENGINEERING CO.
+                        </td>
+                            <!--<td style=" font-size:15px; margin-top: -50px"><strong>#date#</strong></td>-->
+                        </tr>
+                    </table>
+                    
+                    <table width="40%" cellspacing="0" cellpadding="5" border="1" style="font-size: 14px;padding: 20px 0 0 0;float: right; color: #000; #CommBankstyle#">
+                        <tr>
+                            <td>Amount.</td>
+                            <td style="text-align: right;">#netamounttotal#</td>
+                        </tr>
+                        <tr>
+                            <td>Bank Comm.</td>
+                            <td style="text-align: right;">#BankComm#</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Total Amt.</strong></td>
+                            <td style="text-align: right;"><strong>#TotalAmt#</strong></td>
+                        </tr>
+                    </table>
+                    <table width="100%" cellspacing="0" cellpadding="5" border="0" style="font-size: 14px;padding: 20px 0 0 0;float: right; color: #000; #Comm_Bankstyle#">
+                        <tr>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                        </tr>
+                    </table>
+                    <br /><br />
+                    <table width="100%" cellspacing="0" cellpadding="5" border="0" style="font-size: 14px;padding: 20px 0 0 0;color: #000;">
+                        <tr>
+                            <td style="width: 120px; font-weight : bold;padding: 22px 0 0 0;text-align:left; font-size:20px;margin: 0 15px 0 0;">Cheque no.</td>
+                            <td style="width: 300px;height: 30px;border: 1px solid #000;text-align: left;"></td>
+                            <td style="width: 370px;"></td>
+                            <td style="width: 300px;font-weight : bold;padding: 30px 0 0 0;text-align: right;margin: 0 0 0 450px;font-size:20px;">HITESH.K.SHAH (PARTNER)</td>
+                        </tr>
+                    </table>
+                </div>
+
+            </td>
+        </tr>
+
+    </table>
+</html>

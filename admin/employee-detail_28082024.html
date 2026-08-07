@@ -1,0 +1,434 @@
+<style>
+    table,
+    th,
+    td {
+
+        border-collapse: collapse !important;
+        
+        font-family: sans-serif !important;
+    }
+
+    table {
+        border-collapse: collapse;
+        /* Set border collapse */
+        width: 100%;
+
+
+    }
+    .center{text-align: center;}
+    .border td,
+    .border th {
+        border: 1px solid rgb(168, 168, 168) !important;
+    }
+
+    .noborder td {
+        border: none !important;
+        
+    }
+.border{
+    border: 1px solid black;
+}
+.padding5 th, .padding5 td{padding: 5px !important; }
+    * {
+        font-family: DejaVu Sans !important;
+        font-size: 15px;
+    }
+</style>
+
+<table style="width: 1200px;margin: 0 auto;">
+    <tr>
+        <td>
+            <table style="width:100%">
+                <tr>
+                    <td width="70%">
+                        <table cellspacing="6" cellpadding="5" >
+                            <tr>
+                                <td colspan="5">
+                                    <h1 style="font-size: 18px;text-align: center;">EMPLOYEE'S DETAILS</h1>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">EP CODE</td>
+                                <td align="center" class="border" >
+                                    #employeecode#
+                                    </td>
+                                <td colspan="2" border="0"></td>
+                            </tr>
+                            <tr>
+                                <td width="30%">1) PF. No.</td>
+                                <td width="4%">:-</td>
+                                <td width="36%" class="border"> #pfno#</td>
+                                <td width="15%" style="text-align: right;">2) ESIC No.</td>
+                                <td width="15%" align="right" class="border">#ecsno#</td>
+                            </tr>
+                            <tr>
+                                <td>3) Name & Surname</td>
+                                <td>:-</td>
+                                <td colspan="3" class="border"> #emp_name# </td>
+                            </tr>
+                            <tr>
+                                <td>4) Father Name </td>
+                                <td>:-</td>
+                                <td colspan="3" class="border"> #strFatherName#</td>
+                            </tr>
+                            <tr>
+                                <td>5) Date of Birth</td>
+                                <td >:-</td>
+                                <td class="border"> #dateofbirth#</td>
+                                <td colspan="2">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td>6) Marital Status </td>
+                                <td>:-</td>
+                                <td colspan="2" > 
+                                <table cellspacing="0" cellpadding="1" width="80%">
+                                    <tr>
+                                        <td  width="35%">MARRIED &nbsp;&nbsp;</td>
+                                         <td width="15%" class="border"></td> &nbsp;
+                                         <td  width="35%">UNMARRIED &nbsp;&nbsp;</td>
+                                         <td width="15%" class="border"></td>
+                                    </tr>
+                                </table>
+                                
+                                </td>
+                                <td >&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td>7) Date of Joining</td>
+                                <td >:-</td>
+                                <td class="border">#dateofjoining#</td>
+                                <td colspan="2">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td>8) Nature of Work</td>
+                                <td>:-</td>
+                                <td colspan="3" class="border"> </td>
+                            </tr>
+                            <tr>
+                                <td>9) Monthly / Per Day Wages</td>
+                                <td >:-</td>
+                                <td class="border"></td>
+                                <td colspan="2">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td>10)Address (A) Permanent</td>
+                                <td>:-</td>
+                                <td colspan="3" class="border">#PermanentAddressOne#</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td>:-</td>
+                                <td colspan="3" class="border">#PermanentAddressTwo#</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td>:-</td>
+                                <td colspan="3" class="border">#PermanentAddressThree#</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp; &nbsp; &nbsp;Address (B) Local</td>
+                                <td>:-</td>
+                                <td colspan="3" class="border">#LocalAddressOne#</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td>:-</td>
+                                <td colspan="3" class="border">#LocalAddressTwo# </td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td>:-</td>
+                                <td colspan="3" class="border">#LocalAddressThree#</td>
+                            </tr>
+                            <tr>
+                                <td>11) Name of Nominee</td>
+                                <td>:-</td>
+                                <td class="border">#strNomineeName# </td>
+                                <td style="text-align: right;">Relationship with Member :-</td>
+                                <td align="right" class="border">#strNomineeRelation#</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td style="text-align: right;">Date of Birth:-</td>
+                                <td align="right" class="border"></td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td width="20%" align="right" class="">
+                        <br>
+                        <br><br><br>
+                        <table><tr>
+                            <td style=" height:150px; width:120px"></td>
+                            <td style="border:1px solid #000; height:150px; width:120px"></td></tr></table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr class="padding5" cellpadding="5">
+        <td>
+            <!--12) Full Family Details:- -->
+            <table style="width:100%">
+                <tr>
+                    <td width="70%">
+                        <table cellspacing="6" cellpadding="5" >
+                            <tr>
+                                <td width="100%">12) Full Family Details</td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td width="20%" align="right" class="">
+                        <!--<div style="display: block;border: 1px solid #ccc;width: 100px;height: 130px;position: absolute;top: 5px;right: 5px;"> </div>-->
+                    </td>
+                </tr>
+            </table>
+        </td>
+   </tr>
+   <tr>
+       <td><br/></td>
+   </tr>
+    <tr>
+        <td style="padding-left:30px">&nbsp; &nbsp; &nbsp; &nbsp;
+            <table  cellspacing="0" cellpadding="5" border="1" style="width: 1000px;margin-left: 20px;">
+
+                <tr>
+                    <th style="text-align: center;width: 5%;">
+                        S. No.
+                    </th>
+                    <th width="50%"> Name</th>
+                    <th style="text-align: center;" width="15%"> Date of Birth</th>
+                    <th style="text-align: center;" width="30%"> Relationship with Member</th>
+                </tr>
+               #tableDetails#
+                <!--<tr>-->
+                <!--    <td>-->
+                <!--        1-->
+                <!--    </td>-->
+                <!--    <td>-->
+
+                <!--    </td>-->
+                <!--    <td>-->
+
+                <!--    </td>-->
+                <!--    <td>-->
+
+                <!--    </td>-->
+                <!--</tr>-->
+                <!--<tr>-->
+                <!--    <td>-->
+                <!--        2-->
+                <!--    </td>-->
+                <!--    <td>-->
+
+                <!--    </td>-->
+                <!--    <td>-->
+
+                <!--    </td>-->
+                <!--    <td>-->
+
+                <!--    </td>-->
+                <!--</tr>-->
+                <!--<tr>-->
+                <!--    <td>-->
+                <!--        3-->
+                <!--    </td>-->
+                <!--    <td>-->
+
+                <!--    </td>-->
+                <!--    <td>-->
+
+                <!--    </td>-->
+                <!--    <td>-->
+
+                <!--    </td>-->
+                <!--</tr>-->
+                <!--<tr>-->
+                <!--    <td>-->
+                <!--        4-->
+                <!--    </td>-->
+                <!--    <td>-->
+
+                <!--    </td>-->
+                <!--    <td>-->
+
+                <!--    </td>-->
+                <!--    <td>-->
+
+                <!--    </td>-->
+                <!--</tr>-->
+                <!--<tr>-->
+                <!--    <td>-->
+                <!--        5-->
+                <!--    </td>-->
+                <!--    <td>-->
+
+                <!--    </td>-->
+                <!--    <td>-->
+
+                <!--    </td>-->
+                <!--    <td>-->
+
+                <!--    </td>-->
+                <!--</tr>-->
+                <!--<tr>-->
+                <!--    <td>-->
+                <!--        6-->
+                <!--    </td>-->
+                <!--    <td>-->
+
+                <!--    </td>-->
+                <!--    <td>-->
+
+                <!--    </td>-->
+                <!--    <td>-->
+
+                <!--    </td>-->
+                <!--</tr>-->
+                <!--<tr>-->
+                <!--    <td>-->
+                <!--        7-->
+                <!--    </td>-->
+                <!--    <td>-->
+
+                <!--    </td>-->
+                <!--    <td>-->
+
+                <!--    </td>-->
+                <!--    <td>-->
+
+                <!--    </td>-->
+                <!--</tr>-->
+               
+               
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td><br><br></td>
+    </tr>
+    <tr>
+        <td>&nbsp; &nbsp; &nbsp; &nbsp;
+            <table  cellspacing="0" cellpadding="5" border="1" style="width: 700px;">
+                <tr>
+                    <td style="width: 35%;"> 
+                        Educational Qualification :-
+                    </td>
+                    <td  style="width: 65%;">
+                        #EducationalQualification#
+                    </td>
+                </tr>
+                <tr>
+                    <td> 
+                        Pan card :-
+                    </td>
+                    <td>
+                        #pancard#
+                    </td>
+                </tr>
+                <tr>
+                    <td> 
+                        Election card :-
+                    </td>
+                    <td>
+                        #electioncard#
+                    </td>
+                </tr>
+                <tr>
+                    <td> 
+                        Driving Licence :-
+                    </td>
+                    <td>
+                        #DrivingLicence#
+                    </td>
+                </tr>
+                <tr>
+                    <td> 
+                        Aadhar card :-
+                    </td>
+                    <td>
+                        #Aadharcard#
+                    </td>
+                </tr>
+                <tr>
+                    <td> 
+                        Passport :-
+                    </td>
+                    <td>
+                        #Passport#
+                    </td>
+                </tr>
+                <tr>
+                    <td> 
+                        Mobile No :-
+                    </td>
+                    <td>
+                        #MobileNo#
+                    </td>
+                </tr>
+                <tr>
+                    <td> 
+                        Bank A/c No :-
+                    </td>
+                    <td>
+                        #BankAcNo#
+                    </td>
+                </tr>
+                <tr>
+                    <td> 
+                        Bank Branch :-
+                    </td>
+                    <td>
+                        #BankBranch#
+                    </td>
+                </tr>
+                <tr>
+                    <td> 
+                        IFSC Code :-
+                    </td>
+                    <td>
+                        #IFSCCode#
+                    </td>
+                </tr>
+                <tr>
+                    <td> 
+                        UAN No :-
+                    </td>
+                    <td>
+                        #UANNo#
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td> 
+                       Email id :-
+                    </td>
+                    <td>
+                        #EmailId#
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" style="background-color: #ccc; color: #000; font-weight: bold;">
+                        Code: I- Illiterate | N- Non Metric | M- Metric | S- Senior Secondary <br>
+                         &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; G- Gradute | P- Post Graduate | D- Doctorate
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr><td><br><br></td></tr>
+    <tr><td><br><br></td></tr>
+    <!--<tr><td><br><br></td></tr>-->
+   <tr>
+    <td>
+        <table>
+            <tr>
+                <td>Date: _______________________</td>
+                <td>Signature: _______________________</td>
+            </tr>
+        </table>
+    </td>
+   </tr>
+    
+</table>

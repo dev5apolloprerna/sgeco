@@ -1,0 +1,15 @@
+[04-Jul-2025 19:16:21 Asia/Calcutta] PHP Warning:  mysqli_num_rows() expects parameter 1 to be mysqli_result, bool given in /home1/sgeco/public_html/webservices/webservices.php on line 123
+[09-Jul-2025 17:09:32 Asia/Calcutta] PHP Warning:  mysqli_num_rows() expects parameter 1 to be mysqli_result, bool given in /home1/sgeco/public_html/webservices/webservices.php on line 123
+[18-Jul-2025 15:00:09 Asia/Calcutta] PHP Warning:  mysqli_num_rows() expects parameter 1 to be mysqli_result, bool given in /home1/sgeco/public_html/webservices/webservices.php on line 123
+[19-Jul-2025 23:59:06 Asia/Calcutta] PHP Warning:  mysqli_num_rows() expects parameter 1 to be mysqli_result, bool given in /home1/sgeco/public_html/webservices/webservices.php on line 123
+[13-Aug-2025 12:53:25 Asia/Calcutta] PHP Warning:  mysqli_num_rows() expects parameter 1 to be mysqli_result, bool given in /home1/sgeco/public_html/webservices/webservices.php on line 123
+[27-Nov-2025 21:50:32 Asia/Calcutta] PHP Warning:  mysqli_num_rows() expects parameter 1 to be mysqli_result, bool given in /home1/sgeco/public_html/webservices/webservices.php on line 123
+[14-Jan-2026 19:18:16 Asia/Calcutta] PHP Warning:  mysqli_num_rows() expects parameter 1 to be mysqli_result, bool given in /home1/sgeco/public_html/webservices/webservices.php on line 123
+[18-Feb-2026 10:51:30 Asia/Calcutta] PHP Warning:  mysqli_num_rows() expects parameter 1 to be mysqli_result, bool given in /home1/sgeco/public_html/webservices/webservices.php on line 123
+[08-Mar-2026 16:32:11 Asia/Calcutta] PHP Warning:  mysqli_num_rows() expects parameter 1 to be mysqli_result, bool given in /home1/sgeco/public_html/webservices/webservices.php on line 123
+[25-Mar-2026 23:04:31 Asia/Calcutta] PHP Warning:  mysqli_num_rows() expects parameter 1 to be mysqli_result, bool given in /home1/sgeco/public_html/webservices/webservices.php on line 123
+[08-Apr-2026 11:05:41 Asia/Calcutta] PHP Warning:  mysqli_num_rows() expects parameter 1 to be mysqli_result, bool given in /home1/sgeco/public_html/webservices/webservices.php on line 123
+[12-May-2026 13:26:46 Asia/Calcutta] PHP Warning:  mysqli_num_rows() expects parameter 1 to be mysqli_result, bool given in /home1/sgeco/public_html/webservices/webservices.php on line 123
+[20-May-2026 17:33:43 Asia/Calcutta] PHP Warning:  mysqli_num_rows() expects parameter 1 to be mysqli_result, bool given in /home1/sgeco/public_html/webservices/webservices.php on line 123
+[03-Jul-2026 23:29:54 Asia/Calcutta] PHP Warning:  mysqli_num_rows() expects parameter 1 to be mysqli_result, bool given in /home1/sgeco/public_html/webservices/webservices.php on line 123
+[07-Aug-2026 14:26:25 Asia/Calcutta] PHP Warning:  mysqli_num_rows() expects parameter 1 to be mysqli_result, bool given in /home1/sgeco/public_html/webservices/webservices.php on line 123

@@ -1,0 +1,686 @@
+1) Action : userlogin
+
+Url : http://getdemo.in/sgeco/webservices/webservices.php?action=userlogin
+
+Request : 
+{
+  "iMobile":"9876543211",
+  "strDeviceToken" : "",
+  "strPassword" : 1234
+}
+
+Response :
+
+{
+"iAndroidUserId": "1",
+"iMobile": "9876543211",
+"strUserName": "Test",
+"strDeviceToken": "",
+"message": "Login Successfully Done",
+"success": "1"
+}
+
+2) Action : searchemployeebyaadhar
+
+Url : http://getdemo.in/sgeco/webservices/webservices.php?action=searchemployeebyaadhar
+
+Request : 
+{
+    "iMobile":"9876543211",
+    "strDeviceToken" : "",
+    "strPassword" : 1234,
+    "strAdharcardNo" : "95487607"
+}
+
+Response :
+
+{
+    "data": [
+          {
+            "employeeId": "1",
+            "emp_name": "Rajaram Sukhaji Ramlal Yadav",
+            "emp_other_info": null,
+            "mno": "",
+            "address": null,
+            "bankid": "",
+            "otherbankname": null,
+            "ecsno": "",
+            "accountno": "A/C. 045001000014765",
+            "ifsccode": "IOBA0000450",
+            "salaryamt": null,
+            "strEntryDate": null,
+            "strIP": null,
+            "istatus": "1",
+            "isDelete": "0",
+            "designation": null,
+            "designationid": "0",
+            "Skill": null,
+            "pfcode": "83",
+            "employeecode": "83",
+            "pancard": "ADCPY3281E",
+            "drivinglicense": "",
+            "electioncard": "",
+            "adharcard": "954876073992",
+            "passport": "",
+            "other": null,
+            "dateofbirth": "11/17/1958",
+            "uan": "100768427274",
+            "dateofjoining": "Jul-96",
+            "pancardImage": null,
+            "voteridImage": null,
+            "aadharImage": null,
+            "passportImage": null
+        }
+    ],
+    "message": "Employee List.",
+    "success": "1"
+}
+
+3) Action : designationlist
+
+Url : http://getdemo.in/sgeco/webservices/webservices.php?action=designationlist
+
+Request : 
+
+{
+  "iMobile":"9876543211",
+  "strDeviceToken" : "",
+  "strPassword" : 1234
+}
+
+Resposne : 
+{
+    "DesignationList": [
+        {
+            "designationid": "1",
+            "designation": "supervisor",
+            "strEntryDate": "11-07-2019 12:28:30",
+            "strIP": "43.243.36.153",
+            "istatus": "1",
+            "isDelete": "0"
+        },
+        {
+            "designationid": "2",
+            "designation": "Rigger",
+            "strEntryDate": "11-07-2019 12:27:51",
+            "strIP": "43.243.36.153",
+            "istatus": "1",
+            "isDelete": "0"
+        },
+        {
+            "designationid": "3",
+            "designation": "FITTER",
+            "strEntryDate": "25-11-2019 10:19:58",
+            "strIP": "49.36.6.135",
+            "istatus": "1",
+            "isDelete": "0"
+        },
+        {
+            "designationid": "4",
+            "designation": "HELPER",
+            "strEntryDate": "11-07-2019 12:29:18",
+            "strIP": "43.243.36.153",
+            "istatus": "1",
+            "isDelete": "0"
+        },
+        {
+            "designationid": "5",
+            "designation": "HELPER",
+            "strEntryDate": "18-07-2019 17:38:34",
+            "strIP": "49.36.1.7",
+            "istatus": "1",
+            "isDelete": "0"
+        },
+        {
+            "designationid": "6",
+            "designation": "Electrician",
+            "strEntryDate": "25-11-2019 10:05:49",
+            "strIP": "49.36.6.135",
+            "istatus": "1",
+            "isDelete": "0"
+        },
+        {
+            "designationid": "7",
+            "designation": "GRINDER",
+            "strEntryDate": "25-11-2019 10:20:16",
+            "strIP": "49.36.6.135",
+            "istatus": "1",
+            "isDelete": "0"
+        },
+        {
+            "designationid": "8",
+            "designation": "GAS CUTTER",
+            "strEntryDate": "25-11-2019 10:36:20",
+            "strIP": "49.36.6.135",
+            "istatus": "1",
+            "isDelete": "0"
+        },
+        {
+            "designationid": "9",
+            "designation": "WELDER",
+            "strEntryDate": "25-11-2019 11:06:26",
+            "strIP": "49.36.6.135",
+            "istatus": "1",
+            "isDelete": "0"
+        },
+        {
+            "designationid": "10",
+            "designation": "DRIVER",
+            "strEntryDate": "26-05-2020 12:01:17",
+            "strIP": "157.32.147.53",
+            "istatus": "1",
+            "isDelete": "0"
+        }
+    ],
+    "message": "Designation List.",
+    "success": "1"
+}
+
+
+4) Action : banklist
+
+Url : http://getdemo.in/sgeco/webservices/webservices.php?action=banklist 
+
+Request : 
+{
+  "iMobile":"9876543211",
+  "strDeviceToken" : "",
+  "strPassword" : 1234
+}
+
+Resposne :
+{
+  "BankList": [
+    {
+      "bankmasterId": "1",
+      "bankname": "BOB",
+      "City": "Ahemdabad",
+      "MedicalAllowance": null,
+      "MedicalAllowancePer": "0",
+      "strEntryDate": "25-07-2018 17:48:31",
+      "strIP": "127.0.0.1",
+      "istatus": "1",
+      "isDelete": "0"
+    },
+    {
+      "bankmasterId": "2",
+      "bankname": "SBI",
+      "City": "Ahemdabad",
+      "MedicalAllowance": null,
+      "MedicalAllowancePer": "0",
+      "strEntryDate": "31-10-2020 17:55:29",
+      "strIP": "49.34.175.20",
+      "istatus": "1",
+      "isDelete": "0"
+    },
+    {
+      "bankmasterId": "3",
+      "bankname": "Other",
+      "City": "ahemdabad",
+      "MedicalAllowance": null,
+      "MedicalAllowancePer": "0",
+      "strEntryDate": "30-07-2018 18:24:01",
+      "strIP": "127.0.0.1",
+      "istatus": "1",
+      "isDelete": "0"
+    },
+    {
+      "bankmasterId": "9",
+      "bankname": "Central Bank of India",
+      "City": "ahmedabad",
+      "MedicalAllowance": null,
+      "MedicalAllowancePer": "0",
+      "strEntryDate": "09-11-2019 17:40:36",
+      "strIP": "49.36.6.135",
+      "istatus": "1",
+      "isDelete": "0"
+    },
+    {
+      "bankmasterId": "10",
+      "bankname": "Bank of India",
+      "City": "ahmedabad",
+      "MedicalAllowance": null,
+      "MedicalAllowancePer": "0",
+      "strEntryDate": "09-11-2019 17:41:52",
+      "strIP": "49.36.6.135",
+      "istatus": "1",
+      "isDelete": "0"
+    },
+    {
+      "bankmasterId": "11",
+      "bankname": "CANARA BANK",
+      "City": "VODADARA",
+      "MedicalAllowance": null,
+      "MedicalAllowancePer": "0",
+      "strEntryDate": "14-11-2019 17:17:42",
+      "strIP": "49.36.6.135",
+      "istatus": "1",
+      "isDelete": "0"
+    },
+    {
+      "bankmasterId": "12",
+      "bankname": "Cash",
+      "City": "Ahmedabad",
+      "MedicalAllowance": "0",
+      "MedicalAllowancePer": "0",
+      "strEntryDate": "16-11-2019",
+      "strIP": null,
+      "istatus": "1",
+      "isDelete": "0"
+    },
+    {
+      "bankmasterId": "13",
+      "bankname": "PUNJAB NATIONAL BANK",
+      "City": "BIHAR",
+      "MedicalAllowance": null,
+      "MedicalAllowancePer": "0",
+      "strEntryDate": "25-11-2019 11:17:55",
+      "strIP": "49.36.6.135",
+      "istatus": "1",
+      "isDelete": "0"
+    },
+    {
+      "bankmasterId": "14",
+      "bankname": "IDFC BANK LIMITED",
+      "City": "KHANDWA",
+      "MedicalAllowance": null,
+      "MedicalAllowancePer": "0",
+      "strEntryDate": "25-11-2019 11:23:56",
+      "strIP": "49.36.6.135",
+      "istatus": "1",
+      "isDelete": "0"
+    },
+    {
+      "bankmasterId": "15",
+      "bankname": "UNION BANK OF INDIA",
+      "City": "VODADARA",
+      "MedicalAllowance": null,
+      "MedicalAllowancePer": "0",
+      "strEntryDate": "25-11-2019 11:28:47",
+      "strIP": "49.36.6.135",
+      "istatus": "1",
+      "isDelete": "0"
+    },
+    {
+      "bankmasterId": "16",
+      "bankname": "UNITED BANK OF INDIA",
+      "City": "ALAPUR",
+      "MedicalAllowance": null,
+      "MedicalAllowancePer": "0",
+      "strEntryDate": "25-11-2019 14:16:36",
+      "strIP": "49.36.6.135",
+      "istatus": "1",
+      "isDelete": "0"
+    },
+    {
+      "bankmasterId": "17",
+      "bankname": "AXIS BANK",
+      "City": "DAHEJ",
+      "MedicalAllowance": null,
+      "MedicalAllowancePer": "0",
+      "strEntryDate": "19-05-2020 11:05:30",
+      "strIP": "157.32.82.155",
+      "istatus": "1",
+      "isDelete": "0"
+    },
+    {
+      "bankmasterId": "18",
+      "bankname": "HDFC Bank",
+      "City": "Bihar",
+      "MedicalAllowance": null,
+      "MedicalAllowancePer": "0",
+      "strEntryDate": "30-10-2020 14:42:59",
+      "strIP": "49.36.75.217",
+      "istatus": "1",
+      "isDelete": "0"
+    }
+  ],
+  "message": "Bank List.",
+  "success": "1"
+}
+
+5) Action : addemployee
+
+Url : http://getdemo.in/sgeco/webservices/webservices.php?action=addemployee
+
+Request : 
+{
+  "iMobile":"9876543211",
+  "strDeviceToken" : "",
+  "strPassword" : 1234,
+  "emp_name" : "Tarang",
+  "emp_other_info" : "",
+  "mno":"",
+  "address" : "",
+  "bankid" : 0,
+  "ecsno" : "",
+  "accountno " : "",
+  "ifsccode" :"",
+  "designation" : 0,
+  "pfcode" :"",
+  "employeecode": "",
+  "aadharcard" :"",
+  "pancard" :"",
+  "voterid" : "",
+  "passport" :"",
+  "dateofbirth":"",
+  "uan":"",
+  "dateofjoining":""
+}
+
+Response : 
+
+{
+    "iTempEmpId": 1,
+    "message": "Employee added successfully.",
+    "success": "0"
+}
+
+
+6) Action  : documentlist
+
+Url : http://getdemo.in/sgeco/webservices/webservices.php?action=documentlist
+
+Request : 
+{
+  "iMobile":"9876543211",
+  "strDeviceToken" : "b9eb425b30f90b34",
+  "strPassword" : 1234,
+  "iTempEmpId" : 1
+}
+
+
+Resposne : 
+
+{
+  "Documentist": [
+    {
+      "iDocumentId": "1",
+      "strDocumentName": "Aadhar Card",
+      "strEntryDate": "15-05-2023 14:23:25",
+      "strIP": "103.1.100.226",
+      "isDelete": "0",
+      "iStatus": "1"
+    },
+    {
+      "iDocumentId": "2",
+      "strDocumentName": "Pan Card",
+      "strEntryDate": "15-05-2023 14:23:40",
+      "strIP": "103.1.100.226",
+      "isDelete": "0",
+      "iStatus": "1"
+    },
+    {
+      "iDocumentId": "3",
+      "strDocumentName": "Voter Id",
+      "strEntryDate": "15-05-2023 14:23:47",
+      "strIP": "103.1.100.226",
+      "isDelete": "0",
+      "iStatus": "1"
+    },
+    {
+      "iDocumentId": "4",
+      "strDocumentName": "Other Document",
+      "strEntryDate": "15-05-2023 14:23:55",
+      "strIP": "103.1.100.226",
+      "isDelete": "0",
+      "iStatus": "1"
+    }
+  ],
+  "message": "Document List.",
+  "success": "1"
+}
+
+7) Action : adddocumentphotos
+
+Url : http://getdemo.in/sgeco/webservices/webservices.php?action=adddocumentphotos
+
+Request : 
+Body Content type : multipart/form-data
+{
+    "image" : "Test.png",
+    "iMobile":"9876543211",
+    "strDeviceToken" : "b9eb425b30f90b34",
+    "strPassword" : 1234,
+    "iTempEmpId" : 1,
+    "iDocumentId" : 1
+} 
+
+Response : 
+{
+    "message": "sucess",
+    "success": "1"
+}
+
+8) Action : documentphotoslist
+
+http://getdemo.in/sgeco/webservices/webservices.php?action=documentphotoslist
+
+Request : 
+{
+	"iMobile":"9876543211",
+    "strDeviceToken" : "b9eb425b30f90b34",
+    "strPassword" : 1234,
+    "iTempEmpId" : 1
+}
+
+
+Response : 
+{
+  "Documentist": [
+    {
+      "iTempDocId": "1",
+      "iTempEmpId": "1",
+      "iDocumentId": "1",
+      "strDocumentName": "Aadhar Card",
+      "strDocumentImage": "http://getdemo.in/sgeco//admin/TempDocument/1684156943.png",
+      "strEntryDate": "15-05-2023 18:52:23"
+    },
+    {
+      "iTempDocId": "2",
+      "iTempEmpId": "1",
+      "iDocumentId": "2",
+      "strDocumentName": "Pan Card",
+      "strDocumentImage": "http://getdemo.in/sgeco//admin/TempDocument/1684157198.png",
+      "strEntryDate": "15-05-2023 18:56:38"
+    }
+  ],
+  "message": "Document List.",
+  "success": "1"
+}
+
+9) Action  : deletedocumentphotos
+
+Url : http://getdemo.in/sgeco/webservices/webservices.php?action=deletedocumentphotos
+
+Request : 
+{
+	"iMobile":"9876543211",
+    "strDeviceToken" : "b9eb425b30f90b34",
+    "strPassword" : 1234,
+    "iTempEmpId" : 1,
+  	"iTempDocId" : 1
+}
+
+Resposne : 
+{
+    "message": "success.",
+    "success": "1"
+}
+
+10) Action : tempemployeereport
+
+Url : https://getdemo.in/sgeco/webservices/webservices.php?action=tempemployeereport
+
+Request : 
+{
+  "iMobile": "9876543210",
+  "strPassword": "1234",
+  "strDeviceToken" : "",
+  "strFromDate" : "01-06-2023",
+  "strToDate" : "13-06-2023",
+  "strEmployeeName" : "Y"
+}
+
+Response : 
+ {
+   "TempEmployeeList": [{
+     "iTempEmpId": "56",
+     "emp_name": "ggy",
+     "adharcard": "",
+     "strEntryDate": "05-06-2023 16:21:07"
+   }, {
+     "iTempEmpId": "81",
+     "emp_name": "gsy",
+     "adharcard": "",
+     "strEntryDate": "05-06-2023 18:45:34"
+   }, {
+     "iTempEmpId": "36",
+     "emp_name": "jay",
+     "adharcard": "",
+     "strEntryDate": "05-06-2023 12:38:15"
+   }, {
+     "iTempEmpId": "29",
+     "emp_name": "jiya",
+     "adharcard": "",
+     "strEntryDate": "05-06-2023 11:56:16"
+   }, {
+     "iTempEmpId": "30",
+     "emp_name": "jiya12",
+     "adharcard": "",
+     "strEntryDate": "05-06-2023 12:06:13"
+   }, {
+     "iTempEmpId": "35",
+     "emp_name": "joy",
+     "adharcard": "",
+     "strEntryDate": "05-06-2023 12:30:35"
+   }, {
+     "iTempEmpId": "84",
+     "emp_name": "sgys",
+     "adharcard": "",
+     "strEntryDate": "07-06-2023 11:09:50"
+   }, {
+     "iTempEmpId": "46",
+     "emp_name": "yysh",
+     "adharcard": "",
+     "strEntryDate": "05-06-2023 15:10:42"
+   }],
+   "message": "Temp Employee List.",
+   "success": "1"
+ }
+ 
+ 11) Action : edit_tempemployee
+ 
+ Url : https://getdemo.in/sgeco/webservices/webservices.php?action=edit_tempemployee
+ 
+ Request : 
+ {
+  "iMobile": "9876543210",
+  "strPassword": "1234",
+  "strDeviceToken" : "",
+  "iTempEmpId" : 56
+}
+
+Response : 
+ {
+   "iTempEmpId": "56",
+   "emp_name": "ggy",
+   "emp_other_info": "",
+   "mno": "",
+   "address": "",
+   "bankid": "0",
+   "otherbankname": null,
+   "ecsno": "",
+   "accountno": "",
+   "ifsccode": "",
+   "salaryamt": null,
+   "strEntryDate": "05-06-2023 16:21:07",
+   "strIP": "103.1.100.226",
+   "istatus": "1",
+   "isDelete": "0",
+   "designation": "",
+   "designationid": "0",
+   "Skill": null,
+   "pfcode": "0",
+   "employeecode": "0",
+   "pancard": "",
+   "drivinglicense": null,
+   "electioncard": "",
+   "adharcard": "",
+   "passport": "",
+   "other": null,
+   "dateofbirth": "",
+   "uan": "",
+   "dateofjoining": "",
+   "pancardImage": null,
+   "voteridImage": null,
+   "aadharImage": null,
+   "passportImage": null,
+   "message": "Temp Employee List.",
+   "success": "1"
+ }
+ 
+ 12) Action : update_tempemployee
+ 
+ Url : https://getdemo.in/sgeco/webservices/webservices.php?action=update_tempemployee
+ 
+ Request : 
+ {
+  "iMobile": "9876543210",
+  "strPassword": "1234",
+  "strDeviceToken" : "",
+  "iTempEmpId" : 56,
+  "emp_name" : "Gggyyyy",
+  "emp_other_info" : "Test",
+  "mno" : "",
+  "address" : "",
+  "bankid" : 0,
+  "ecsno" : "",
+  "accountno" : "",
+  "ifsccode" : "",
+  "designationid" : "",
+  "pfcode" : "",
+  "employeecode" : "",
+  "adharcard" : "",
+  "pancard" : "",
+  "electioncard" : "",
+  "passport" : "",
+  "dateofbirth" : "",
+  "uan" : "",
+  "dateofjoining" : ""
+}
+
+Response : 
+{
+   "iTempEmpId": 1,
+   "message": "Employee Updated successfully.",
+   "success": "1"
+}
+
+13) Action : marital_status 
+Url : https://getdemo.in/sgeco/webservices/webservices.php?action=marital_status
+
+Request : 
+{
+
+  "iMobile": "9876543211",
+  "strPassword": "1234",
+  "strDeviceToken" : ""
+
+}
+
+Resposne : 
+ {
+   "MaritalStatus": [{
+     "id": "",
+     "value": "Select Marital Status"
+   }, {
+     "id": "Married",
+     "value": "Married"
+   }, {
+     "id": "Unmarried",
+     "value": "Unmarried"
+   }],
+   "message": "success.",
+   "success": "1"
+ }
