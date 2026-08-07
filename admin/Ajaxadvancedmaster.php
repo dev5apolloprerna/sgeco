@@ -21,7 +21,7 @@ if ($_REQUEST['action'] == 'Delete') {
 
 if ($_POST['action'] == 'ListUser') {
     $search = mysqli_real_escape_string($dbconn, isset($_POST['Search_Txt']) ? trim($_POST['Search_Txt']) : '');
-    $where = " WHERE isDelete=0 AND istatus=1" . ($search === '' ? '' : " AND strMonthYour LIKE '%" . $search . "%'");
+    $where = " WHERE isDelete=0 AND istatus=1" . ($search === '' ? '' : " AND strMonthYear LIKE '%" . $search . "%'");
     $countResult = mysqli_query($dbconn, 'SELECT COUNT(*) AS TotalRow FROM advanced_master' . $where);
     $totalrecord = (int) mysqli_fetch_assoc($countResult)['TotalRow'];
     $per_page = $cateperpaging;
@@ -34,12 +34,16 @@ if ($_POST['action'] == 'ListUser') {
             <thead class="tbg">
                 <tr>
                     <th>Month / Year</th>
+                    <th>From Date</th>
+                    <th>To Date</th>
                     <th class="desktop">Action</th>
                 </tr>
             </thead>
             <tbody>
                 <?php while ($advanced = mysqli_fetch_assoc($result)) { ?><tr>
-                        <td><?php echo htmlspecialchars($advanced['strMonthYour'], ENT_QUOTES, 'UTF-8'); ?></td>
+                        <td><?php echo htmlspecialchars($advanced['strMonthYear'], ENT_QUOTES, 'UTF-8'); ?></td>
+                        <td><?php echo date('d-m-Y', strtotime($advanced['fromdate'])); ?></td>
+                        <td><?php echo date('d-m-Y', strtotime($advanced['todate'])); ?></td>
                         <td><button type="button" class="btn blue" onclick="editAdvanced(<?php echo (int) $advanced['iAdvancedMasterId']; ?>)" title="Edit"><i class="fa fa-edit"></i></button> <button type="button" class="btn blue" onclick="deleteAdvanced(<?php echo (int) $advanced['iAdvancedMasterId']; ?>)" title="Delete"><i class="fa fa-trash-o"></i></button></td>
                     </tr><?php } ?>
             </tbody>

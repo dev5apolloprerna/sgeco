@@ -42,10 +42,14 @@ if ($_SESSION['AdminType'] != 1 && (!isset($rights['isAdvancedEntry']) || $right
                                     </div>
                                     <div class="portlet-body form">
                                         <form method="post" id="advancedForm"><input type="hidden" name="action" id="action" value="AddAdvanced">
-                                            <div class="form-body">
-                                                <div class="form-group"><label for="strMonthYour">Month / Year</label><input type="text" name="strMonthYour" id="strMonthYour" class="form-control" placeholder="Select month and year" required></div>
+                                            <div class="form-group"><label for="strMonthYear">Month / Year</label><input type="text" name="strMonthYear" id="strMonthYear" class="form-control" placeholder="Select month and year" autocomplete="off" required></div>
+                                            <div class="form-group"><label for="fromdate">From Date</label><input type="date" name="fromdate" id="fromdate" class="form-control" required></div>
+                                            <div class="form-group"><label for="todate">To Date</label><input type="date" name="todate" id="todate" class="form-control" required></div>
+                                            <div class="form-actions noborder">
+                                                <!-- <button class="btn blue margin-top-20" type="submit" id="submitButton">Submit</button> -->
+                                                <input class="btn blue margin-top-20" type="submit" id="Btnmybtn"  value="Submit" name="submit">      
+                                                <button type="button" class="btn blue margin-top-20" onclick="resetForm()">Cancel</button>
                                             </div>
-                                            <div class="form-actions noborder"><button class="btn blue margin-top-20" type="submit" id="submitButton">Submit</button><button type="button" class="btn blue margin-top-20" onclick="resetForm()">Cancel</button></div>
                                         </form>
                                     </div>
                                 </div>
@@ -73,11 +77,30 @@ if ($_SESSION['AdminType'] != 1 && (!isset($rights['isAdvancedEntry']) || $right
     <?php include_once './footer.php'; ?>
     <script src="<?php echo $web_url; ?>admin/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.js" type="text/javascript"></script>
     <script>
-        $('#strMonthYour').datepicker({
+        $('#strMonthYear').datepicker({
             autoclose: true,
             minViewMode: 1,
             format: 'mm/yyyy'
+        }).on('changeDate', function() {
+            setDateRange(true);
         });
+
+        function setDateRange(resetDates) {
+            var parts = $('#strMonthYear').val().split('/');
+            if (parts.length !== 2) return;
+            var month = parseInt(parts[0], 10);
+            var year = parseInt(parts[1], 10);
+            if (!month || !year) return;
+            var prefix = year + '-' + String(month).padStart(2, '0') + '-';
+            var firstDate = prefix + '01';
+            var lastDay = new Date(year, month, 0).getDate();
+            var lastDate = prefix + String(lastDay).padStart(2, '0');
+            $('#fromdate, #todate').attr({min: firstDate, max: lastDate});
+            if (resetDates) {
+                $('#fromdate').val(firstDate);
+                $('#todate').val(lastDate);
+            }
+        }
 
         function resetForm() {
             window.location.href = 'advancedmaster.php';
@@ -90,6 +113,7 @@ if ($_SESSION['AdminType'] != 1 && (!isset($rights['isAdvancedEntry']) || $right
                 if (response == 1) alert('Advanced added successfully.');
                 else if (response == 2) alert('Advanced edited successfully.');
                 else if (response == 3) alert('This month / year already exists.');
+                else if (response == 4) alert('From Date and To Date must be valid dates in the selected month / year.');
                 else alert('Invalid request.');
                 if (response == 1 || response == 2) resetForm();
             });
@@ -104,7 +128,10 @@ if ($_SESSION['AdminType'] != 1 && (!isset($rights['isAdvancedEntry']) || $right
                 $('#loading').hide();
                 var data = JSON.parse(response);
                 $('#formTitle').text('Edit Advanced');
-                $('#strMonthYour').val(data.strMonthYour);
+                $('#strMonthYear').val(data.strMonthYear);
+                $('#fromdate').val(data.fromdate);
+                $('#todate').val(data.todate);
+                setDateRange(false);
                 $('#action').val('EditAdvanced');
                 $('#advancedForm input[name=iAdvancedMasterId]').remove();
                 $('<input>', {

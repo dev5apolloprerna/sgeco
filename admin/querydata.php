@@ -10,15 +10,6 @@ include '../PHPMailer-master/PHPMailerAutoload.php';
 
 $action = $_REQUEST['action'];
 
-function hasAdvancedAccess($dbconn) {
-    if ($_SESSION['AdminType'] == 1) {
-        return true;
-    }
-    $result = mysqli_query($dbconn, "SELECT isAdvancedEntry FROM user_rights WHERE iUserId='" . (int) $_SESSION['AdminId'] . "'");
-    $rights = mysqli_fetch_assoc($result);
-    return isset($rights['isAdvancedEntry']) && $rights['isAdvancedEntry'] == 1;
-}
-
 switch ($action) {
     case "UserProfileChangePassword":
         $hash_result = create_hash($_POST['oldpassword']);
@@ -2229,18 +2220,22 @@ switch ($action) {
             echo $e->getMessage(); //Boring error messages from anything else!
         }
         break;
-        
+
     case "AddAdvanced":
         if (!hasAdvancedAccess($dbconn)) { http_response_code(403); echo '0'; break; }
-        $monthYear = trim($_POST['strMonthYour']);
+        $monthYear = trim($_POST['strMonthYear']);
+        $fromDate = isset($_POST['fromdate']) ? trim($_POST['fromdate']) : '';
+        $toDate = isset($_POST['todate']) ? trim($_POST['todate']) : '';
         $escapedMonthYear = mysqli_real_escape_string($dbconn, $monthYear);
-        $existing = mysqli_query($dbconn, "SELECT iAdvancedMasterId FROM advanced_master WHERE strMonthYour='" . $escapedMonthYear . "' AND isDelete=0");
-        if ($monthYear === '' || mysqli_num_rows($existing) > 0) {
-            echo $monthYear === '' ? '0' : '3';
+        $existing = mysqli_query($dbconn, "SELECT iAdvancedMasterId FROM advanced_master WHERE strMonthYear='" . $escapedMonthYear . "' AND isDelete=0");
+        if (!validAdvancedDates($monthYear, $fromDate, $toDate) || mysqli_num_rows($existing) > 0) {
+            echo mysqli_num_rows($existing) > 0 ? '3' : '4';
             break;
         }
         $data = array(
-            "strMonthYour" => $monthYear,
+            "strMonthYear" => $monthYear,
+            "fromdate" => $fromDate,
+            "todate" => $toDate,
             "strEntryDate" => date('d-m-Y H:i:s'),
             "strIP" => $_SERVER['REMOTE_ADDR'],
             "iEntryBy" => $_SESSION['AdminId'],
@@ -2260,15 +2255,19 @@ switch ($action) {
     case "EditAdvanced":
         if (!hasAdvancedAccess($dbconn)) { http_response_code(403); echo '0'; break; }
         $id = (int) $_POST['iAdvancedMasterId'];
-        $monthYear = trim($_POST['strMonthYour']);
+        $monthYear = trim($_POST['strMonthYear']);
+        $fromDate = isset($_POST['fromdate']) ? trim($_POST['fromdate']) : '';
+        $toDate = isset($_POST['todate']) ? trim($_POST['todate']) : '';
         $escapedMonthYear = mysqli_real_escape_string($dbconn, $monthYear);
-        $existing = mysqli_query($dbconn, "SELECT iAdvancedMasterId FROM advanced_master WHERE strMonthYour='" . $escapedMonthYear . "' AND iAdvancedMasterId!=" . $id . " AND isDelete=0");
-        if ($id < 1 || $monthYear === '' || mysqli_num_rows($existing) > 0) {
-            echo $monthYear !== '' && mysqli_num_rows($existing) > 0 ? '3' : '0';
+        $existing = mysqli_query($dbconn, "SELECT iAdvancedMasterId FROM advanced_master WHERE strMonthYear='" . $escapedMonthYear . "' AND iAdvancedMasterId!=" . $id . " AND isDelete=0");
+        if ($id < 1 || !validAdvancedDates($monthYear, $fromDate, $toDate) || mysqli_num_rows($existing) > 0) {
+            echo mysqli_num_rows($existing) > 0 ? '3' : '4';
             break;
         }
         $data = array(
-            "strMonthYour" => $monthYear,
+            "strMonthYear" => $monthYear,
+            "fromdate" => $fromDate,
+            "todate" => $toDate,
             "strIP" => $_SERVER['REMOTE_ADDR'],
             "iUpdatedBy" => $_SESSION['AdminId'],
             "UpdatedDate" => date('Y-m-d')
@@ -2303,6 +2302,31 @@ function getSessionVariableWithExpiry($key) {
         }
     }
     return null; // Variable does not exist or has expired
+}
+
+
+function hasAdvancedAccess($dbconn) {
+    if ($_SESSION['AdminType'] == 1) {
+        return true;
+    }
+    $result = mysqli_query($dbconn, "SELECT isAdvancedEntry FROM user_rights WHERE iUserId='" . (int) $_SESSION['AdminId'] . "'");
+    $rights = mysqli_fetch_assoc($result);
+    return isset($rights['isAdvancedEntry']) && $rights['isAdvancedEntry'] == 1;
+}
+
+function validAdvancedDates($monthYear, $fromDate, $toDate) {
+    if (!preg_match('/^(0[1-9]|1[0-2])\/([0-9]{4})$/', $monthYear, $matches)) {
+        return false;
+    }
+    $expectedMonth = $matches[2] . '-' . $matches[1];
+    $from = DateTime::createFromFormat('!Y-m-d', $fromDate);
+    $to = DateTime::createFromFormat('!Y-m-d', $toDate);
+    return $from && $to
+        && $from->format('Y-m-d') === $fromDate
+        && $to->format('Y-m-d') === $toDate
+        && $from->format('Y-m') === $expectedMonth
+        && $to->format('Y-m') === $expectedMonth
+        && $from <= $to;
 }
 
 ?>
