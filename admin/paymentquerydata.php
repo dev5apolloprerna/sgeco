@@ -48,21 +48,44 @@ switch ($action) {
 
     case "AddUsers":
         
-        $result = mysqli_query($dbconn, "SELECT * FROM `admin` WHERE `loginid`='" . $_POST['loginid'] . "'");
+        $rightsResult = mysqli_query($dbconn, "SELECT isUserEntry FROM user_rights WHERE iUserId='" . (int) $_SESSION['AdminId'] . "'");
+        $rights = mysqli_fetch_assoc($rightsResult);
+        if ($_SESSION['AdminType'] != 1 && (!isset($rights['isUserEntry']) || $rights['isUserEntry'] != 1)) {
+            http_response_code(403);
+            echo '0';
+            break;
+        }
+
+        $username = isset($_POST['username']) ? trim($_POST['username']) : '';
+        $loginid = isset($_POST['loginid']) ? trim($_POST['loginid']) : '';
+        $email = isset($_POST['email']) ? trim($_POST['email']) : '';
+        $mobileNo = isset($_POST['mobileNo']) ? trim($_POST['mobileNo']) : '';
+        $password = isset($_POST['password']) ? $_POST['password'] : '';
+        $confirmPassword = isset($_POST['cpassword']) ? $_POST['cpassword'] : '';
+        if ($username === '' || $loginid === '' || strlen($password) < 6 || $password !== $confirmPassword
+            || ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL))
+            || ($mobileNo !== '' && !preg_match('/^[0-9]{10}$/', $mobileNo))) {
+            echo '4';
+            break;
+        }
+
+        $escapedLoginId = mysqli_real_escape_string($dbconn, $loginid);
+        $result = mysqli_query($dbconn, "SELECT id FROM `admin` WHERE `loginid`='" . $escapedLoginId . "'");
         if (mysqli_num_rows($result) > 0) {
-            echo 3;
+            echo '3';
+            break;
         } else {
-            $hash_result = create_hash($_REQUEST['password']);
+            $hash_result = create_hash($password);
             $hash_params = explode(":", $hash_result);
             $salt = $hash_params[HASH_SALT_INDEX];
             $hash = $hash_params[HASH_PBKDF2_INDEX];
             
             $data = array(
-                "username" => $_POST['username'],
-                "loginid" => $_POST['loginid'],
+                "username" => $username,
+                "loginid" => $loginid,
                 "type" => 2,
-                "email" => $_POST['email'],
-                "mobileNo" => $_POST['mobileNo'],
+                "email" => $email,
+                "mobileNo" => $mobileNo,
                 "password" => $hash,
                 "salt" => $salt,
                 "strEntryDate" => date('d-m-Y H:i:s'),
@@ -70,9 +93,9 @@ switch ($action) {
                 "iEntryBy" => $_SESSION['AdminId'],
                 "EntryDate" => date('d-m-Y H:i:s')
             );
-            $iPaymentId = $connect->insertrecord($dbconn, 'admin', $data);
+            $userId = $connect->insertrecord($dbconn, 'admin', $data);
         }
-        echo $statusMsg = $iPaymentId ? '1' : '0';
+        echo $userId ? '1' : '0';
     break;
     
     case "EditUsers":

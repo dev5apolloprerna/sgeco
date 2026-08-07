@@ -3,7 +3,7 @@ $MasterEntry = array("State.php", "City.php", "Location.php", "ExcelFormMaster.p
 $salary = array("salarydetails.php", "salarymaster.php");
 $report = array("paypayment.php", "paidpayment.php");
 $reportHistory = array("MultiCompanyPaymentHistory.php", "CompanyPaymentHistory.php");
-$advanced = array("advancedmaster.php");
+$advanced = array("advancedmaster.php", "AddAdvancedDetails.php");
 ?>
 <div class="page-header">
     <div class="page-header-top">
