@@ -53,18 +53,6 @@ $advancedPeriod = mysqli_fetch_assoc($advancedResult);
                                         <div class="alert alert-info">Advanced period: <strong><?php echo htmlspecialchars($advancedPeriod['strMonthYear'], ENT_QUOTES, 'UTF-8'); ?></strong> (<?php echo date('d-m-Y', strtotime($advancedPeriod['fromdate'])); ?> to <?php echo date('d-m-Y', strtotime($advancedPeriod['todate'])); ?>)</div>
                                         <form id="searchForm" method="post" role="form">
                                             <input type="hidden" id="advancedId" value="<?php echo $advancedId; ?>">
-                                            <div class="row">
-                                                <div class="form-group col-md-4"><label for="companyId">Company <span class="required">*</span></label>
-                                                    <select class="form-control" id="companyId" required>
-                                                        <option value="">Select company</option>
-                                                        <?php $companies = mysqli_query($dbconn, "SELECT companymasterId, companyname FROM companymaster WHERE isDelete=0 AND istatus=1 ORDER BY companyname");
-                                                        while ($company = mysqli_fetch_assoc($companies)) { ?>
-                                                            <option value="<?php echo (int) $company['companymasterId']; ?>"><?php echo htmlspecialchars($company['companyname'], ENT_QUOTES, 'UTF-8'); ?></option>
-                                                        <?php } ?>
-                                                    </select>
-                                                </div>
-                                                <div class="form-group col-md-4"><label for="advancedDate">Date <span class="required">*</span></label><input class="form-control" type="date" id="advancedDate" min="<?php echo $advancedPeriod['fromdate']; ?>" max="<?php echo $advancedPeriod['todate']; ?>" required><span class="help-block">Date must be between <?php echo date('d-m-Y', strtotime($advancedPeriod['fromdate'])); ?> and <?php echo date('d-m-Y', strtotime($advancedPeriod['todate'])); ?>.</span></div>
-                                            </div>
                                             <hr>
                                             <div class="row">
                                                 <div class="form-group col-md-4">
@@ -103,8 +91,6 @@ $advancedPeriod = mysqli_fetch_assoc($advancedResult);
             $.post('AjaxAdvancedDetails.php', {
                 action: 'SearchEmployees',
                 advancedId: $('#advancedId').val(),
-                companyId: $('#companyId').val(),
-                advancedDate: $('#advancedDate').val(),
                 employeeSearch: $('#employeeSearch').val()
             }, function(html) {
                 $('#employeeResults').html(html);

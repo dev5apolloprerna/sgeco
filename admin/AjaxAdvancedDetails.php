@@ -51,6 +51,14 @@ if ($action === 'SearchEmployees') {
         echo '<div class="alert alert-info"><h4 class="text-center">No Data Found!</h4></div>';
         exit;
     }
+
+    $advancedId = isset($_GET['token']) ? (int) $_GET['token'] : 0;
+    $advancedResult = mysqli_query($dbconn, "SELECT * FROM advanced_master WHERE iAdvancedMasterId=" . $advancedId . " AND isDelete=0 AND istatus=1");
+    if (!$advancedResult || mysqli_num_rows($advancedResult) === 0) {
+        http_response_code(404);
+        exit('Advanced date range not found.');
+    }
+    $advancedPeriod = mysqli_fetch_assoc($advancedResult);
 ?>
     <table class="table table-bordered table-hover table-responsive">
         <thead class="tbg">
@@ -58,8 +66,10 @@ if ($action === 'SearchEmployees') {
                 <th>Employee Name</th>
                 <th>Employee Code</th>
                 <th>UAN</th>
+                <th>Company</th>
+                <th>Date</th>
                 <th>Amount</th>
-                
+
                 <th>Remarks</th>
                 <th>Action</th>
             </tr>
@@ -68,6 +78,19 @@ if ($action === 'SearchEmployees') {
             <?php while ($employee = mysqli_fetch_assoc($employees)) { ?><tr>
                     <td><?php echo htmlspecialchars(ucwords(strtolower($employee['emp_name'])), ENT_QUOTES, 'UTF-8'); ?></td>
                     <td><?php echo htmlspecialchars($employee['employeecode'], ENT_QUOTES, 'UTF-8'); ?></td>
+                    <td>
+                        <select class="form-control" id="companyId" required>
+                            <option value="">Select company</option>
+                            <?php $companies = mysqli_query($dbconn, "SELECT companymasterId, companyname FROM companymaster WHERE isDelete=0 AND istatus=1 ORDER BY companyname");
+                            while ($company = mysqli_fetch_assoc($companies)) { ?>
+                                <option value="<?php echo (int) $company['companymasterId']; ?>"><?php echo htmlspecialchars($company['companyname'], ENT_QUOTES, 'UTF-8'); ?></option>
+                            <?php } ?>
+                        </select>
+
+                    </td>
+                    <td>
+                        <input class="form-control" type="date" id="advancedDate" min="<?php echo $advancedPeriod['fromdate']; ?>" max="<?php echo $advancedPeriod['todate']; ?>" required><span class="help-block">Date must be between <?php echo date('d-m-Y', strtotime($advancedPeriod['fromdate'])); ?> and <?php echo date('d-m-Y', strtotime($advancedPeriod['todate'])); ?>
+                    </td>
                     <td><?php echo htmlspecialchars($employee['uan'], ENT_QUOTES, 'UTF-8'); ?></td>
                     <td>
                         <input type="number" min="0.01" step="0.01" class="form-control advanced-amount" placeholder="0.00">
