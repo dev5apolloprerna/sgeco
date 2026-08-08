@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register of Fines - Form XXI</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #ececec;
+            color: #000;
+            font-family: "Times New Roman", Times, serif;
+        }
+
+        /*
+         * Legal paper - Landscape
+         * 14in x 8.5in
+         */
+        .form-page {
+            width: 14in;
+            height: 8.5in;
+            margin: 18px auto;
+            padding: 20mm 12mm 20mm;
+            background: #fff;
+            overflow: hidden;
+            position: relative;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        .page-layout {
+            width: 100%;
+            height: 100%;
+            table-layout: fixed;
+        }
+
+        .page-layout > tbody > tr > td {
+            padding: 0;
+            vertical-align: top;
+        }
+
+        /* Header */
+
+        .header-table {
+            width: 100%;
+            table-layout: fixed;
+            margin-bottom: 0.10in;
+        }
+
+        .header-table td {
+            border: 0;
+            padding: 0;
+            vertical-align: top;
+        }
+
+        .left-header,
+        .right-header {
+            font-size: 9.5pt;
+            line-height: 1.45;
+        }
+
+        .left-header {
+            padding-right: 0.18in !important;
+        }
+
+        .right-header {
+            padding-left: 0.18in !important;
+        }
+
+        .center-header {
+            text-align: center;
+            /* padding-top: 0.02in !important; */
+        }
+
+        .main-title {
+            margin-bottom: 10px;
+            font-size: 26px;
+            line-height: 1.05;
+            font-weight: 700;
+        }
+
+        .form-number {
+            /* margin-top: 0.08in; */
+            font-size: 13pt;
+            font-weight: 700;
+        }
+
+        .rule-text {
+            margin-top: 0.08in;
+            font-size: 10.5pt;
+        }
+
+        .month-row {
+            margin-top: 0.35in;
+            font-size: 12pt;
+        }
+
+        .month-label {
+            font-weight: 700;
+        }
+
+        .info-table {
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        .info-table td {
+            border: 0;
+            padding: 0 0 0.06in 0;
+            vertical-align: top;
+        }
+
+        .info-label {
+            font-weight: 700;
+            white-space: nowrap;
+            padding-right: 0.12in !important;
+        }
+
+        .address-line {
+            padding-left: 0.02in;
+        }
+
+        .right-line {
+            margin-bottom: 0.25in;
+            font-weight: 700;
+        }
+
+        .right-line:last-child {
+            margin-bottom: 0;
+        }
+
+        .normal-weight {
+            font-weight: 400;
+        }
+
+        .work-title {
+            margin: 0.04in 0 0.07in;
+            font-size: 10.5pt;
+            font-weight: 700;
+        }
+
+        /* Register table */
+
+        .register-frame {
+            width: 100%;
+            border: 1px solid #000;
+            position: relative;
+        }
+
+        /* Keeps the outer right border visible in Chrome PDF */
+        .register-frame::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            border-right: 1px solid #000;
+            pointer-events: none;
+        }
+
+        .register-table {
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: collapse;
+        }
+
+        .register-table th,
+        .register-table td {
+            border-right: 1px solid #000;
+            border-bottom: 1px solid #000;
+            padding: 0.035in 0.025in;
+            vertical-align: middle;
+        }
+
+        .register-table th:last-child,
+        .register-table td:last-child {
+            border-right: 0;
+        }
+
+        .register-table tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .register-table thead th {
+            height: 0.78in;
+            text-align: center;
+            font-size: 9.2pt;
+            line-height: 1.08;
+            font-weight: 700;
+        }
+
+        .register-table .column-number-row td {
+            height: 0.20in;
+            padding: 0.01in 0.02in;
+            text-align: center;
+            font-size: 9.5pt;
+            line-height: 1;
+            font-weight: 700;
+        }
+
+        .register-table .data-row td {
+            height: 0.24in;
+            font-size: 9.5pt;
+            line-height: 1.05;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-left {
+            text-align: left;
+        }
+
+        @page {
+            size: 14in 8.5in;
+            margin: 0;
+        }
+
+        @media print {
+            html,
+            body {
+                margin: 0;
+                padding: 0;
+                background: #fff;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .form-page {
+                width: 14in;
+                height: 8.5in;
+                margin: 0;
+                padding: 20mm 12mm 20mm;
+                overflow: hidden;
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+            /*
+             * Every repeated form starts on a new page.
+             * No page-break-after is used, so no blank final page.
+             */
+            .form-page + .form-page {
+                break-before: page;
+                page-break-before: always;
+            }
+
+            .register-frame,
+            .register-table {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+        }
+
+        @media screen and (max-width: 1450px) {
+            body {
+                overflow-x: auto;
+            }
+
+            .form-page {
+                margin-left: 12px;
+                margin-right: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    
+    <section class="form-page">
+
+        <table class="page-layout">
+            <tr>
+                <td>
+                    <div class="main-title " style="text-align: center;">Register of Fines</div>
+                    <table class="header-table">
+                        <colgroup>
+                            <col style="width: 39%;">
+                            <col style="width: 22%;">
+                            <col style="width: 39%;">
+                        </colgroup>
+
+                        <tr>
+                            <!-- Left contractor details -->
+                            <td class="left-header">
+                                <table class="info-table">
+                                    <colgroup>
+                                        <col style="width: 55%;">
+                                        <col style="width: 45%;">
+                                    </colgroup>
+
+                                    <tr>
+                                        <td class="info-label">
+                                            NAME AND ADDRESS OF CONTRACTOR :
+                                        </td>
+                                        <td>
+                                            SHREE GANESH ENGINEERING CO.
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td></td>
+                                        <td class="address-line">FF-8, Devshruti Complex,</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td></td>
+                                        <td class="address-line">Nr. HCG Hospital,</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td></td>
+                                        <td class="address-line">
+                                            Mithakhali, Ahmedabad - 380006
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+
+                            <!-- Centre title -->
+                            <td class="center-header">
+                                <!-- <div class="main-title">Register of Fines</div> -->
+                                <div class="form-number">FORM NO. XXI</div>
+                                <div class="rule-text">[See rule 78 (2)(d)]</div>
+
+                                <div class="month-row">
+                                    <span class="month-label">Month:</span>
+                                    <span>September-2024</span>
+                                </div>
+                            </td>
+
+                            <!-- Right establishment details -->
+                            <td class="right-header">
+                                <div class="right-line">
+                                    Name and Address of establishment in/under which
+                                    contract is carried on
+                                </div>
+
+                                <div class="right-line">
+                                    Name and Address of the principal Employer :
+                                    <span class="normal-weight">
+                                        TATA Chemicals Ltd., Mithapur
+                                    </span>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <div class="work-title">
+                        NATURE AND LOCATION OF WORK
+                    </div>
+
+                    <div class="register-frame">
+                        <table class="register-table">
+                            <colgroup>
+                                <col style="width: 2.5%;">
+                                <col style="width: 16%;">
+                                <col style="width: 12.5%;">
+                                <col style="width: 8%;">
+                                <col style="width: 8.5%;">
+                                <col style="width: 6%;">
+                                <col style="width: 9%;">
+                                <col style="width: 10.5%;">
+                                <col style="width: 7%;">
+                                <col style="width: 7%;">
+                                <col style="width: 7%;">
+                                <col style="width: 6%;">
+                            </colgroup>
+
+                            <thead>
+                                <tr>
+                                    <th>Sr.<br>No.</th>
+                                    <th>Name of Workmen</th>
+                                    <th>Father's / Husband's<br>Name</th>
+                                    <th>Designation/<br>Nature of<br>Employment</th>
+                                    <th>Act/Omission<br>for which fine<br>imposed</th>
+                                    <th>Date of<br>offence</th>
+                                    <th>Whether workman<br>showed cause<br>against fine</th>
+                                    <th>
+                                        Name of person<br>
+                                        in whose presence<br>
+                                        workman<br>
+                                        explanation<br>
+                                        was heard
+                                    </th>
+                                    <th>Wage periods<br>and<br>wages payable</th>
+                                    <th>Amount of fine<br>imposed</th>
+                                    <th>Date on which<br>fine<br>realised</th>
+                                    <th>Remarks</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr class="column-number-row">
+                                    <td>1</td>
+                                    <td>2</td>
+                                    <td>3</td>
+                                    <td>4</td>
+                                    <td>5</td>
+                                    <td>6</td>
+                                    <td>7</td>
+                                    <td>8</td>
+                                    <td>9</td>
+                                    <td>10</td>
+                                    <td>11</td>
+                                    <td>12</td>
+                                </tr>
+
+                                <tr class="data-row">
+                                    <td class="text-center">1</td>
+                                    <td class="text-left">Dilip Yadav</td>
+                                    <td class="text-left">Mahendra Yadav</td>
+                                    <td class="text-left">Supervisor</td>
+                                    <td class="text-center">NIL</td>
+                                    <td class="text-center">NIL</td>
+                                    <td class="text-center">NIL</td>
+                                    <td class="text-center">NIL</td>
+                                    <td class="text-center">NIL</td>
+                                    <td class="text-center">NIL</td>
+                                    <td class="text-center">NIL</td>
+                                    <td class="text-center">NIL</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </td>
+            </tr>
+        </table>
+
+    </section>
+
+</body>
+</html>

@@ -9,7 +9,8 @@ $rightsResult = mysqli_query($dbconn, "SELECT isUserEntry FROM user_rights WHERE
 $rights = mysqli_fetch_assoc($rightsResult);
 if ($_SESSION['AdminType'] != 1 && (!isset($rights['isUserEntry']) || $rights['isUserEntry'] != 1)) {
     http_response_code(403);
-    exit('Access denied.');
+    header('location:'.$web_url.'admin/login.php');	
+        exit;
 }
 ?>
 <!DOCTYPE html>

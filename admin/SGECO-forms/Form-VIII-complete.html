@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form VIII - Service Certificate</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #e9e9e9;
+            color: #000;
+            font-family: "Times New Roman", Times, serif;
+        }
+
+        /* One complete certificate = one PDF page */
+        .certificate-page {
+            width: 210mm;
+            height: 246mm;
+            margin: 12px auto;
+            padding: 24mm 22mm 18mm 24mm;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        .certificate-table {
+            width: 100%;
+            height: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        .certificate-table td {
+            border: 0;
+            padding: 0;
+            vertical-align: top;
+        }
+
+        /* Header */
+        .header-section {
+            height: 39mm;
+            text-align: center;
+        }
+
+        .form-title {
+            padding: 0 0 7mm !important;
+            text-align: center;
+            font-size: 22pt;
+            line-height: 1;
+            font-weight: 700;
+        }
+
+        .rule-title {
+            padding: 0 0 2mm !important;
+            text-align: center;
+            font-size: 13.3pt;
+            line-height: 1.25;
+            font-weight: 400;
+            white-space: nowrap;
+        }
+
+        .certificate-title {
+            padding: 0 !important;
+            text-align: center;
+            font-size: 19pt;
+            line-height: 1.1;
+            font-weight: 700;
+        }
+
+        /* Details area */
+        .details-section {
+            height: 100mm;
+        }
+
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            font-size: 13pt;
+            line-height: 1.28;
+        }
+
+        .details-table td {
+            padding: 1.25mm 0;
+            vertical-align: top;
+        }
+
+        .number-cell {
+            width: 9mm;
+            padding-right: 2mm !important;
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        .content-cell {
+            width: auto;
+            padding-left: 2mm !important;
+        }
+
+        .value {
+            font-weight: 700;
+            text-decoration: underline;
+            text-decoration-thickness: 0.7px;
+            text-underline-offset: 2px;
+        }
+
+        .italic-label {
+            font-style: italic;
+        }
+
+        .nature-row td {
+            padding-top: 1.5mm;
+            padding-bottom: 9mm;
+        }
+
+        .nature-line {
+            display: inline-block;
+            width: 90mm;
+            height: 6mm;
+            margin-left: 2mm;
+            border-bottom: 0.7px solid #000;
+            vertical-align: bottom;
+        }
+
+        .nature-line.second {
+            display: block;
+            width: 90mm;
+            margin-top: 2mm;
+            margin-left: 55mm;
+        }
+
+        .employment-line {
+            display: inline-block;
+            width: 73mm;
+            height: 5mm;
+            margin-left: 2mm;
+            border-bottom: 0.7px solid #000;
+            vertical-align: bottom;
+        }
+
+        /* Signature */
+        .signature-section {
+            height: 48mm;
+            vertical-align: bottom !important;
+        }
+
+        .signature-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        .signature-table td {
+            border: 0;
+            padding: 0 3mm 6mm 0;
+            text-align: right;
+            vertical-align: bottom;
+            font-size: 13pt;
+            white-space: nowrap;
+        }
+
+        @page {
+            size: A4 portrait;
+            margin: 0;
+        }
+
+        @media print {
+            html,
+            body {
+                margin: 0;
+                padding: 0;
+                background: #fff;
+            }
+
+            .certificate-page {
+                width: 210mm;
+                height: 256mm;
+                margin: 0;
+                padding: 24mm 22mm 18mm 24mm;
+                overflow: hidden;
+
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+            /* Every certificate after the first starts on a new page. */
+            .certificate-page + .certificate-page {
+                break-before: page;
+                page-break-before: always;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- CERTIFICATE 1 -->
+    <div class="certificate-page">
+        <table class="certificate-table">
+            <tr>
+                <td class="header-section">
+                    <table style="width:100%; border-collapse:collapse; table-layout:fixed;">
+                        <tr>
+                            <td class="form-title">FORM VIII</td>
+                        </tr>
+                        <tr>
+                            <td class="rule-title">
+                                [Under rule 77 of the Contract Labour (Regulation and Abolition) Central Rules, 1971]
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="certificate-title">Service Certificate</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="details-section">
+                    <table class="details-table">
+                        <tr>
+                            <td class="number-cell">1.</td>
+                            <td class="content-cell">
+                                Name of employer: <span class="value">Shree Ganesh Engineering Co.</span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number-cell">2.</td>
+                            <td class="content-cell">
+                                LIN/PAN No. of the employer: <span class="value"><em>AAMFS3884N</em></span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number-cell">3.</td>
+                            <td class="content-cell">
+                                <span class="italic-label">Email Id of the employer:</span>
+                                <span class="value"><em>hkshah@sgeco.in</em></span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number-cell">4.</td>
+                            <td class="content-cell">
+                                <span class="italic-label">Mobile No. of the employer:</span>
+                                <span class="value">7984454082</span>
+                            </td>
+                        </tr>
+
+                        <tr class="nature-row">
+                            <td class="number-cell">5.</td>
+                            <td class="content-cell">
+                                Nature and location of work:
+                                <span class="nature-line"></span>
+                                <span class="nature-line second"></span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number-cell">6.</td>
+                            <td class="content-cell">
+                                Name of the workman: <span class="value">DILIP MAHENDRA YADAV</span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number-cell">7.</td>
+                            <td class="content-cell">
+                                UAN / Aadhaar No.: UAN: <span class="value">101740014604</span>
+                                &nbsp;/&nbsp; Aadhar No.: <span class="value">4360 7982 5423</span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number-cell">8.</td>
+                            <td class="content-cell">
+                                Mobile No.: <span class="value">7619818421</span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number-cell">9.</td>
+                            <td class="content-cell">
+                                Serial Number in the Register of Workmen: <span class="value">99</span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number-cell">10.</td>
+                            <td class="content-cell">
+                                Period of Employment:<span class="employment-line"></span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number-cell">11.</td>
+                            <td class="content-cell">
+                                Designation: <span class="value">Supervisor</span>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="signature-section">
+                    <table class="signature-table">
+                        <tr>
+                            <td>Seal and Signature of Employer</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+</body>
+</html>

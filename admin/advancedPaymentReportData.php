@@ -10,7 +10,8 @@ function requireAdvancedPaymentReportAccess($dbconn)
     $rights = $result ? mysqli_fetch_assoc($result) : array();
     if (!isset($rights['isAdvancedEntry']) || $rights['isAdvancedEntry'] != 1) {
         http_response_code(403);
-        exit('Access denied.');
+        header('location:'.$web_url.'admin/login.php');	
+        exit;
     }
 }
 
@@ -51,7 +52,7 @@ function advancedPaymentReportWhere($dbconn, $filters)
 
 function advancedPaymentReportQuery($where)
 {
-    return "SELECT ad.iAmount, ad.strDate, ad.strRemarks, e.emp_name, e.employeecode, e.accountno, e.ifsccode, " .
+    return "SELECT ad.iAmount, ad.strDate, ad.strRemarks, e.emp_name, e.employeecode, e.accountno, e.ifsccode, e.address, " .
         "c.companyname, b.bankname FROM advanced_details ad " .
         "INNER JOIN advanced_master am ON am.iAdvancedMasterId=ad.iAdvancedMasterId " .
         "INNER JOIN employee e ON e.employeeId=ad.iEmployeeId " .

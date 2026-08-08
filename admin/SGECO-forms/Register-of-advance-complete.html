@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register of Advance - Form XXIII</title>
+    <style>
+        * {
+            box-sizing: border-box
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            background: #ececec;
+            color: #000;
+            font-family: "Times New Roman", Times, serif
+        }
+
+        .form-page {
+            width: 14in;
+            height: 8.5in;
+            margin: 18px auto;
+            padding: 20mm 12mm 20mm;
+            background: #fff;
+            position: relative;
+            overflow: hidden
+        }
+
+        table {
+            border-collapse: collapse
+        }
+
+        .page-table {
+            width: 100%;
+            height: 100%;
+            table-layout: fixed
+        }
+
+        .page-table>tbody>tr>td {
+            padding: 0;
+            vertical-align: top
+        }
+
+        .header-table {
+            width: 100%;
+            table-layout: fixed;
+            margin-bottom: .08in
+        }
+
+        .header-table td {
+            border: 0;
+            padding: 0;
+            vertical-align: top
+        }
+
+        .left-header {
+            padding-right: .18in !important;
+            font-size: 10pt;
+            line-height: 1.45
+        }
+
+        .center-header {
+            text-align: center;
+            padding-top: .02in !important
+        }
+
+        .right-header {
+            padding-left: .18in !important;
+            font-size: 10pt;
+            line-height: 1.45
+        }
+
+        .title {
+            margin-bottom: 10px;
+            font-size: 26px;
+            line-height: 1.05;
+            font-weight: 700
+        }
+
+        .form-number {
+            /* margin-top: .07in; */
+            font-size: 14pt;
+            line-height: 1.05;
+            font-weight: 700
+        }
+
+        .rule-text {
+            margin-top: .07in;
+            font-size: 10pt
+        }
+
+        .month-row {
+            margin-top: .29in;
+            font-size: 12pt
+        }
+
+        .month-label {
+            font-weight: 700
+        }
+
+        .contractor-table {
+            width: 100%;
+            table-layout: fixed
+        }
+
+        .contractor-table td {
+            border: 0;
+            padding: 0 0 .055in 0;
+            vertical-align: top
+        }
+
+        .contractor-label {
+            font-weight: 700;
+            white-space: nowrap;
+            padding-right: .10in !important
+        }
+
+        .right-heading {
+            margin-bottom: .22in;
+            font-weight: 700
+        }
+
+        .right-heading:last-child {
+            margin-bottom: 0
+        }
+
+        .normal {
+            font-weight: 400
+        }
+
+        .nature-title {
+            margin: .05in 0 .07in;
+            font-size: 10pt;
+            font-weight: 700
+        }
+
+        .register-frame {
+            width: 100%;
+            border: 1px solid #000;
+            position: relative
+        }
+
+        .register-frame::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            border-right: 1px solid #000;
+            pointer-events: none
+        }
+
+        .register-table {
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: collapse
+        }
+
+        .register-table th,
+        .register-table td {
+            border-right: 1px solid #000;
+            border-bottom: 1px solid #000;
+            padding: .035in .028in;
+            vertical-align: middle
+        }
+
+        .register-table th:last-child,
+        .register-table td:last-child {
+            border-right: 0
+        }
+
+        .register-table tr:last-child td {
+            border-bottom: 0
+        }
+
+        .register-table thead th {
+            height: .79in;
+            text-align: center;
+            font-size: 9.3pt;
+            line-height: 1.08;
+            font-weight: 700
+        }
+
+        .column-number-row td {
+            height: .20in;
+            padding: .01in .02in;
+            text-align: center;
+            font-size: 9.3pt;
+            line-height: 1;
+            font-weight: 700
+        }
+
+        .data-row td {
+            height: 1.72in;
+            font-size: 9.8pt;
+            line-height: 1.14
+        }
+
+        .center {
+            text-align: center
+        }
+
+        .left {
+            text-align: left
+        }
+
+        .installments {
+            width: 100%;
+            table-layout: fixed
+        }
+
+        .installments td {
+            border: 0 !important;
+            height: auto;
+            padding: .055in 0 !important;
+            text-align: center;
+            font-size: 9.5pt;
+            line-height: 1.05
+        }
+
+        .installment-date {
+            display: block;
+            margin-bottom: .015in
+        }
+
+        @page {
+            size: 14in 8.5in;
+            margin: 0
+        }
+
+        @media print {
+
+            html,
+            body {
+                margin: 0;
+                padding: 0;
+                background: #fff;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact
+            }
+
+            .form-page {
+                width: 14in;
+                height: 8.5in;
+                margin: 0;
+                padding: 20mm 12mm 20mm;
+                overflow: hidden;
+                break-inside: avoid;
+                page-break-inside: avoid
+            }
+
+            .form-page+.form-page {
+                break-before: page;
+                page-break-before: always
+            }
+
+            .register-frame,
+            .register-table {
+                break-inside: avoid;
+                page-break-inside: avoid
+            }
+        }
+
+        @media screen and (max-width:1450px) {
+            body {
+                overflow-x: auto
+            }
+
+            .form-page {
+                margin-left: 12px;
+                margin-right: 12px
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <section class="form-page">
+        <table class="page-table">
+            <tr>
+                <td>
+                    <div class="title" style="text-align: center;">Register of Advance</div>
+                    <table class="header-table">
+                        <colgroup>
+                            <col style="width:42%">
+                            <col style="width:20%">
+                            <col style="width:38%">
+                        </colgroup>
+                        <tr>
+                            <td class="left-header">
+                                <table class="contractor-table">
+                                    <colgroup>
+                                        <col style="width:53%">
+                                        <col style="width:47%">
+                                    </colgroup>
+                                    <tr>
+                                        <td class="contractor-label">NAME AND ADDRESS OF CONTRACTOR :</td>
+                                        <td>SHREE GANESH ENGINEERING CO.</td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td>FF-8, Devshruti Complex,</td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td>Nr. HCG Hospital,</td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td>Mithakhali, Ahmedabad - 380006</td>
+                                    </tr>
+                                </table>
+                            </td>
+
+                            <td class="center-header">
+                                <!-- <div class="title">Register of Advance</div> -->
+                                <div class="form-number">FORM NO. XXII</div>
+                                <div class="rule-text">[See Rule 78 (1) (a) (ii)]</div>
+                                <div class="month-row"><span class="month-label">Month:</span> September-2024</div>
+                            </td>
+
+                            <td class="right-header">
+                                <div class="right-heading">Name and Address of establishment in/under which contract is
+                                    carried on</div>
+                                <div class="right-heading">Name and Address of the principal Employer : <span
+                                        class="normal">TATA Chemicals Ltd., Mithapur</span></div>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <div class="nature-title">NATURE AND LOCATION OF WORK</div>
+
+                    <div class="register-frame">
+                        <table class="register-table">
+                            <colgroup>
+                                <col style="width:2.6%">
+                                <col style="width:16%">
+                                <col style="width:13%">
+                                <col style="width:8%">
+                                <col style="width:6.6%">
+                                <col style="width:8.5%">
+                                <col style="width:9.7%">
+                                <col style="width:9.2%">
+                                <col style="width:8.6%">
+                                <col style="width:11.2%">
+                                <col style="width:6.6%">
+                            </colgroup>
+
+                            <thead>
+                                <tr>
+                                    <th>Sr.<br>No.</th>
+                                    <th>Name</th>
+                                    <th>Father's / Husband's Name</th>
+                                    <th>Name of<br>employment<br>Designation</th>
+                                    <th>Wage Period<br>and wages<br>payable</th>
+                                    <th>Date and amount<br>of advance given</th>
+                                    <th>Purpose(s) for which<br>advance made</th>
+                                    <th>No. of instalments<br>by which advance<br>to be paid</th>
+                                    <th>Date and amount<br>of each instalment<br>repaid</th>
+                                    <th>Date on which last<br>instalment was repaid</th>
+                                    <th>Remarks</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr class="column-number-row">
+                                    <td>1</td>
+                                    <td>2</td>
+                                    <td>3</td>
+                                    <td>4</td>
+                                    <td>5</td>
+                                    <td>6</td>
+                                    <td>7</td>
+                                    <td>8</td>
+                                    <td>9</td>
+                                    <td>10</td>
+                                    <td>11</td>
+                                </tr>
+
+                                <tr class="data-row">
+                                    <td class="center">1</td>
+                                    <td class="left">Dilip Yadav</td>
+                                    <td class="left">Mahendra Yadav</td>
+                                    <td class="left">Supervisor</td>
+                                    <td class="center">Monthly<br>ie. No. Days x<br>Wage Rate =<br>Amt.</td>
+                                    <td class="center">Last date of Adv.<br>Total Amt. of Adv.</td>
+                                    <td class="center">Personal /<br>Food Allow.</td>
+                                    <td class="center">No. of instalments<br>by which advance to<br>be paid</td>
+                                    <td>
+                                        <table class="installments">
+                                            <tr>
+                                                <td><span class="installment-date">/ &nbsp;&nbsp; /2026</span>Rs. 1000/-
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><span class="installment-date">/ &nbsp;&nbsp; /2026</span>Rs. 1000/-
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><span class="installment-date">/ &nbsp;&nbsp; /2026</span>Rs. 1000/-
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><span class="installment-date">/ &nbsp;&nbsp; /2026</span>Rs. 1000/-
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                    <td class="center">Last date of Adv.</td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </td>
+            </tr>
+        </table>
+    </section>
+
+</body>
+
+</html>

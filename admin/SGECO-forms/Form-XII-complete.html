@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form XII - Employment Card</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #e9e9e9;
+            color: #000;
+            font-family: "Times New Roman", Times, serif;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        td {
+            padding: 0;
+            vertical-align: top;
+        }
+
+        .form-page {
+            width: 210mm;
+            height: 296mm;
+            margin: 12px auto;
+            padding: 20mm 24mm 19mm 24mm;
+            overflow: hidden;
+            background: #fff;
+            font-size: 13.7pt;
+            line-height: 1.28;
+        }
+
+        /* Header */
+        .form-title {
+            text-align: center;
+            font-size: 19pt;
+            font-weight: 700;
+            line-height: 1.1;
+            padding-bottom: 5mm;
+        }
+
+        .rule-title {
+            text-align: center;
+            font-size: 11.5pt;
+            line-height: 1.25;
+            padding-bottom: 2.5mm;
+        }
+
+        .card-title {
+            text-align: center;
+            font-size: 16pt;
+            font-weight: 700;
+            line-height: 1.1;
+            padding-bottom: 12mm;
+        }
+
+        /* Employer section */
+
+        /* Explicit label/value column layout like the wages slip */
+        .section-outer {
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        .detail-inner {
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        .detail-inner td {
+            padding-bottom: 3.2mm;
+            vertical-align: top;
+        }
+
+        .detail-label-cell {
+            padding-right: 4mm;
+        }
+
+        .detail-value-cell {
+            padding-left: 1mm;
+        }
+
+        .employer-table td {
+            padding-bottom: 3.2mm;
+        }
+
+        .item-code {
+            white-space: nowrap;
+        }
+
+        .item-label {
+            white-space: nowrap;
+        }
+
+        .filled-value {
+            display: inline;
+            font-weight: 700;
+            text-decoration: underline;
+            text-decoration-thickness: 1px;
+            text-underline-offset: 2px;
+        }
+
+        .photo-cell {
+            padding-left: 5mm !important;
+            vertical-align: top;
+        }
+
+        .photo-box {
+            width: 38mm;
+            height: 40mm;
+            border: 1px solid #000;
+            display: table;
+            margin-left: auto;
+            margin-top: -1mm;
+        }
+
+        .photo-box-text {
+            display: table-cell;
+            vertical-align: bottom;
+            padding: 0 0 2.5mm 3mm;
+            font-size: 13.5pt;
+            line-height: 1.25;
+        }
+
+        /* Nature of work */
+        .work-section {
+            margin-top: 7mm;
+        }
+
+
+
+
+        .line-cell {
+            padding-left: 1mm;
+        }
+
+        .blank-line {
+            height: 7mm;
+            border-bottom: 1px solid #000;
+        }
+
+        .blank-line+.blank-line {
+            margin-top: 1.5mm;
+        }
+
+        /* Workman information */
+        .workman-section {
+            margin-top: 12mm;
+        }
+
+        .workman-section td {
+            padding-bottom: 3.2mm;
+        }
+
+        /* Employment particulars */
+        /* .particulars-table {
+            margin-top: 7mm;
+        } */
+
+        .particulars-table td {
+            padding-bottom: 2.1mm;
+        }
+
+        /* .serial-number {
+            padding-left: 2mm;
+        } */
+
+        .right-value {
+            padding-left: 1mm;
+        }
+
+        .short-input-line {
+            display: inline-block;
+            min-width: 29mm;
+            text-align: center;
+            border-bottom: 1px solid #000;
+            font-weight: 700;
+            line-height: 1.05;
+            padding-bottom: 0.5mm;
+        }
+
+        .date-line {
+            display: inline-block;
+            width: 37mm;
+            border-bottom: 1px solid #000;
+            height: 5mm;
+            vertical-align: bottom;
+        }
+
+        .remarks-dots {
+            display: inline-block;
+            width: 116mm;
+            overflow: hidden;
+            white-space: nowrap;
+            letter-spacing: 1.2px;
+            vertical-align: bottom;
+        }
+
+        /* Signature */
+        .signature-table {
+            margin-top: 42mm;
+        }
+
+
+
+        .signature-text {
+            text-align: center;
+            white-space: nowrap;
+            font-size: 13.5pt;
+        }
+
+        /* Screen helper */
+        @media screen and (max-width: 850px) {
+            body {
+                overflow-x: auto;
+            }
+
+            .form-page {
+                margin-left: 0;
+                margin-right: 0;
+            }
+        }
+
+        /* Printing and multiple records */
+        @page {
+            size: A4 portrait;
+            margin: 0;
+        }
+
+        @media print {
+
+            html,
+            body {
+                margin: 0;
+                padding: 0;
+                background: #fff;
+            }
+
+            .form-page {
+                width: 210mm;
+                height: 296mm;
+                margin: 0;
+                padding: 20mm 24mm 19mm 24mm;
+                overflow: hidden;
+
+                break-inside: avoid;
+                page-break-inside: avoid;
+                break-after: auto;
+                page-break-after: auto;
+            }
+
+            /* Every repeated form starts on the next PDF page. */
+            .form-page+.form-page {
+                break-before: page;
+                page-break-before: always;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="form-page">
+        <table class="header-table">
+            <tr>
+                <td class="form-title">FORM XII</td>
+            </tr>
+            <tr>
+                <td class="rule-title">
+                    [Under rule 76 of the Contract Labour (Regulation and Abolition) Central Rules, 1971]
+                </td>
+            </tr>
+            <tr>
+                <td class="card-title">Employment Card</td>
+            </tr>
+        </table>
+
+        <table class="section-outer employer-table">
+            <colgroup>
+                <col style="width: 77%;">
+                <col style="width: 23%;">
+            </colgroup>
+            <tr>
+                <td>
+                    <table class="detail-inner">
+                        <colgroup>
+                            <col style="width: 40%;">
+                            <col style="width: 60%;">
+                        </colgroup>
+                        <tr>
+                            <td class="detail-label-cell">A. &nbsp; Name Contractor:</td>
+                            <td class="detail-value-cell">
+                                <span class="filled-value">Shree Ganesh Engineering Co.</span>
+                            </td>
+                        </tr>
+                    </table>
+                    <table class="detail-inner">
+                        <colgroup>
+                            <col style="width: 55%;">
+                            <col style="width: 35%;">
+                        </colgroup>
+                        <tr>
+                            <td class="detail-label-cell">A1. LIN/PAN No. of the contractor:</td>
+                            <td class="detail-value-cell">
+                                <span class="filled-value">AAMFS3884N</span>
+                            </td>
+                        </tr>
+                    </table>
+                    <table class="detail-inner">
+                        <colgroup>
+                            <col style="width: 40%;">
+                            <col style="width: 35%;">
+                        </colgroup>
+                        <tr>
+                            <td class="detail-label-cell">A2. Email Id of the contractor:</td>
+                            <td class="detail-value-cell">
+                                <span class="filled-value">hkshah@sgeco.in</span>
+                            </td>
+                        </tr>
+                    </table>
+                    <table class="detail-inner">
+                        <colgroup>
+                            <col style="width: 50%;">
+                            <col style="width: 35%;">
+                        </colgroup>
+
+                        <tr>
+                            <td class="detail-label-cell">A3. Mobile No. of the contractor:</td>
+                            <td class="detail-value-cell">
+                                <span class="filled-value">7984454082</span>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td class="photo-cell">
+                    <div class="photo-box">
+                        <div class="photo-box-text">
+                            Passport Size<br>Photo
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <table class="work-section detail-inner">
+            <colgroup>
+                <col style="width: 42%;">
+                <col style="width: 58%;">
+            </colgroup>
+            <tr>
+                <td class="detail-label-cell">B. &nbsp; Nature and location of work:</td>
+                <td class="line-cell detail-value-cell">
+                    <div class="blank-line"></div>
+                    <div class="blank-line"></div>
+                </td>
+            </tr>
+        </table>
+
+        <table class="workman-section detail-inner">
+            <colgroup>
+                <col style="width: 31%;">
+                <col style="width: 69%;">
+            </colgroup>
+            <tr>
+                <td class="detail-label-cell">C. &nbsp; Name of workmen:</td>
+                <td class="detail-value-cell">
+                    <span class="filled-value">Rajiakbhai Sattarbhai Vahora</span>
+                </td>
+            </tr>
+        </table>
+        <table class="detail-inner">
+            <colgroup>
+                <col style="width: 31%;">
+                <col style="width: 69%;">
+            </colgroup>
+            <tr>
+                <td class="detail-label-cell">C1. UAN/Aadhar No.:</td>
+                <td class="detail-value-cell">
+                    <span class="filled-value">UAN: 100311841131 / Aadhar: 9164 3383 2027</span>
+                </td>
+            </tr>
+        </table>
+        <table class="detail-inner">
+            <colgroup>
+                <col style="width: 23%;">
+                <col style="width: 77%;">
+            </colgroup>
+        <tr>
+            <td class="detail-label-cell">C2. Mobile No.:</td>
+            <td class="detail-value-cell">
+                <span class="filled-value">7984411021</span>
+            </td>
+        </tr>
+        </table>
+
+        <table class="particulars-table" style="margin-top: 25px;">
+            <colgroup>
+                <col style="width: 4%;">
+                <col style="width: 64%;">
+                <col style="width: 32%;">
+            </colgroup>
+            <tr>
+                <td class="serial-number">1.</td>
+                <td>Serial number in the register of workmen employed:</td>
+                <td class="right-value">
+                    <span class="short-input-line">1</span>
+                </td>
+            </tr>
+        </table>
+        <table class="particulars-table">
+            <colgroup>
+                <col style="width: 4%;">
+                <col style="width: 59%;">
+                <col style="width: 37%;">
+            </colgroup>
+            <tr>
+                <td class="serial-number">2.</td>
+                <td>
+                    Nature of Designation:
+                    <span class="filled-value">Supervisor</span>
+                </td>
+                <td></td>
+            </tr>
+        </table>
+        <table class="particulars-table">
+            <colgroup>
+                <col style="width: 4%;">
+                <col style="width: 59%;">
+                <col style="width: 37%;">
+            </colgroup>
+            <tr>
+                <td class="serial-number">3.</td>
+                <td colspan="2">
+                    Wages rate (with particulars of unit, in case of piece-work):
+                    <span class="filled-value">510.50</span>
+                </td>
+            </tr>
+        </table>
+        <table class="particulars-table">
+            <colgroup>
+                <col style="width: 4%;">
+                <col style="width: 59%;">
+                <col style="width: 37%;">
+            </colgroup>
+            <tr>
+                <td class="serial-number">4.</td>
+                <td colspan="2">
+                    Date of commencement of employment:
+                    <span class="date-line"></span>
+                </td>
+            </tr>
+        </table>
+        <table class="particulars-table">
+            <colgroup>
+                <col style="width: 4%;">
+                <col style="width: 59%;">
+                <col style="width: 37%;">
+            </colgroup>
+            <tr>
+                <td class="serial-number">5.</td>
+                <td colspan="2">
+                    Remarks
+                    <span
+                        class="remarks-dots">........................................................................................................</span>
+                </td>
+            </tr>
+        </table>
+
+        <table class="signature-table">
+            <colgroup>
+                <col style="width: 58%;">
+                <col style="width: 42%;">
+            </colgroup>
+            <tr>
+                <td></td>
+                <td class="signature-text">Seal and Signature of Contractor</td>
+            </tr>
+        </table>
+    </div>
+
+</body>
+
+</html>

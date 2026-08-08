@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Wages Slip</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #eeeeee;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #000000;
+        }
+
+        .print-page {
+            width: 1120px;
+            min-height: 730px;
+            margin: 0 auto;
+            padding: 14px;
+            background: #ffffff;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        /*
+         * Use a separate block frame for the outer border.
+         * Chrome can drop the right edge of a 100%-wide collapsed table
+         * while creating a PDF, especially when rightmost cells use
+         * border-right: none. A normal block border is rendered reliably.
+         */
+        .wage-slip-frame {
+            width: 100%;
+            border: 1px solid #000000;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        /* Draw the PDF right edge one pixel inside the frame. */
+        .wage-slip-frame::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 1px;
+            bottom: 0;
+            border-right: 1px solid #000000;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .wage-slip {
+            width: 100%;
+            table-layout: fixed;
+            border: 0;
+            font-size: 14px;
+        }
+
+        /* .wage-slip > tbody > tr > td,
+        .wage-slip > tbody > tr > th {
+            border: 1px solid #000000;
+        } */
+
+        /* Title */
+
+        .title-cell {
+            height: 50px;
+            padding: 8px 10px;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 21px;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+        }
+
+        /* General nested tables */
+
+        .inner-table {
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        .inner-table td,
+        .inner-table th {
+            border: 0;
+            padding: 4px 7px;
+            vertical-align: top;
+        }
+
+        /* Slip information */
+
+        .slip-info td {
+            height: 35px;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        .field-title {
+            font-weight: 400;
+        }
+
+        .field-value {
+            font-weight: 700;
+        }
+
+        .align-right {
+            text-align: right;
+        }
+
+        /* Contractor and worker details */
+
+        .detail-row {
+            min-height: 36px;
+        }
+
+        .detail-row td {
+            padding-top: 5px;
+            padding-bottom: 5px;
+            line-height: 1.45;
+        }
+
+        .detail-label {
+            width: 27%;
+            font-weight: 700;
+        }
+
+        .detail-value {
+            width: 66%;
+            font-weight: 400;
+        }
+
+        .contractor-name {
+            font-weight: 500;
+        }
+
+        /* Main payroll table */
+
+        .payroll-table {
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        .payroll-table>thead>tr>th {
+            border: 1px solid #000000;
+            padding: 5px 4px;
+            height: 32px;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .payroll-table>tbody>tr>td {
+            /* border-left: 1px solid #000000; */
+            border-right: 1px solid #000000;
+            border-top: 0;
+            border-bottom: 0;
+            vertical-align: top;
+            padding: 0;
+        }
+
+        .payroll-table>tbody>tr.payroll-content>td {
+            height: 315px;
+        }
+
+        .payroll-lines {
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        .payroll-lines td {
+            height: 23px;
+            border: 0;
+            padding: 3px 7px;
+            font-size: 14px;
+            line-height: 17px;
+            vertical-align: top;
+        }
+
+        .amount-column td {
+            text-align: right;
+        }
+
+        /* Bank details */
+
+        .bank-details {
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        .bank-details td {
+            border: 0;
+            padding: 3px 5px;
+            height: 24px;
+            font-size: 14px;
+            vertical-align: top;
+        }
+
+        .bank-label {
+            width: 45%;
+            font-weight: 400;
+        }
+
+        .bank-value {
+            width: 55%;
+            font-weight: 400;
+        }
+
+        /* Totals row */
+
+        .total-row td {
+            border: 1px solid #000000 !important;
+            height: 35px;
+            padding: 5px 7px !important;
+            vertical-align: middle !important;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .total-label {
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .total-value {
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        .net-pay-table {
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        .net-pay-table td {
+            border: 0 !important;
+            padding: 0 !important;
+            height: auto;
+            font-weight: 700;
+        }
+
+        /* Contractor signature */
+
+        .contractor-signature {
+            height: 72px;
+            padding: 10px 50px 10px 10px !important;
+            text-align: end;
+            vertical-align: center !important;
+            font-size: 14px;
+
+        }
+
+        .signature-line {
+            display: inline-block;
+            width: 235px;
+            margin-left: 8px;
+            border-bottom: 1px solid #000000;
+            transform: translateY(-3px);
+        }
+
+        /* Print settings */
+
+        @media print {
+            @page {
+                size: A4 landscape;
+                margin: 8mm;
+            }
+
+            html,
+            body {
+                margin: 0;
+                padding: 0;
+                background: #ffffff;
+            }
+
+            .print-page {
+                width: 100%;
+                min-height: auto;
+                margin: 0;
+                padding: 0;
+
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+            /* Start every wages slip after the first one on a new page */
+            .print-page+.print-page {
+                break-before: page;
+                page-break-before: always;
+            }
+
+            .wage-slip-frame,
+            .wage-slip {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+        }
+
+        @media screen and (max-width: 1150px) {
+            body {
+                overflow-x: auto;
+            }
+
+            .print-page {
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="print-page">
+
+        <div class="wage-slip-frame">
+            <table class="wage-slip">
+
+                <!-- Title -->
+                <tr>
+                    <td class="title-cell">
+                        FORM - XIX - [ SEE RULE - 78(I)(B) ] - WAGES SLIP
+                    </td>
+                </tr>
+
+                <!-- Slip basic information -->
+                <tr>
+                    <td>
+                        <table class="inner-table slip-info">
+                            <colgroup>
+                                <col style="width: 20%;">
+                                <col style="width: 25%;">
+                                <col style="width: 25%;">
+                                <col style="width: 30%;">
+                            </colgroup>
+
+                            <tr>
+                                <td>
+                                    <span class="field-title">Sr. No.:</span>
+                                    <span class="field-value">5</span>
+                                </td>
+
+                                <td>
+                                    <span class="field-title">PF No.:</span>
+                                    <span class="field-value">12443</span>
+                                </td>
+
+                                <td>
+                                    <span class="field-title">Worker No.:</span>
+                                    <span class="field-value">5</span>
+                                </td>
+
+                                <td class="align-right">
+                                    <span class="field-title">Period:</span>
+                                    <span class="field-value">September-2024</span>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- Contractor name and address -->
+                <tr>
+                    <td>
+                        <table class="inner-table detail-row">
+                            <colgroup>
+                                <col style="width: 5%;">
+                                <col style="width: 95%;">
+                            </colgroup>
+
+                            <tr>
+                                <td class="detail-label">
+                                    Name &amp; Address of Contractor
+                                </td>
+
+                                <td class="detail-value">
+                                    <span class="contractor-name">
+                                        SHREE GANESH ENGINEERING COMPANY
+                                    </span>
+                                    <br>
+
+                                    FF-8, DEVSHRUTI COMPLEX, NR. HCG HOSPITAL,
+                                    MITHAKHALI, AHMEDABAD-380006.
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- Workman name -->
+                <tr>
+                    <td>
+                        <table class="inner-table detail-row">
+                            <colgroup>
+                                <col style="width: 40%;">
+                                <col style="width: 60%;">
+                            </colgroup>
+
+                            <tr>
+                                <td class="detail-label">
+                                    Code/Name and Father's/Husband's Name of Workman:
+                                </td>
+
+                                <td class="detail-value">
+                                    Dilip Mahendra Yadav
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- Nature and location of work -->
+                <tr>
+                    <td>
+                        <table class="inner-table detail-row">
+                            <colgroup>
+                                <col style="width: 5%;">
+                                <col style="width: 95%;">
+                            </colgroup>
+
+                            <tr>
+                                <td class="detail-label">
+                                    Nature and Location of Work :
+                                </td>
+
+                                <td class="detail-value">
+                                    TATA Chemicals Limited, Mithapur
+                                    <br>
+                                    Work of HPB-4 Boiler Valve/Piping Replacement.
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- Payroll details -->
+                <tr>
+                    <td style="padding: 0;">
+
+                        <table class="payroll-table">
+
+                            <colgroup>
+                                <col style="width: 14%;">
+                                <col style="width: 8%;">
+                                <col style="width: 17%;">
+                                <col style="width: 10%;">
+                                <col style="width: 14%;">
+                                <col style="width: 10%;">
+                                <col style="width: 27%;">
+                            </colgroup>
+
+                            <thead>
+                                <tr>
+                                    <th
+                                        style="border-left:none !important;border-right: none !important;text-align: left;">
+                                        Head</th>
+                                    <th style="border-left:none !important;text-align: right;">Wages</th>
+                                    <th colspan="2">Earning</th>
+                                    <th colspan="2">Deduction</th>
+                                    <th style="border-right:none !important;">Signature</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                <tr class="payroll-content">
+
+                                    <!-- Wage heads -->
+                                    <td style="border-right: none !important;">
+                                        <table class="payroll-lines">
+                                            <tr>
+                                                <td>Minimum</td>
+                                            </tr>
+                                            <tr>
+                                                <td>HRA</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Conveyance</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Education</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Medical</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Washing</td>
+                                            </tr>
+                                            <tr>
+                                                <td>OT Hours</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+
+                                    <!-- Wage amounts -->
+                                    <td>
+                                        <table class="payroll-lines amount-column">
+                                            <tr>
+                                                <td>497.00</td>
+                                            </tr>
+                                            <tr>
+                                                <td>0.00</td>
+                                            </tr>
+                                            <tr>
+                                                <td>0.00</td>
+                                            </tr>
+                                            <tr>
+                                                <td>0.00</td>
+                                            </tr>
+                                            <tr>
+                                                <td>0.00</td>
+                                            </tr>
+                                            <tr>
+                                                <td>0.00</td>
+                                            </tr>
+                                            <tr>
+                                                <td>0.00</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+
+                                    <!-- Earning labels -->
+                                    <td style="border-right: none !important;">
+                                        <table class="payroll-lines">
+                                            <tr>
+                                                <td>Basic</td>
+                                            </tr>
+                                            <tr>
+                                                <td>HRA</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Conveyance</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Education</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Medical</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Washing</td>
+                                            </tr>
+                                            <tr>
+                                                <td>OT Earn</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Food Allow.</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Other Allow.</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Mobile Allow.</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Bonus</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Leave</td>
+                                            </tr>
+                                            <tr>
+                                                <td>National Holiday</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+
+                                    <!-- Earning values -->
+                                    <td>
+                                        <table class="payroll-lines amount-column">
+                                            <tr>
+                                                <td>10437.00</td>
+                                            </tr>
+                                            <tr>
+                                                <td>0.00</td>
+                                            </tr>
+                                            <tr>
+                                                <td>0.00</td>
+                                            </tr>
+                                            <tr>
+                                                <td>0.00</td>
+                                            </tr>
+                                            <tr>
+                                                <td>0.00</td>
+                                            </tr>
+                                            <tr>
+                                                <td>0.00</td>
+                                            </tr>
+                                            <tr>
+                                                <td>6710.00</td>
+                                            </tr>
+                                            <tr>
+                                                <td>0.00</td>
+                                            </tr>
+                                            <tr>
+                                                <td>0.00</td>
+                                            </tr>
+                                            <tr>
+                                                <td>0.00</td>
+                                            </tr>
+                                            <tr>
+                                                <td>869</td>
+                                            </tr>
+                                            <tr>
+                                                <td>2322</td>
+                                            </tr>
+                                            <tr>
+                                                <td>0.00</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+
+                                    <!-- Deduction labels -->
+                                    <td style="border-right: none !important;">
+                                        <table class="payroll-lines">
+                                            <tr>
+                                                <td>Prof. Tax</td>
+                                            </tr>
+                                            <tr>
+                                                <td>PF</td>
+                                            </tr>
+                                            <tr>
+                                                <td>ESIC</td>
+                                            </tr>
+                                            <tr>
+                                                <td>GL.W.F.</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Other Deduction</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Advance</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+
+                                    <!-- Deduction values -->
+                                    <td>
+                                        <table class="payroll-lines amount-column">
+                                            <tr>
+                                                <td>200.00</td>
+                                            </tr>
+                                            <tr>
+                                                <td>1252.44</td>
+                                            </tr>
+                                            <tr>
+                                                <td>0.00</td>
+                                            </tr>
+                                            <tr>
+                                                <td>0.00</td>
+                                            </tr>
+                                            <tr>
+                                                <td>0.00</td>
+                                            </tr>
+                                            <tr>
+                                                <td>0.00</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+
+                                    <!-- Bank and signature information -->
+                                    <td style="border-right: none !important;">
+                                        <table class="bank-details">
+                                            <tr>
+                                                <td class="bank-label">Bank Name:</td>
+                                                <td class="bank-value">
+                                                    Central Bank Of India
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <td class="bank-label">IFSC Code:</td>
+                                                <td class="bank-value">
+                                                    CBIN0282967
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <td class="bank-label">UAN No.:</td>
+                                                <td class="bank-value">
+                                                    101740014604
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+
+                                </tr>
+
+                                <!-- Total row -->
+                                <tr class="total-row">
+
+                                    <td class="total-label"
+                                        style="border-left: none !important; border-right: none !important;">
+                                        Work Days
+                                    </td>
+
+                                    <td class="total-value" style="border-left: none !important;">
+                                        21
+                                    </td>
+
+                                    <td class="total-label" style=" border-right: none !important;">
+                                        Gross Earn.
+                                    </td>
+
+                                    <td class="total-value" style="border-left: none !important;">
+                                        18538
+                                    </td>
+
+                                    <td class="total-label" style=" border-right: none !important;">
+                                        Total Deduction
+                                    </td>
+
+                                    <td class="total-value" style="border-left: none !important;">
+                                        1452.44
+                                    </td>
+
+                                    <td style="border-right: none !important;">
+                                        <table class="net-pay-table">
+                                            <tr>
+                                                <td style="text-align: left;">
+                                                    Net Pay.
+                                                </td>
+
+                                                <td style="text-align: right;">
+                                                    17086.00
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+                        </table>
+
+                    </td>
+                </tr>
+
+                <!-- Contractor signature -->
+                <tr>
+                    <td class="contractor-signature">
+                        Initials of the Contractor or his Representative
+                        <span class="signature-line"></span>
+                    </td>
+                </tr>
+
+            </table>
+        </div>
+
+    </div>
+</body>
+
+</html>

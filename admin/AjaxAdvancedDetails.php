@@ -26,7 +26,8 @@ function validDetailDate($date, $advanced)
 
 if (!advancedDetailsAccess($dbconn)) {
     http_response_code(403);
-    exit('Access denied.');
+    header('location:'.$web_url.'admin/login.php');	
+    exit;
 }
 $action = isset($_POST['action']) ? $_POST['action'] : '';
 $advancedId = isset($_POST['advancedId']) ? (int) $_POST['advancedId'] : 0;

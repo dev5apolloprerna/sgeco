@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register of Overtime - Form XXIII</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #ececec;
+            color: #000;
+            font-family: "Times New Roman", Times, serif;
+        }
+
+        /*
+         * Legal paper in landscape:
+         * 14in x 8.5in
+         */
+        .form-page {
+            width: 14in;
+            height: 8.5in;
+            margin: 18px auto;
+            padding: 20mm 12mm 20mm;
+            background: #fff;
+            position: relative;
+            overflow: hidden;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        .page-layout {
+            width: 100%;
+            height: 100%;
+            table-layout: fixed;
+        }
+
+        .page-layout > tbody > tr > td {
+            padding: 0;
+            vertical-align: top;
+        }
+
+        /* Header */
+
+        .header-table {
+            width: 100%;
+            table-layout: fixed;
+            margin-bottom: 0.08in;
+        }
+
+        .header-table td {
+            border: 0;
+            padding: 0;
+            vertical-align: top;
+        }
+
+        .left-header {
+            padding-right: 0.18in !important;
+            font-size: 9.5pt;
+            line-height: 1.45;
+        }
+
+        .center-header {
+            padding-top: 0.01in !important;
+            text-align: center;
+        }
+
+        .right-header {
+            padding-left: 0.18in !important;
+            font-size: 10pt;
+            line-height: 1.45;
+        }
+
+        .title {
+            margin-bottom: 10px;
+            font-size: 19pt;
+            line-height: 1.05;
+            font-weight: 700;
+        }
+
+        .form-number {
+            /* margin-top: 0.06in; */
+            font-size: 14pt;
+            line-height: 1.05;
+            font-weight: 700;
+        }
+
+        .rule-text {
+            margin-top: 0.07in;
+            font-size: 10pt;
+        }
+
+        .month-row {
+            margin-top: 0.28in;
+            font-size: 12pt;
+        }
+
+        .month-label {
+            font-weight: 700;
+        }
+
+        .contractor-table {
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        .contractor-table td {
+            border: 0;
+            padding: 0 0 0.055in 0;
+            vertical-align: top;
+        }
+
+        .contractor-label {
+            padding-right: 0.10in !important;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .right-heading {
+            margin-bottom: 0.22in;
+            font-weight: 700;
+        }
+
+        .right-heading:last-child {
+            margin-bottom: 0;
+        }
+
+        .normal {
+            font-weight: 400;
+        }
+
+        .nature-title {
+            margin: 0.05in 0 0.07in;
+            font-size: 10pt;
+            font-weight: 700;
+        }
+
+        /* Register table */
+
+        .register-frame {
+            width: 100%;
+            border: 1px solid #000;
+            position: relative;
+        }
+
+        /* Reliable right-side border in Chrome PDF */
+        .register-frame::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            border-right: 1px solid #000;
+            pointer-events: none;
+        }
+
+        .register-table {
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: collapse;
+        }
+
+        .register-table th,
+        .register-table td {
+            border-right: 1px solid #000;
+            border-bottom: 1px solid #000;
+            padding: 0.035in 0.025in;
+            vertical-align: middle;
+        }
+
+        .register-table th:last-child,
+        .register-table td:last-child {
+            border-right: 0;
+        }
+
+        .register-table tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .register-table thead th {
+            height: 0.82in;
+            text-align: center;
+            font-size: 9.2pt;
+            line-height: 1.08;
+            font-weight: 700;
+        }
+
+        .column-number-row td {
+            height: 0.20in;
+            padding: 0.01in 0.02in;
+            text-align: center;
+            font-size: 9.3pt;
+            line-height: 1;
+            font-weight: 700;
+        }
+
+        .data-row td {
+            height: 0.30in;
+            font-size: 9.5pt;
+            line-height: 1.05;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-left {
+            text-align: left;
+        }
+
+        @page {
+            size: 14in 8.5in;
+            margin: 0;
+        }
+
+        @media print {
+            html,
+            body {
+                margin: 0;
+                padding: 0;
+                background: #fff;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .form-page {
+                width: 14in;
+                height: 8.5in;
+                margin: 0;
+                padding: 20mm 12mm 20mm;
+                overflow: hidden;
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+            /*
+             * Every repeated form starts on the next page.
+             * No page-break-after is used, so no blank final page.
+             */
+            .form-page + .form-page {
+                break-before: page;
+                page-break-before: always;
+            }
+
+            .register-frame,
+            .register-table {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+        }
+
+        @media screen and (max-width: 1450px) {
+            body {
+                overflow-x: auto;
+            }
+
+            .form-page {
+                margin-left: 12px;
+                margin-right: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <section class="form-page">
+
+        <table class="page-layout">
+            <tr>
+                <td>
+                    <div class="title" style="text-align: center;">Register of Overtime</div>
+                    <table class="header-table">
+                        <colgroup>
+                            <col style="width: 42%;">
+                            <col style="width: 20%;">
+                            <col style="width: 38%;">
+                        </colgroup>
+
+                        <tr>
+                            <td class="left-header">
+                                <table class="contractor-table">
+                                    <colgroup>
+                                        <col style="width: 52%;">
+                                        <col style="width: 48%;">
+                                    </colgroup>
+
+                                    <tr>
+                                        <td class="contractor-label">
+                                            NAME AND ADDRESS OF CONTRACTOR :
+                                        </td>
+                                        <td>SHREE GANESH ENGINEERING CO.</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td></td>
+                                        <td>FF-8, Devshruti Complex,</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td></td>
+                                        <td>Nr. HCG Hospital,</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td></td>
+                                        <td>Mithakhali, Ahmedabad - 380006</td>
+                                    </tr>
+                                </table>
+                            </td>
+
+                            <td class="center-header">
+                                <!-- <div class="title">Register of Overtime</div> -->
+                                <div class="form-number">FORM NO. XXIII</div>
+                                <div class="rule-text">[See Rule 78 (1) (a) (iii)]</div>
+
+                                <div class="month-row">
+                                    <span class="month-label">Month :</span>
+                                    <span>September-2024</span>
+                                </div>
+                            </td>
+
+                            <td class="right-header">
+                                <div class="right-heading">
+                                    Name and Address of establishment in/under which
+                                    contract is carried on
+                                </div>
+
+                                <div class="right-heading">
+                                    Name and Address of the principal Employer :
+                                    <span class="normal">
+                                        TATA Chemicals Ltd., Mithapur
+                                    </span>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <div class="nature-title">
+                        NATURE AND LOCATION OF WORK
+                    </div>
+
+                    <div class="register-frame">
+                        <table class="register-table">
+
+                            <colgroup>
+                                <col style="width: 2.5%;">
+                                <col style="width: 16.5%;">
+                                <col style="width: 13.5%;">
+                                <col style="width: 5%;">
+                                <col style="width: 9.5%;">
+                                <col style="width: 9%;">
+                                <col style="width: 10%;">
+                                <col style="width: 6.5%;">
+                                <col style="width: 7.2%;">
+                                <col style="width: 5.8%;">
+                                <col style="width: 8.8%;">
+                                <col style="width: 5.7%;">
+                            </colgroup>
+
+                            <thead>
+                                <tr>
+                                    <th>Sr.<br>No.</th>
+                                    <th>Name of Workmen</th>
+                                    <th>Father's / Husband's Name</th>
+                                    <th>Sex</th>
+                                    <th>Designation/Nature<br>of<br>Employment</th>
+                                    <th>Date on Which<br>Overtime worked</th>
+                                    <th>
+                                        Total overtime<br>
+                                        worked or Production<br>
+                                        in case of piece-rated
+                                    </th>
+                                    <th>Normal rate<br>of wages</th>
+                                    <th>Overtime of<br>wages</th>
+                                    <th>Overtime<br>earning</th>
+                                    <th>Date on which<br>overtime wages<br>paid</th>
+                                    <th>Remarks</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr class="column-number-row">
+                                    <td>1</td>
+                                    <td>2</td>
+                                    <td>3</td>
+                                    <td>4</td>
+                                    <td>5</td>
+                                    <td>6</td>
+                                    <td>7</td>
+                                    <td>8</td>
+                                    <td>9</td>
+                                    <td>10</td>
+                                    <td>11</td>
+                                    <td>12</td>
+                                </tr>
+
+                                <tr class="data-row">
+                                    <td class="text-center">1</td>
+                                    <td class="text-left">Dilip Yadav</td>
+                                    <td class="text-left">Mahendra Yadav</td>
+                                    <td class="text-center">M</td>
+                                    <td class="text-left">Supervisor</td>
+                                    <td class="text-center">Sep-24</td>
+                                    <td class="text-center">54</td>
+                                    <td class="text-center">534.5</td>
+                                    <td class="text-center">1069</td>
+                                    <td class="text-center">7215.75</td>
+                                    <td class="text-center">30-09-2024</td>
+                                    <td class="text-center">NIL</td>
+                                </tr>
+                            </tbody>
+
+                        </table>
+                    </div>
+
+                </td>
+            </tr>
+        </table>
+
+    </section>
+
+</body>
+</html>
