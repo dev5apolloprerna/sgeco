@@ -43,7 +43,7 @@ $html .= '<tr><td><strong>SUB : ADVANCE SHEET<br>SITE : ' . advancedPaymentPdfEs
 //  - ' . advancedPaymentPdfEscape($bankName) . ' - Bank Payment
 $html .= '<tr><td><table width="100%" cellspacing="0" cellpadding="5" border="1" style="font-size:18px;color:#000">';
 $html .= '<thead><tr style="background-color:#ccc;font-size:16px;font-weight:bold;text-align:center">';
-$html .= '<th width="7%">Sr.<br>No.</th><th width="22%">Beneficiary Account<br>Number</th><th width="12%">Amount</th><th width="43%">Beneficiary Name</th><th width="16%">IFSC Code</th>';
+$html .= '<th width="7%">Sr.<br>No.</th><th width="22%">Beneficiary Account<br>Number</th><th width="12%">Amount</th><th width="43%">Beneficiary Name</th><th width="43%">Beneficiary Address</th><th width="16%">IFSC Code</th><th width="16%">Comm.</th>';
 $html .= '</tr></thead><tbody>';
 
 $serial = 1;
