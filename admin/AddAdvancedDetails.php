@@ -91,12 +91,13 @@ $advancedPeriod = mysqli_fetch_assoc($advancedResult);
             $.post('AjaxAdvancedDetails.php', {
                 action: 'SearchEmployees',
                 advancedId: $('#advancedId').val(),
-                employeeSearch: $('#employeeSearch').val()
+                employeeSearch: $.trim($('#employeeSearch').val())
             }, function(html) {
                 $('#employeeResults').html(html);
                 $('#loading').hide();
             }).fail(function(xhr) {
                 $('#loading').hide();
+                $('#employeeResults').empty();
                 showMessage('danger', xhr.responseText || 'Unable to search employees.');
             });
         });
@@ -107,34 +108,55 @@ $advancedPeriod = mysqli_fetch_assoc($advancedResult);
             }
         });
 
-        function addAdvancedDetail(employeeId, button) {
-            var row = $(button).closest('tr');
-            var amount = row.find('.advanced-amount').val();
-            var bankId = row.find('.advanced-bank').val();
-            if (!amount || parseFloat(amount) <= 0) {
-                showMessage('danger', 'Enter a valid amount.');
+        function submitAdvancedDetails(button) {
+            var companyId = $('#companyId').val();
+            var advancedDate = $('#advancedDate').val();
+            if (!companyId || !advancedDate) {
+                showMessage('danger', 'Select a company and date.');
                 return;
             }
-            if (!bankId) {
-                showMessage('danger', 'Bank is not configured in the employee master.');
+            var details = [];
+            var invalidAmount = false;
+            $('#employeeResults .employee-row').each(function() {
+                var row = $(this);
+                var amount = $.trim(row.find('.advanced-amount').val());
+                if (amount === '') {
+                    return;
+                }
+                if (!/^\d+(\.\d{1,2})?$/.test(amount) || parseFloat(amount) <= 0) {
+                    invalidAmount = true;
+                    return false;
+                }
+                details.push({
+                    employeeId: row.data('employee-id'),
+                    amount: amount,
+                    remarks: row.find('.advanced-remarks').val()
+                });
+            });
+            if (invalidAmount) {
+                showMessage('danger', 'Amounts must be greater than zero and have no more than two decimal places.');
+                return;
+            }
+            if (details.length === 0) {
+                showMessage('danger', 'Enter an amount for at least one employee.');
                 return;
             }
             $(button).prop('disabled', true);
             $('#loading').show();
             $.post('AjaxAdvancedDetails.php', {
-                action: 'AddAdvancedDetail',
+                action: 'AddAdvancedDetails',
                 advancedId: $('#advancedId').val(),
-                companyId: $('#companyId').val(),
-                advancedDate: $('#advancedDate').val(),
-                employeeId: employeeId,
-                amount: amount,
-                bankId: bankId,
-                remarks: row.find('.advanced-remarks').val()
+                companyId: companyId,
+                advancedDate: advancedDate,
+                details: JSON.stringify(details)
             }, function(response) {
                 $('#loading').hide();
                 if (response.success) {
                     showMessage('success', response.message);
-                    row.find('input, select, button').prop('disabled', true);
+                    details.forEach(function(detail) {
+                        $('#employeeResults .employee-row[data-employee-id="' + detail.employeeId + '"]').find('input').prop('disabled', true);
+                    });
+                    $(button).prop('disabled', true);
                 } else {
                     $(button).prop('disabled', false);
                     showMessage('danger', response.message);

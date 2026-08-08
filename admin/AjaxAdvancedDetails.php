@@ -37,13 +37,6 @@ if (!$advanced) {
 }
 
 if ($action === 'SearchEmployees') {
-    $companyId = isset($_POST['companyId']) ? (int) $_POST['companyId'] : 0;
-    $date = isset($_POST['advancedDate']) ? trim($_POST['advancedDate']) : '';
-    $company = mysqli_query($dbconn, "SELECT companymasterId FROM companymaster WHERE companymasterId=" . $companyId . " AND isDelete=0 AND istatus=1");
-    if (!$company || mysqli_num_rows($company) === 0 || !validDetailDate($date, $advanced)) {
-        http_response_code(400);
-        exit('Select a valid company and a date within the advanced period.');
-    }
     $search = mysqli_real_escape_string($dbconn, isset($_POST['employeeSearch']) ? trim($_POST['employeeSearch']) : '');
     $where = $search === '' ? '' : " AND (emp_name LIKE '%" . $search . "%' OR employeecode LIKE '%" . $search . "%')";
     $employees = mysqli_query($dbconn, "SELECT employeeId, emp_name, employeecode, uan, bankid FROM employee WHERE isDelete=0 AND istatus=1 AND isExitEmployee=0" . $where . " ORDER BY emp_name LIMIT 100");
@@ -52,77 +45,113 @@ if ($action === 'SearchEmployees') {
         exit;
     }
 
-    $advancedId = isset($_GET['token']) ? (int) $_GET['token'] : 0;
-    $advancedResult = mysqli_query($dbconn, "SELECT * FROM advanced_master WHERE iAdvancedMasterId=" . $advancedId . " AND isDelete=0 AND istatus=1");
-    if (!$advancedResult || mysqli_num_rows($advancedResult) === 0) {
-        http_response_code(404);
-        exit('Advanced date range not found.');
-    }
-    $advancedPeriod = mysqli_fetch_assoc($advancedResult);
+    $companies = mysqli_query($dbconn, "SELECT companymasterId, companyname FROM companymaster WHERE isDelete=0 AND istatus=1 ORDER BY companyname");
 ?>
+    <div class="row">
+        <div class="form-group col-md-4">
+            <label for="companyId"><strong>Company</strong></label>
+            <select class="form-control" id="companyId" required>
+                <option value="">Select company</option>
+                <?php while ($companies && $company = mysqli_fetch_assoc($companies)) { ?>
+                    <option value="<?php echo (int) $company['companymasterId']; ?>"><?php echo htmlspecialchars($company['companyname'], ENT_QUOTES, 'UTF-8'); ?></option>
+                <?php } ?>
+            </select>
+        </div>
+        <div class="form-group col-md-4">
+            <label for="advancedDate"><strong>Date</strong></label>
+            <input class="form-control" type="date" id="advancedDate" min="<?php echo htmlspecialchars($advanced['fromdate'], ENT_QUOTES, 'UTF-8'); ?>" max="<?php echo htmlspecialchars($advanced['todate'], ENT_QUOTES, 'UTF-8'); ?>" required>
+        </div>
+    </div>
     <table class="table table-bordered table-hover table-responsive">
         <thead class="tbg">
             <tr>
                 <th>Employee Name</th>
                 <th>Employee Code</th>
                 <th>UAN</th>
-                <th>Company</th>
-                <th>Date</th>
                 <th>Amount</th>
-
                 <th>Remarks</th>
-                <th>Action</th>
+                <!-- <th>Action</th> -->
             </tr>
         </thead>
         <tbody>
-            <?php while ($employee = mysqli_fetch_assoc($employees)) { ?><tr>
+            <?php while ($employee = mysqli_fetch_assoc($employees)) { ?>
+            <tr class="employee-row" data-employee-id="<?php echo (int) $employee['employeeId']; ?>">
+
                     <td><?php echo htmlspecialchars(ucwords(strtolower($employee['emp_name'])), ENT_QUOTES, 'UTF-8'); ?></td>
                     <td><?php echo htmlspecialchars($employee['employeecode'], ENT_QUOTES, 'UTF-8'); ?></td>
-                    <td>
-                        <select class="form-control" id="companyId" required>
-                            <option value="">Select company</option>
-                            <?php $companies = mysqli_query($dbconn, "SELECT companymasterId, companyname FROM companymaster WHERE isDelete=0 AND istatus=1 ORDER BY companyname");
-                            while ($company = mysqli_fetch_assoc($companies)) { ?>
-                                <option value="<?php echo (int) $company['companymasterId']; ?>"><?php echo htmlspecialchars($company['companyname'], ENT_QUOTES, 'UTF-8'); ?></option>
-                            <?php } ?>
-                        </select>
-
-                    </td>
-                    <td>
-                        <input class="form-control" type="date" id="advancedDate" min="<?php echo $advancedPeriod['fromdate']; ?>" max="<?php echo $advancedPeriod['todate']; ?>" required><span class="help-block">Date must be between <?php echo date('d-m-Y', strtotime($advancedPeriod['fromdate'])); ?> and <?php echo date('d-m-Y', strtotime($advancedPeriod['todate'])); ?>
-                    </td>
                     <td><?php echo htmlspecialchars($employee['uan'], ENT_QUOTES, 'UTF-8'); ?></td>
                     <td>
                         <input type="number" min="0.01" step="0.01" class="form-control advanced-amount" placeholder="0.00">
                         <input type="hidden" class="advanced-bank" value="<?php echo (int) $employee['bankid']; ?>">
                     </td>
                     <td><input type="text" maxlength="1000" class="form-control advanced-remarks" placeholder="Remarks"></td>
-                    <td><button type="button" class="btn blue" onclick="addAdvancedDetail(<?php echo (int) $employee['employeeId']; ?>, this)">Add</button></td>
+                    <!-- <td><button type="button" class="btn blue" onclick="addAdvancedDetail(<?php echo (int) $employee['employeeId']; ?>, this)">Add</button></td> -->
                 </tr><?php } ?></tbody>
     </table>
+    <button type="button" class="btn blue pull-right" onclick="submitAdvancedDetails(this)"><i class="fa fa-save"></i> Submit</button>
+    <div class="clearfix"></div>
 <?php exit;
 }
 
 header('Content-Type: application/json');
-if ($action === 'AddAdvancedDetail') {
-    $companyId = (int) $_POST['companyId'];
-    $employeeId = (int) $_POST['employeeId'];
-    $bankId = (int) $_POST['bankId'];
-    $date = trim($_POST['advancedDate']);
-    $amount = isset($_POST['amount']) ? (float) $_POST['amount'] : 0;
-    $remarks = isset($_POST['remarks']) ? trim($_POST['remarks']) : '';
+if ($action === 'AddAdvancedDetails') {
+    $companyId = isset($_POST['companyId']) ? (int) $_POST['companyId'] : 0;
+    $date = isset($_POST['advancedDate']) ? trim($_POST['advancedDate']) : '';
+    $details = json_decode(isset($_POST['details']) ? $_POST['details'] : '', true);
     $validCompany = mysqli_query($dbconn, "SELECT companymasterId FROM companymaster WHERE companymasterId=" . $companyId . " AND isDelete=0 AND istatus=1");
-    $validEmployee = mysqli_query($dbconn, "SELECT employeeId, bankid FROM employee WHERE employeeId=" . $employeeId . " AND isDelete=0 AND istatus=1 AND isExitEmployee=0");
-    $employee = $validEmployee ? mysqli_fetch_assoc($validEmployee) : null;
-    $bankId = $employee ? (int) $employee['bankid'] : 0;
-    $validBank = mysqli_query($dbconn, "SELECT bankmasterId FROM bankmaster WHERE bankmasterId=" . $bankId . " AND isDelete=0 AND istatus=1");
-    if (!validDetailDate($date, $advanced) || $amount <= 0 || !$validCompany || mysqli_num_rows($validCompany) === 0 || !$employee || !$validBank || mysqli_num_rows($validBank) === 0) {
-        echo json_encode(array('success' => false, 'message' => 'Invalid details. Check the company, employee, bank, amount, and date.'));
+    if (!validDetailDate($date, $advanced) || !$validCompany || mysqli_num_rows($validCompany) === 0 || !is_array($details) || count($details) === 0 || count($details) > 100) {
+        echo json_encode(array('success' => false, 'message' => 'Select a valid company and date, and enter an amount for at least one employee.'));
         exit;
     }
-    $data = array('iAdvancedMasterId' => $advancedId, 'iEmployeeId' => $employeeId, 'iCompanyId' => $companyId, 'iAmount' => number_format($amount, 2, '.', ''), 'strDate' => $date, 'strRemarks' => $remarks, 'iBankId' => $bankId, 'strEntryDate' => date('d-m-Y H:i:s'), 'iEntryBy' => $_SESSION['AdminId'], 'EntryDate' => date('Y-m-d'));
-    $result = $connect->insertrecord($dbconn, 'advanced_details', $data);
-    echo json_encode(array('success' => (bool) $result, 'message' => $result ? 'Advanced details added successfully.' : 'Unable to add advanced details.'));
+
+    $employeeStatement = mysqli_prepare($dbconn, "SELECT e.bankid FROM employee e INNER JOIN bankmaster b ON b.bankmasterId=e.bankid AND b.isDelete=0 AND b.istatus=1 WHERE e.employeeId=? AND e.isDelete=0 AND e.istatus=1 AND e.isExitEmployee=0");
+    $insertStatement = mysqli_prepare($dbconn, "INSERT INTO advanced_details (iAdvancedMasterId, iEmployeeId, iCompanyId, iAmount, strDate, strRemarks, iBankId, strEntryDate, iEntryBy, EntryDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    if (!$employeeStatement || !$insertStatement) {
+        echo json_encode(array('success' => false, 'message' => 'Unable to prepare advanced details.'));
+        exit;
+    }
+    mysqli_begin_transaction($dbconn);
+    $employeeIds = array();
+    $success = true;
+    foreach ($details as $detail) {
+        $employeeId = isset($detail['employeeId']) ? (int) $detail['employeeId'] : 0;
+        $amountValue = isset($detail['amount']) ? trim((string) $detail['amount']) : '';
+        $remarks = isset($detail['remarks']) ? trim((string) $detail['remarks']) : '';
+        if ($employeeId <= 0 || isset($employeeIds[$employeeId]) || !preg_match('/^\d+(\.\d{1,2})?$/', $amountValue) || (float) $amountValue <= 0 || strlen($remarks) > 1000) {
+            $success = false;
+            break;
+        }
+        $employeeIds[$employeeId] = true;
+        mysqli_stmt_bind_param($employeeStatement, 'i', $employeeId);
+        if (!mysqli_stmt_execute($employeeStatement)) {
+            $success = false;
+            break;
+        }
+        $employeeResult = mysqli_stmt_get_result($employeeStatement);
+        $employee = $employeeResult ? mysqli_fetch_assoc($employeeResult) : null;
+        if (!$employee) {
+            $success = false;
+            break;
+        }
+        $bankId = (int) $employee['bankid'];
+        $amount = number_format((float) $amountValue, 2, '.', '');
+        $entryDateTime = date('d-m-Y H:i:s');
+        $entryBy = (int) $_SESSION['AdminId'];
+        $entryDate = date('Y-m-d');
+        mysqli_stmt_bind_param($insertStatement, 'iiidssisis', $advancedId, $employeeId, $companyId, $amount, $date, $remarks, $bankId, $entryDateTime, $entryBy, $entryDate);
+        if (!mysqli_stmt_execute($insertStatement)) {
+            $success = false;
+            break;
+        }
+    }
+    if ($success) {
+        mysqli_commit($dbconn);
+    } else {
+        mysqli_rollback($dbconn);
+    }
+    mysqli_stmt_close($employeeStatement);
+    mysqli_stmt_close($insertStatement);
+    echo json_encode(array('success' => $success, 'message' => $success ? count($details) . ' advanced detail(s) added successfully.' : 'No details were added. Check each selected employee, bank, amount, and remarks.'));
     exit;
 }
 echo json_encode(array('success' => false, 'message' => 'Invalid request.'));

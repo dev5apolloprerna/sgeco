@@ -3,7 +3,7 @@ $MasterEntry = array("State.php", "City.php", "Location.php", "ExcelFormMaster.p
 $salary = array("salarydetails.php", "salarymaster.php");
 $report = array("paypayment.php", "paidpayment.php");
 $reportHistory = array("MultiCompanyPaymentHistory.php", "CompanyPaymentHistory.php");
-$advanced = array("advancedmaster.php", "AddAdvancedDetails.php");
+$advanced = array("advancedmaster.php", "AddAdvancedDetails.php",'viewAdvancedDetails.php');
 ?>
 <div class="page-header">
     <div class="page-header-top">
@@ -158,7 +158,18 @@ $advanced = array("advancedmaster.php", "AddAdvancedDetails.php");
                             if((isset($row['isAdvancedEntry']) && $row['isAdvancedEntry'] == 1) || $_SESSION['AdminType'] == 1){
                         ?>
                             <li class="menu-dropdown classic-menu-dropdown <?php if (in_array(basename(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH)), $advanced)) { echo 'active'; } ?>">
-                                <a href="<?php echo $web_url; ?>admin/advancedmaster.php">Advanced</a>
+                                <a href="#">Advanced</a>
+                                <ul class="dropdown-menu pull-left">
+                                    <li>
+                                        <a href="<?php echo $web_url; ?>admin/viewAdvancedDetails.php">View Advanced</a>
+                                    </li>
+                                    <li>
+                                        <a href="<?php echo $web_url; ?>admin/advancedmaster.php">Create Advanced</a>
+                                    </li>
+                                    <li>
+                                        <a href="<?php echo $web_url; ?>admin/advancedPaymentReport.php">Advanced Payment Report</a>
+                                    </li>
+                                </ul>
                             </li>
                         <?php }
                             if((isset($row['isSalaryMenu']) && $row['isSalaryMenu'] == 1) || $_SESSION['AdminType'] == 1){
