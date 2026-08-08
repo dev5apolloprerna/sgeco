@@ -52,15 +52,16 @@ $spreadsheet->getProperties()
     ->setDescription('Advanced payment report in bank payment sheet format.');
 
 $sheet->setCellValue('E1', 'Date: ' . date('d-m-Y'));
-$sheet->setCellValue('A3', 'SUB :PAYMENT SHEET');
+$sheet->setCellValue('A3', 'SUB :ADVANCE SHEET');
 $sheet->setCellValue('A4', 'SITE :' . $companyName);
-$sheet->setCellValue('A5', 'Month : ' . $monthLabel . ' - ' . $bankName . ' - Bank Payment');
-$sheet->fromArray(array('Sr. No.', 'Beneficiary Account Number', 'Amount', 'Beneficiary Name', 'IFSC Code'), null, 'A6');
+$sheet->setCellValue('A5', 'Month : ' . $monthLabel);
+// . ' - ' . $bankName . ' - Bank Payment'
+$sheet->fromArray(array('Sr. No.', 'Beneficiary Account Number', 'Amount', 'Beneficiary Name','Beneficiary Address', 'IFSC Code','Comm.'), null, 'A6');
 
 $sheet->getStyle('A3:A5')->getFont()->setBold(true)->setSize(10);
-$sheet->getStyle('E1')->getFont()->setBold(true)->setSize(10);
-$sheet->getStyle('E1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-$sheet->getStyle('A6:E6')->applyFromArray(array(
+$sheet->getStyle('G1')->getFont()->setBold(true)->setSize(10);
+$sheet->getStyle('G1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+$sheet->getStyle('A6:G6')->applyFromArray(array(
     'font' => array('bold' => true, 'size' => 10),
     'fill' => array('fillType' => Fill::FILL_SOLID, 'startColor' => array('rgb' => 'CCCCCC')),
     'alignment' => array(
@@ -86,7 +87,9 @@ while ($result && $row = mysqli_fetch_assoc($result)) {
     $sheet->setCellValueExplicit('B' . $rowNumber, $accountNumber, DataType::TYPE_STRING);
     $sheet->setCellValue('C' . $rowNumber, $amount);
     $sheet->setCellValue('D' . $rowNumber, ucwords(strtolower($row['emp_name'])));
-    $sheet->setCellValue('E' . $rowNumber, trim($row['ifsccode']));
+    $sheet->setCellValue('E' . $rowNumber, ucwords(strtolower($row['address'])));
+    $sheet->setCellValue('F' . $rowNumber, trim($row['ifsccode']));
+    $sheet->setCellValue('G' . $rowNumber, trim($row['comm'] ?? ''));
     $sheet->getStyle('A' . $rowNumber . ':E' . $rowNumber)->getFont()->setSize(10);
     $sheet->getStyle('A' . $rowNumber . ':E' . $rowNumber)->getAlignment()->setWrapText(true);
     $sheet->getStyle('C' . $rowNumber)->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
@@ -96,6 +99,7 @@ while ($result && $row = mysqli_fetch_assoc($result)) {
     $serial++;
     $rowNumber++;
 }
+
 $sheet->setCellValue('B' . $rowNumber, 'Total Amt.');
 $sheet->setCellValue('C' . $rowNumber, $total);
 $sheet->getStyle('C' . $rowNumber)->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
@@ -130,7 +134,7 @@ $sheet->getColumnDimension('B')->setWidth(15);
 $sheet->getColumnDimension('C')->setWidth(15);
 $sheet->getColumnDimension('D')->setWidth(40);
 $sheet->getColumnDimension('E')->setWidth(20);
-$sheet->getDefaultStyle()->getFont()->setSize(10);
+$spreadsheet->getDefaultStyle()->getFont()->setSize(10);
 $sheet->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_A4);
 $sheet->getPageSetup()->setFitToWidth(1)->setFitToHeight(0);
 $sheet->getPageMargins()->setTop(2.5);
@@ -141,8 +145,7 @@ $temporaryFile = tempnam(sys_get_temp_dir(), 'advanced-payment-report-');
 $writer = new Xlsx($spreadsheet);
 $writer->save($temporaryFile);
 
-// common.php starts an output buffer and included files may emit whitespace.
-// Any bytes before the ZIP signature make the XLSX package invalid in Excel.
+// Included legacy files can emit whitespace, which would corrupt the XLSX ZIP response.
 while (ob_get_level() > 0) {
     ob_end_clean();
 }
