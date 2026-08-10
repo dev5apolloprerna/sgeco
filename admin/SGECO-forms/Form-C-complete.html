@@ -158,6 +158,15 @@
             font-size: 12px;
         }
 
+        .register-table thead {
+            display: table-header-group;
+        }
+
+        .register-table tbody tr {
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+
         .footnote {
             margin: 24px 0 0;
             font-size: 12px;
@@ -183,25 +192,18 @@
 
             .form-page {
                 width: 14in;
-                height: 8.5in;
                 min-height: 8.5in;
                 margin: 0;
                 padding: 20mm 12mm 20mm;
-                overflow: hidden;
-                break-inside: avoid;
-                page-break-inside: avoid;
-            }
-
-            /* Each repeated FORM C starts on the next PDF page. */
-            .form-page + .form-page {
-                break-before: page;
-                page-break-before: always;
+                overflow: visible;
+                break-inside: auto;
+                page-break-inside: auto;
             }
 
             .register-frame,
             .register-table {
-                break-inside: avoid;
-                page-break-inside: avoid;
+                break-inside: auto;
+                page-break-inside: auto;
             }
         }
 
@@ -330,13 +332,6 @@
 
         <p class="footnote">*Applicable only in case of damage/loss/fine</p>
     </section>
-
-    <!--
-    FOR MULTIPLE PAGES:
-    Copy the complete <section class="form-page">...</section> block above
-    and paste it below. Every repeated section will begin on a new PDF page.
-    Do not use page-break-after: always; it can add an extra blank final page.
-    -->
 
 </body>
 </html>

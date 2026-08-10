@@ -71,27 +71,21 @@ function renderFormCHtml(array $employees, $salaryMonth, $companyName)
         throw new RuntimeException('The Form C template has an unexpected format.');
     }
 
-    $sectionPrefix = $matches[1];
-    $sectionSuffix = $matches[3];
-    $sections = '';
-    // Twelve rows fit on the legal-landscape page defined by the supplied template.
-    $pages = count($employees) ? array_chunk($employees, 12) : array(array());
-    foreach ($pages as $pageEmployees) {
-        $rows = '';
-        foreach ($pageEmployees as $employeeName) {
-            $cells = '<td>NIL</td><td class="name-cell">' . htmlspecialchars($employeeName, ENT_QUOTES, 'UTF-8') . '</td>';
-            $cells .= str_repeat('<td>NIL</td>', 11);
-            $rows .= '<tr>' . $cells . '</tr>';
-        }
-        if (!$pageEmployees) {
-            $rows = '<tr>' . str_repeat('<td>NIL</td>', 13) . '</tr>';
-        }
-        $sections .= $sectionPrefix . $rows . $sectionSuffix;
+    $serialNumber = 1;
+    $rows = '';
+    foreach ($employees as $employeeName) {
+        $cells = '<td>' . $serialNumber . '</td><td class="name-cell">' . htmlspecialchars($employeeName, ENT_QUOTES, 'UTF-8') . '</td>';
+        $cells .= str_repeat('<td>NIL</td>', 11);
+        $rows .= '<tr>' . $cells . '</tr>';
+        $serialNumber++;
     }
-
+    if (!$employees) {
+        $rows = '<tr>' . str_repeat('<td>NIL</td>', 13) . '</tr>';
+    }
     $firstSection = strpos($template, $matches[0]);
+
     $html = substr($template, 0, $firstSection)
-        . $sections
+        . $matches[1] . $rows . $matches[3]
         . substr($template, $firstSection + strlen($matches[0]));
 
     $month = DateTime::createFromFormat('!m/Y', $salaryMonth);
@@ -99,10 +93,10 @@ function renderFormCHtml(array $employees, $salaryMonth, $companyName)
         throw new InvalidArgumentException('A valid salary month is required.');
     }
 
-    return str_replace(
-        array('{{FORM_C_MONTH}}', '{{FORM_C_COMPANY}}'),
-        array($month->format('F-y'), htmlspecialchars($companyName, ENT_QUOTES, 'UTF-8')),
-        $html
+    return renderFormCHtml(
+        getFormCEmployees($dbconn, $companyId, $salaryMonth),
+        $salaryMonth,
+        getFormCCompanyName($dbconn, $companyId)
     );
 }
 
@@ -114,7 +108,7 @@ function getFormCRequestData($dbconn)
         http_response_code(400);
         throw new InvalidArgumentException('A valid company, month, and year are required.');
     }
-    return renderFormCHtml(
+     return renderFormCHtml(
         getFormCEmployees($dbconn, $companyId, $salaryMonth),
         $salaryMonth,
         getFormCCompanyName($dbconn, $companyId)
