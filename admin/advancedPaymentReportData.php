@@ -52,7 +52,7 @@ function advancedPaymentReportWhere($dbconn, $filters)
 
 function advancedPaymentReportQuery($where)
 {
-    return "SELECT ad.iAmount, ad.strDate, ad.strRemarks, e.emp_name, e.employeecode, e.accountno, e.ifsccode, e.address, " .
+    return "SELECT ad.iAmount, ad.strDate, ad.strRemarks, e.emp_name, e.employeecode, e.accountno, e.ifsccode, " .
         "c.companyname, b.bankname FROM advanced_details ad " .
         "INNER JOIN advanced_master am ON am.iAdvancedMasterId=ad.iAdvancedMasterId " .
         "INNER JOIN employee e ON e.employeeId=ad.iEmployeeId " .

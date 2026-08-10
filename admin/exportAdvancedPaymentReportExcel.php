@@ -89,7 +89,7 @@ while ($result && $row = mysqli_fetch_assoc($result)) {
     $sheet->setCellValueExplicit('B' . $rowNumber, $accountNumber, DataType::TYPE_STRING);
     $sheet->setCellValue('C' . $rowNumber, $amount);
     $sheet->setCellValue('D' . $rowNumber, ucwords(strtolower($row['emp_name'])));
-    $sheet->setCellValue('E' . $rowNumber, ucwords(strtolower($row['address'])));
+    $sheet->setCellValue('E' . $rowNumber, '');
     $sheet->setCellValue('F' . $rowNumber, trim($row['ifsccode']));
     $sheet->setCellValue('G' . $rowNumber, $commission);
     $sheet->getStyle('A' . $rowNumber . ':G' . $rowNumber)->getFont()->setSize(10);

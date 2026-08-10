@@ -58,7 +58,7 @@ while ($result && $row = mysqli_fetch_assoc($result)) {
     $html .= '<td width="18%">' . advancedPaymentPdfEscape($accountNumber) . '</td>';
     $html .= '<td width="11%" align="right">' . number_format($amount, 2) . '</td>';
     $html .= '<td width="25%">' . advancedPaymentPdfEscape(ucwords(strtolower($row['emp_name']))) . '</td>';
-    $html .= '<td width="19%">' . advancedPaymentPdfEscape(ucwords(strtolower($row['address']))) . '</td>';
+    $html .= '<td width="19%"></td>';
     $html .= '<td width="14%">' . advancedPaymentPdfEscape(trim($row['ifsccode'])) . '</td>';
     $html .= '<td width="8%" align="right">' . number_format($commission, 2) . '</td>';
     $html .= '</tr>';
