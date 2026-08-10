@@ -1,0 +1,84 @@
+<?php
+
+/**
+ * Shared data retrieval and template binding for the Form C exports.
+ */
+function getFormCEmployees($dbconn, $companyId, $salaryMonth)
+{
+    // Keep this filter in step with Ajaxreport.php/newReport.php.  Exports must
+    // not paginate: every matching salary detail belongs in the register.
+    $companyId = mysqli_real_escape_string($dbconn, $companyId);
+    $salaryMonth = mysqli_real_escape_string($dbconn, $salaryMonth);
+    $sql = "SELECT employee.emp_name
+            FROM salarydetails
+            INNER JOIN employee ON employee.employeeId = salarydetails.emp_id
+                AND employee.isDelete = '0'
+            WHERE salarydetails.companyId = '" . $companyId . "'
+              AND salarydetails.salaryId IN (
+                  SELECT salarymasterId FROM salarymaster
+                  WHERE month = '" . $salaryMonth . "'
+                    AND isDelete = '0' AND istatus = '1'
+              )
+              AND salarydetails.isDelete = '0'
+              AND salarydetails.istatus = '1'
+              AND salarydetails.workingdays > 0
+            ORDER BY salarydetails.salarydetailsId ASC";
+
+    $result = mysqli_query($dbconn, $sql);
+    if ($result === false) {
+        throw new RuntimeException('Unable to retrieve Form C employees.');
+    }
+
+    $employees = array();
+    while ($row = mysqli_fetch_assoc($result)) {
+        $employees[] = $row['emp_name'];
+    }
+    return $employees;
+}
+
+function renderFormCHtml(array $employees)
+{
+    $templatePath = __DIR__ . '/SGECO-forms/Form-C-complete.html';
+    $template = file_get_contents($templatePath);
+    if ($template === false) {
+        throw new RuntimeException('The Form C template could not be loaded.');
+    }
+
+    if (!preg_match('/(<section class="form-page">.*?<tbody>)(.*?)(<\/tbody>.*?<\/section>)/s', $template, $matches)) {
+        throw new RuntimeException('The Form C template has an unexpected format.');
+    }
+
+    $sectionPrefix = $matches[1];
+    $sectionSuffix = $matches[3];
+    $sections = '';
+    // Twelve rows fit on the legal-landscape page defined by the supplied template.
+    $pages = count($employees) ? array_chunk($employees, 12) : array(array());
+    foreach ($pages as $pageEmployees) {
+        $rows = '';
+        foreach ($pageEmployees as $employeeName) {
+            $cells = '<td>NIL</td><td class="name-cell">' . htmlspecialchars($employeeName, ENT_QUOTES, 'UTF-8') . '</td>';
+            $cells .= str_repeat('<td>NIL</td>', 11);
+            $rows .= '<tr>' . $cells . '</tr>';
+        }
+        if (!$pageEmployees) {
+            $rows = '<tr>' . str_repeat('<td>NIL</td>', 13) . '</tr>';
+        }
+        $sections .= $sectionPrefix . $rows . $sectionSuffix;
+    }
+
+    $firstSection = strpos($template, $matches[0]);
+    return substr($template, 0, $firstSection)
+        . $sections
+        . substr($template, $firstSection + strlen($matches[0]));
+}
+
+function getFormCRequestData($dbconn)
+{
+    $companyId = isset($_GET['Company']) ? trim($_GET['Company']) : '';
+    $salaryMonth = isset($_GET['salarymasterId']) ? trim($_GET['salarymasterId']) : '';
+    if ($companyId === '' || !preg_match('/^(0[1-9]|1[0-2])\/\d{4}$/', $salaryMonth)) {
+        http_response_code(400);
+        throw new InvalidArgumentException('A valid company, month, and year are required.');
+    }
+    return renderFormCHtml(getFormCEmployees($dbconn, $companyId, $salaryMonth));
+}

@@ -220,7 +220,7 @@ $advanced = array("advancedmaster.php", "AddAdvancedDetails.php",'viewAdvancedDe
                         <?php } 
                             if((isset($row['isReportMenu']) && $row['isReportMenu'] == 1) || $_SESSION['AdminType'] == 1){
                         ?>
-                            <li class="menu-dropdown classic-menu-dropdown  <?php if (basename($_SERVER['REQUEST_URI']) == 'Report.php') { echo 'active'; } ?>">
+                            <li class="menu-dropdown classic-menu-dropdown  <?php if (in_array(basename(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH)), array('Report.php', 'OtherReport.php'))) { echo 'active'; } ?>">
                                 <a href="#"> Report</a>
                                  <ul class="dropdown-menu pull-left">
                                     <!-- <li>
@@ -278,6 +278,11 @@ $advanced = array("advancedmaster.php", "AddAdvancedDetails.php",'viewAdvancedDe
                                     <li>
                                         <a href="<?php echo $web_url; ?>admin/Block_Report.php" class="nav-link">
                                             Block Report
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="<?php echo $web_url; ?>admin/OtherReport.php" class="nav-link">
+                                            Other Report
                                         </a>
                                     </li>
                                 </ul>
