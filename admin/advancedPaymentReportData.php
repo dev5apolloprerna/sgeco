@@ -21,6 +21,8 @@ function advancedPaymentReportFilters($dbconn, $source)
     $bankId = isset($source['bank']) ? (int) $source['bank'] : 0;
     $month = isset($source['month']) ? trim($source['month']) : '';
     $year = isset($source['Year']) ? trim($source['Year']) : '';
+    $fromDate = isset($source['fromDate']) ? trim($source['fromDate']) : '';
+    $toDate = isset($source['toDate']) ? trim($source['toDate']) : '';
 
     if ($month !== '' && !preg_match('/^(0[1-9]|1[0-2])$/', $month)) {
         $month = '';
@@ -29,7 +31,21 @@ function advancedPaymentReportFilters($dbconn, $source)
         $year = '';
     }
 
-    return array('companyId' => $companyId, 'bankId' => $bankId, 'month' => $month, 'year' => $year);
+    $monthStart = ($month !== '' && $year !== '') ? $year . '-' . $month . '-01' : '';
+    $monthEnd = $monthStart !== '' ? date('Y-m-t', strtotime($monthStart)) : '';
+    if (!preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/', $fromDate) || ($monthStart !== '' && ($fromDate < $monthStart || $fromDate > $monthEnd))) {
+        $fromDate = '';
+    }
+    if (!preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/', $toDate) || ($monthStart !== '' && ($toDate < $monthStart || $toDate > $monthEnd))) {
+        $toDate = '';
+    }
+    if ($fromDate !== '' && $toDate !== '' && $fromDate > $toDate) {
+        $temporaryDate = $fromDate;
+        $fromDate = $toDate;
+        $toDate = $temporaryDate;
+    }
+
+    return array('companyId' => $companyId, 'bankId' => $bankId, 'month' => $month, 'year' => $year, 'fromDate' => $fromDate, 'toDate' => $toDate);
 }
 
 function advancedPaymentReportWhere($dbconn, $filters)
@@ -39,7 +55,7 @@ function advancedPaymentReportWhere($dbconn, $filters)
         $where[] = 'ad.iCompanyId=' . $filters['companyId'];
     }
     if ($filters['bankId'] > 0) {
-        $where[] = 'ad.iBankId=' . $filters['bankId'];
+        $where[] = $filters['bankId'] === 3 ? 'ad.iBankId NOT IN (1,2)' : 'ad.iBankId=' . $filters['bankId'];
     }
     if ($filters['month'] !== '') {
         $where[] = "DATE_FORMAT(ad.strDate, '%m')='" . mysqli_real_escape_string($dbconn, $filters['month']) . "'";
@@ -47,7 +63,34 @@ function advancedPaymentReportWhere($dbconn, $filters)
     if ($filters['year'] !== '') {
         $where[] = "DATE_FORMAT(ad.strDate, '%Y')='" . mysqli_real_escape_string($dbconn, $filters['year']) . "'";
     }
+    if ($filters['fromDate'] !== '') {
+        $where[] = "DATE(ad.strDate)>='" . mysqli_real_escape_string($dbconn, $filters['fromDate']) . "'";
+    }
+    if ($filters['toDate'] !== '') {
+        $where[] = "DATE(ad.strDate)<='" . mysqli_real_escape_string($dbconn, $filters['toDate']) . "'";
+    }
     return implode(' AND ', $where);
+}
+
+function advancedPaymentReportUsesBankFormat($filters)
+{
+    return $filters['bankId'] === 1 || $filters['bankId'] === 2;
+}
+
+function advancedPaymentReportDateLabel($filters)
+{
+    if ($filters['fromDate'] !== '' || $filters['toDate'] !== '') {
+        $from = $filters['fromDate'] !== '' ? date('d-m-Y', strtotime($filters['fromDate'])) : 'Beginning';
+        $to = $filters['toDate'] !== '' ? date('d-m-Y', strtotime($filters['toDate'])) : 'End';
+        return $from . ' to ' . $to;
+    }
+    if ($filters['month'] !== '' && $filters['year'] !== '') {
+        return DateTime::createFromFormat('!m/Y', $filters['month'] . '/' . $filters['year'])->format('F-Y');
+    }
+    if ($filters['month'] !== '') {
+        return DateTime::createFromFormat('!m', $filters['month'])->format('F') . ' (All Years)';
+    }
+    return $filters['year'] !== '' ? $filters['year'] : 'All Dates';
 }
 
 function advancedPaymentReportQuery($where)

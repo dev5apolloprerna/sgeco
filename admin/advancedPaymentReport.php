@@ -36,7 +36,7 @@ requireAdvancedPaymentReportAccess($dbconn);
                                 <div class="portlet-body form">
                                     <form id="frmSearch" role="form">
                                         <div class="row">
-                                            <div class="form-group col-md-3"><label for="Company">Company</label><select class="form-control" id="Company">
+                                            <div class="form-group col-md-2"><label for="Company">Company</label><select class="form-control" id="Company">
                                                     <option value="">All Companies</option><?php
                                                                                             $companies = mysqli_query($dbconn, "SELECT companymasterId, companyname FROM companymaster WHERE isDelete=0 AND istatus=1 ORDER BY companyname");
                                                                                             while ($company = mysqli_fetch_assoc($companies)) {
@@ -59,6 +59,8 @@ requireAdvancedPaymentReportAccess($dbconn);
                                                                                         }
                                                                                         ?>
                                                 </select></div>
+                                            <div class="form-group col-md-2"><label for="fromDate">From Date</label><input class="form-control" type="date" id="fromDate" disabled></div>
+                                            <div class="form-group col-md-2"><label for="toDate">To Date</label><input class="form-control" type="date" id="toDate" disabled></div>
                                             <div class="form-group col-md-2"><label for="bank">Bank</label>
                                                 <?php
                                                 //$queryCom = "SELECT * FROM `bankmaster`  where  bankmasterId > 1 and isDelete='0'  and  istatus='1' order by  bankmasterId asc LIMIT 2";
@@ -72,7 +74,7 @@ requireAdvancedPaymentReportAccess($dbconn);
                                                 echo "</select>";
                                                 ?>
                                             </div>
-                                            <div class="col-md-3 margin-top-20">
+                                            <div class="col-md-4 margin-top-20">
                                                 <button type="submit" class="btn blue margin-bottom-20"><i class="fa fa-search"></i> Search</button>
                                                 <button type="button" class="btn btn-success margin-bottom-20" onclick="exportReport('exportAdvancedPaymentReportExcel.php')"><i class="fa fa-file-excel-o"></i> Export Excel</button>
                                                 <button type="button" class="btn red margin-bottom-20" onclick="exportReport('generateAdvancedPaymentReportPDF.php')"><i class="fa fa-file-pdf-o"></i> Download PDF</button>
@@ -95,7 +97,9 @@ requireAdvancedPaymentReportAccess($dbconn);
                 Company: $('#Company').val(),
                 month: $('#month').val(),
                 Year: $('#Year').val(),
-                bank: $('#bank').val()
+                bank: $('#bank').val(),
+                fromDate: $('#fromDate').val(),
+                toDate: $('#toDate').val()
             });
         }
 
@@ -117,6 +121,23 @@ requireAdvancedPaymentReportAccess($dbconn);
             event.preventDefault();
             PageLoadData(1);
         });
+        function updateDateRange() {
+            var month = $('#month').val();
+            var year = $('#Year').val();
+            var fields = $('#fromDate, #toDate');
+            if (!month || !year) {
+                fields.val('').prop('disabled', true).removeAttr('min max');
+                return;
+            }
+            var lastDay = new Date(Number(year), Number(month), 0).getDate();
+            var minimum = year + '-' + month + '-01';
+            var maximum = year + '-' + month + '-' + ('0' + lastDay).slice(-2);
+            fields.prop('disabled', false).attr({min: minimum, max: maximum});
+            if (!$('#fromDate').val() || $('#fromDate').val() < minimum || $('#fromDate').val() > maximum) $('#fromDate').val(minimum);
+            if (!$('#toDate').val() || $('#toDate').val() < minimum || $('#toDate').val() > maximum) $('#toDate').val(maximum);
+        }
+        $('#month, #Year').on('change', updateDateRange);
+        updateDateRange();
         // PageLoadData(1);
     </script>
 </body>

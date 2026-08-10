@@ -33,14 +33,9 @@ function advancedPaymentReportLookupName($dbconn, $table, $idColumn, $nameColumn
 
 $companyName = advancedPaymentReportLookupName($dbconn, 'companymaster', 'companymasterId', 'companyname', $filters['companyId'], 'All Companies');
 $bankName = advancedPaymentReportLookupName($dbconn, 'bankmaster', 'bankmasterId', 'bankname', $filters['bankId'], 'All Banks');
-$monthLabel = 'All Dates';
-if ($filters['month'] !== '' && $filters['year'] !== '') {
-    $monthLabel = DateTime::createFromFormat('!m/Y', $filters['month'] . '/' . $filters['year'])->format('F-Y');
-} elseif ($filters['month'] !== '') {
-    $monthLabel = DateTime::createFromFormat('!m', $filters['month'])->format('F') . ' (All Years)';
-} elseif ($filters['year'] !== '') {
-    $monthLabel = $filters['year'];
-}
+$dateLabel = advancedPaymentReportDateLabel($filters);
+$bankFormat = advancedPaymentReportUsesBankFormat($filters);
+$lastColumn = $bankFormat ? 'E' : 'G';
 
 $spreadsheet = new Spreadsheet();
 $sheet = $spreadsheet->getActiveSheet();
@@ -51,17 +46,19 @@ $spreadsheet->getProperties()
     ->setSubject('Advanced Payment Bank Report')
     ->setDescription('Advanced payment report in bank payment sheet format.');
 
-$sheet->setCellValue('G1', 'Date: ' . date('d-m-Y'));
+$sheet->setCellValue($lastColumn . '1', 'Date: ' . date('d-m-Y'));
 $sheet->setCellValue('A3', 'SUB :ADVANCE SHEET');
 $sheet->setCellValue('A4', 'SITE :' . $companyName);
-$sheet->setCellValue('A5', 'Month : ' . $monthLabel);
-// . ' - ' . $bankName . ' - Bank Payment'
-$sheet->fromArray(array('Sr. No.', 'Beneficiary Account Number', 'Amount', 'Beneficiary Name','Beneficiary Address', 'IFSC Code','Comm.'), null, 'A6');
+$sheet->setCellValue('A5', 'Date Range : ' . $dateLabel . ' - ' . $bankName . ' - Bank Payment');
+$headers = $bankFormat
+    ? array('Sr. No.', 'Beneficiary Account Number', 'Amount', 'Beneficiary Name', 'IFSC Code')
+    : array('Sr. No.', 'Beneficiary Account Number', 'Amount', 'Beneficiary Name', 'Beneficiary Address', 'IFSC Code', 'Comm.');
+$sheet->fromArray($headers, null, 'A6');
 
 $sheet->getStyle('A3:A5')->getFont()->setBold(true)->setSize(10);
-$sheet->getStyle('G1')->getFont()->setBold(true)->setSize(10);
-$sheet->getStyle('G1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-$sheet->getStyle('A6:G6')->applyFromArray(array(
+$sheet->getStyle($lastColumn . '1')->getFont()->setBold(true)->setSize(10);
+$sheet->getStyle($lastColumn . '1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+$sheet->getStyle('A6:' . $lastColumn . '6')->applyFromArray(array(
     'font' => array('bold' => true, 'size' => 10),
     'fill' => array('fillType' => Fill::FILL_SOLID, 'startColor' => array('rgb' => 'CCCCCC')),
     'alignment' => array(
@@ -89,48 +86,57 @@ while ($result && $row = mysqli_fetch_assoc($result)) {
     $sheet->setCellValueExplicit('B' . $rowNumber, $accountNumber, DataType::TYPE_STRING);
     $sheet->setCellValue('C' . $rowNumber, $amount);
     $sheet->setCellValue('D' . $rowNumber, ucwords(strtolower($row['emp_name'])));
-    $sheet->setCellValue('E' . $rowNumber, '');
-    $sheet->setCellValue('F' . $rowNumber, trim($row['ifsccode']));
-    $sheet->setCellValue('G' . $rowNumber, $commission);
-    $sheet->getStyle('A' . $rowNumber . ':G' . $rowNumber)->getFont()->setSize(10);
-    $sheet->getStyle('A' . $rowNumber . ':G' . $rowNumber)->getAlignment()->setWrapText(true);
+    if ($bankFormat) {
+        $sheet->setCellValue('E' . $rowNumber, trim($row['ifsccode']));
+    } else {
+        $sheet->setCellValue('E' . $rowNumber, '');
+        $sheet->setCellValue('F' . $rowNumber, trim($row['ifsccode']));
+        $sheet->setCellValue('G' . $rowNumber, $commission);
+        $sheet->getStyle('G' . $rowNumber)->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
+    }
+    $sheet->getStyle('A' . $rowNumber . ':' . $lastColumn . $rowNumber)->getFont()->setSize(10);
+    $sheet->getStyle('A' . $rowNumber . ':' . $lastColumn . $rowNumber)->getAlignment()->setWrapText(true);
     $sheet->getStyle('C' . $rowNumber)->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
-    $sheet->getStyle('G' . $rowNumber)->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
     $sheet->getRowDimension($rowNumber)->setRowHeight(20);
 
     $total += $amount;
-    $totalCommission += $commission;
+    if (!$bankFormat) {
+        $totalCommission += $commission;
+    }
     $serial++;
     $rowNumber++;
 }
 
 $sheet->setCellValue('B' . $rowNumber, 'Total Amt.');
 $sheet->setCellValue('C' . $rowNumber, $total);
-$sheet->setCellValue('G' . $rowNumber, $totalCommission);
+$sheet->setCellValue($lastColumn . $rowNumber, $bankFormat ? '' : $totalCommission);
 $sheet->getStyle('C' . $rowNumber)->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
-$sheet->getStyle('G' . $rowNumber)->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
-$sheet->getStyle('A' . $rowNumber . ':G' . $rowNumber)->applyFromArray(array(
+if (!$bankFormat) {
+    $sheet->getStyle('G' . $rowNumber)->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
+}
+$sheet->getStyle('A' . $rowNumber . ':' . $lastColumn . $rowNumber)->applyFromArray(array(
     'font' => array('bold' => true, 'size' => 10),
     'fill' => array('fillType' => Fill::FILL_SOLID, 'startColor' => array('rgb' => 'CCCCCC')),
 ));
 $sheet->getRowDimension($rowNumber)->setRowHeight(30);
 
-$sheet->getStyle('A6:G' . $rowNumber)->getBorders()->getAllBorders()
+$sheet->getStyle('A6:' . $lastColumn . $rowNumber)->getBorders()->getAllBorders()
     ->setBorderStyle(Border::BORDER_THIN)
     ->getColor()->setRGB('000000');
 
 $amountTableRow = $rowNumber + 2;
-$sheet->fromArray(array(
-    array('Amount', $total),
-    array('Bank Comm.', $totalCommission),
-    array('Total Amt.', $total + $totalCommission),
-), null, 'B' . $amountTableRow);
+if (!$bankFormat) {
+    $sheet->fromArray(array(
+        array('Amount', $total),
+        array('Bank Comm.', $totalCommission),
+        array('Total Amt.', $total + $totalCommission),
+    ), null, 'B' . $amountTableRow);
 $sheet->getStyle('B' . $amountTableRow . ':C' . ($amountTableRow + 2))->getBorders()->getAllBorders()
     ->setBorderStyle(Border::BORDER_THIN)
     ->getColor()->setRGB('000000');
 $sheet->getStyle('C' . $amountTableRow . ':C' . ($amountTableRow + 2))->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
 $sheet->getStyle('B' . ($amountTableRow + 2) . ':C' . ($amountTableRow + 2))->getFont()->setBold(true);
-
+}
 $signatureRow = $amountTableRow;
 
 $sheet->setCellValue('E' . $signatureRow, 'For, SHREE GANESH ENGINEERING CO.');
@@ -150,7 +156,7 @@ $sheet->getStyle('C' . $chequeRow)->getBorders()->getAllBorders()->setBorderStyl
 $sheet->getRowDimension($chequeRow)->setRowHeight(25);
 
 $noteRow = $chequeRow + 2;
-$sheet->mergeCells('A' . $noteRow . ':G' . ($noteRow + 1));
+$sheet->mergeCells('A' . $noteRow . ':' . $lastColumn . ($noteRow + 1));
 $sheet->setCellValue('A' . $noteRow, 'Note: Soft Copy of the Bulk Transfer will be Sent from hkshah@sgeco.in and we are solely responsible for any discrepancy in the soft copy and the hard copy sent to you.');
 $sheet->getStyle('A' . $noteRow)->getFont()->setBold(true)->setSize(9);
 $sheet->getStyle('A' . $noteRow)->getAlignment()->setWrapText(true)->setVertical(Alignment::VERTICAL_TOP);
@@ -163,11 +169,13 @@ $sheet->getColumnDimension('D')->setWidth(40);
 $sheet->getColumnDimension('E')->setWidth(20);
 $sheet->getColumnDimension('F')->setWidth(16);
 $sheet->getColumnDimension('G')->setWidth(10);
+$sheet->getColumnDimension('D')->setWidth($bankFormat ? 45 : 40);
+$sheet->getColumnDimension('E')->setWidth($bankFormat ? 18 : 20);
 $spreadsheet->getDefaultStyle()->getFont()->setSize(10);
 $sheet->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_A4);
 $sheet->getPageSetup()->setFitToWidth(1)->setFitToHeight(0);
 $sheet->getPageMargins()->setTop(0.4)->setBottom(0.4)->setLeft(0.3)->setRight(0.3);
-$sheet->getPageSetup()->setPrintArea('A1:G' . ($noteRow + 1));
+$sheet->getPageSetup()->setPrintArea('A1:' . $lastColumn . ($noteRow + 1));
 $sheet->getHeaderFooter()->setOddHeader('');
 $spreadsheet->setActiveSheetIndex(0);
 
