@@ -36,7 +36,30 @@ function getFormCEmployees($dbconn, $companyId, $salaryMonth)
     return $employees;
 }
 
-function renderFormCHtml(array $employees)
+function getFormCCompanyName($dbconn, $companyId)
+{
+    $companyId = mysqli_real_escape_string($dbconn, $companyId);
+    $sql = "SELECT companyname
+            FROM companymaster
+            WHERE companymasterId = '" . $companyId . "'
+              AND isDelete = '0'
+              AND istatus = '1'
+            LIMIT 1";
+
+    $result = mysqli_query($dbconn, $sql);
+    if ($result === false) {
+        throw new RuntimeException('Unable to retrieve the Form C company.');
+    }
+
+    $company = mysqli_fetch_assoc($result);
+    if (!$company) {
+        throw new RuntimeException('The selected company could not be found.');
+    }
+
+    return $company['companyname'];
+}
+
+function renderFormCHtml(array $employees, $salaryMonth, $companyName)
 {
     $templatePath = __DIR__ . '/SGECO-forms/Form-C-complete.html';
     $template = file_get_contents($templatePath);
@@ -67,9 +90,20 @@ function renderFormCHtml(array $employees)
     }
 
     $firstSection = strpos($template, $matches[0]);
-    return substr($template, 0, $firstSection)
+    $html = substr($template, 0, $firstSection)
         . $sections
         . substr($template, $firstSection + strlen($matches[0]));
+
+    $month = DateTime::createFromFormat('!m/Y', $salaryMonth);
+    if ($month === false || $month->format('m/Y') !== $salaryMonth) {
+        throw new InvalidArgumentException('A valid salary month is required.');
+    }
+
+    return str_replace(
+        array('{{FORM_C_MONTH}}', '{{FORM_C_COMPANY}}'),
+        array($month->format('F-y'), htmlspecialchars($companyName, ENT_QUOTES, 'UTF-8')),
+        $html
+    );
 }
 
 function getFormCRequestData($dbconn)
@@ -80,5 +114,9 @@ function getFormCRequestData($dbconn)
         http_response_code(400);
         throw new InvalidArgumentException('A valid company, month, and year are required.');
     }
-    return renderFormCHtml(getFormCEmployees($dbconn, $companyId, $salaryMonth));
+    return renderFormCHtml(
+        getFormCEmployees($dbconn, $companyId, $salaryMonth),
+        $salaryMonth,
+        getFormCCompanyName($dbconn, $companyId)
+    );
 }

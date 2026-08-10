@@ -49,6 +49,7 @@ include('IsLogin.php');
                                                 <select class="form-control" name="Report" id="Report" required>
                                                     <option value="">Select Report</option>
                                                     <option value="form-c">Form C (Register of Loan / Recoveries / Damage / Loss / Fine / Advance / Absence)</option>
+                                                    <option value="form-xxi">Form XXI (Register of Fine)</option>
                                                 </select>
                                             </div>
                                             <div class="form-group col-md-2">
@@ -209,7 +210,11 @@ include('IsLogin.php');
             }
             //var salarymasterId = $('#salarymasterId').val();
             var salarymasterId = month + '/' + Year;
-            window.open("generateFormCReportPDF.php?Company=" + encodeURIComponent(Company) + "&salarymasterId=" + encodeURIComponent(salarymasterId), '_blank');
+            // window.open("generateFormCReportPDF.php?Company=" + encodeURIComponent(Company) + "&salarymasterId=" + encodeURIComponent(salarymasterId), '_blank');
+            var reportUrl = $('#Report').val() === 'form-xxi'
+                ? 'generateFormXXIReportPDF.php'
+                : 'generateFormCReportPDF.php';
+            window.open(reportUrl + "?Company=" + encodeURIComponent(Company) + "&salarymasterId=" + encodeURIComponent(salarymasterId), '_blank');            
         }
         //foreach($attr_array[1] as $id => $name) {
 
@@ -222,7 +227,11 @@ include('IsLogin.php');
                 return;
             }
             var salarymasterId = month + '/' + Year;
-            window.open("exportFormCReportExcel.php?Company=" + encodeURIComponent(Company) + "&salarymasterId=" + encodeURIComponent(salarymasterId), '_blank');
+            //window.open("exportFormCReportExcel.php?Company=" + encodeURIComponent(Company) + "&salarymasterId=" + encodeURIComponent(salarymasterId), '_blank');
+            var reportUrl = $('#Report').val() === 'form-xxi'
+                ? 'exportFormXXIReportExcel.php'
+                : 'exportFormCReportExcel.php';
+            window.open(reportUrl + "?Company=" + encodeURIComponent(Company) + "&salarymasterId=" + encodeURIComponent(salarymasterId), '_blank');
         }
     </script>
 </body>
