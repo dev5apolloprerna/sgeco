@@ -5,6 +5,7 @@
  */
 function getFormCEmployees($dbconn, $companyId, $salaryMonth)
 {
+    validateFormCDatabaseConnection($dbconn);
     // Keep this filter in step with Ajaxreport.php/newReport.php.  Exports must
     // not paginate: every matching salary detail belongs in the register.
     $companyId = mysqli_real_escape_string($dbconn, $companyId);
@@ -38,6 +39,7 @@ function getFormCEmployees($dbconn, $companyId, $salaryMonth)
 
 function getFormCCompanyName($dbconn, $companyId)
 {
+    validateFormCDatabaseConnection($dbconn);
     $companyId = mysqli_real_escape_string($dbconn, $companyId);
     $sql = "SELECT companyname
             FROM companymaster
@@ -67,7 +69,7 @@ function renderFormCHtml(array $employees, $salaryMonth, $companyName)
         throw new RuntimeException('The Form C template could not be loaded.');
     }
 
-    if (!preg_match('/(<section class="form-page">.*?<tbody>)(.*?)(<\/tbody>.*?<\/section>)/s', $template, $matches)) {
+    if (!preg_match('/(<section class="form-page">.*?<tbody class="register-body">)(.*?)(<\/tbody>.*?<\/section>)/s', $template, $matches)) {
         throw new RuntimeException('The Form C template has an unexpected format.');
     }
 
@@ -93,11 +95,18 @@ function renderFormCHtml(array $employees, $salaryMonth, $companyName)
         throw new InvalidArgumentException('A valid salary month is required.');
     }
 
-    return renderFormCHtml(
-        getFormCEmployees($dbconn, $companyId, $salaryMonth),
-        $salaryMonth,
-        getFormCCompanyName($dbconn, $companyId)
+    return str_replace(
+        array('{{FORM_C_MONTH}}', '{{FORM_C_COMPANY}}'),
+        array($month->format('F-y'), htmlspecialchars($companyName, ENT_QUOTES, 'UTF-8')),
+        $html
     );
+}
+
+function validateFormCDatabaseConnection($dbconn)
+{
+    if (!($dbconn instanceof mysqli)) {
+        throw new RuntimeException('A database connection could not be established.');
+    }
 }
 
 function getFormCRequestData($dbconn)
@@ -108,7 +117,8 @@ function getFormCRequestData($dbconn)
         http_response_code(400);
         throw new InvalidArgumentException('A valid company, month, and year are required.');
     }
-     return renderFormCHtml(
+    validateFormCDatabaseConnection($dbconn);
+    return renderFormCHtml(
         getFormCEmployees($dbconn, $companyId, $salaryMonth),
         $salaryMonth,
         getFormCCompanyName($dbconn, $companyId)

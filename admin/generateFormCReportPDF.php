@@ -23,11 +23,11 @@ $pdf->setPrintHeader(false);
 $pdf->setPrintFooter(false);
 // $pdf->SetMargins(0, 0, 0);
 // $pdf->SetAutoPageBreak(false, 0);
-// TCPDF does not reliably apply padding from HTML block elements. Apply the
-// template's page inset as native PDF margins so both tables remain clear of
-// the left and right edges (including the Remarks column).
-$pdf->SetMargins(12, 20, 12);
-$pdf->SetAutoPageBreak(true, 20);
+// Keep a small printable inset, matching the compact wage-register export, so
+// the legal-landscape page can accommodate substantially more employee rows.
+$pdf->SetMargins(5, 5, 5);
+$pdf->SetAutoPageBreak(true, 5);
+$pdf->SetFont('helvetica', '', 8);
 $pdf->AddPage('L', 'LEGAL');
 $pdf->writeHTML($html, true, false, true, false, '');
 $pdf->Output('Form-C.pdf', 'I');
