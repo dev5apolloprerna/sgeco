@@ -22,18 +22,20 @@ if ($_REQUEST['action'] == 'Delete') {
 
 if ($_POST['action'] == 'ListUser') {
     $search = mysqli_real_escape_string($dbconn, isset($_POST['Search_Txt']) ? trim($_POST['Search_Txt']) : '');
-    $where = " WHERE isDelete=0 AND istatus=1" . ($search === '' ? '' : " AND strMonthYear LIKE '%" . $search . "%'");
-    $countResult = mysqli_query($dbconn, 'SELECT COUNT(*) AS TotalRow FROM advanced_master' . $where);
+    $where = " WHERE am.isDelete=0 AND am.istatus=1" . ($search === '' ? '' : " AND (am.strMonthYear LIKE '%" . $search . "%' OR c.companyname LIKE '%" . $search . "%')");
+    $from = ' FROM advanced_master am LEFT JOIN companymaster c ON c.companymasterId=am.iCompanyId';
+    $countResult = mysqli_query($dbconn, 'SELECT COUNT(*) AS TotalRow' . $from . $where);
     $totalrecord = (int) mysqli_fetch_assoc($countResult)['TotalRow'];
     $per_page = $cateperpaging;
     $total_pages = max(1, ceil($totalrecord / $per_page));
     $show_page = max(1, (int) $_REQUEST['Page']);
     $startpage = ($show_page - 1) * $per_page;
-    $result = mysqli_query($dbconn, 'SELECT * FROM advanced_master' . $where . ' ORDER BY iAdvancedMasterId DESC LIMIT ' . $startpage . ', ' . $per_page);
+    $result = mysqli_query($dbconn, 'SELECT am.*, c.companyname' . $from . $where . ' ORDER BY am.iAdvancedMasterId DESC LIMIT ' . $startpage . ', ' . $per_page);
     if ($totalrecord > 0) { ?>
         <table class="table table-bordered table-hover center table-responsive" width="100%">
             <thead class="tbg">
                 <tr>
+                    <th>Company</th>
                     <th>Month / Year</th>
                     <th>From Date</th>
                     <th>To Date</th>
@@ -42,6 +44,7 @@ if ($_POST['action'] == 'ListUser') {
             </thead>
             <tbody>
                 <?php while ($advanced = mysqli_fetch_assoc($result)) { ?><tr>
+                        <td><?php echo htmlspecialchars($advanced['companyname'], ENT_QUOTES, 'UTF-8'); ?></td>
                         <td><?php echo htmlspecialchars($advanced['strMonthYear'], ENT_QUOTES, 'UTF-8'); ?></td>
                         <td><?php echo date('d-m-Y', strtotime($advanced['fromdate'])); ?></td>
                         <td><?php echo date('d-m-Y', strtotime($advanced['todate'])); ?></td>

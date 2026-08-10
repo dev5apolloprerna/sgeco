@@ -46,23 +46,8 @@ if ($action === 'SearchEmployees') {
         exit;
     }
 
-    $companies = mysqli_query($dbconn, "SELECT companymasterId, companyname FROM companymaster WHERE isDelete=0 AND istatus=1 ORDER BY companyname");
+
 ?>
-    <div class="row">
-        <div class="form-group col-md-4">
-            <label for="companyId"><strong>Company</strong></label>
-            <select class="form-control" id="companyId" required>
-                <option value="">Select company</option>
-                <?php while ($companies && $company = mysqli_fetch_assoc($companies)) { ?>
-                    <option value="<?php echo (int) $company['companymasterId']; ?>"><?php echo htmlspecialchars($company['companyname'], ENT_QUOTES, 'UTF-8'); ?></option>
-                <?php } ?>
-            </select>
-        </div>
-        <div class="form-group col-md-4">
-            <label for="advancedDate"><strong>Date</strong></label>
-            <input class="form-control" type="date" id="advancedDate" min="<?php echo htmlspecialchars($advanced['fromdate'], ENT_QUOTES, 'UTF-8'); ?>" max="<?php echo htmlspecialchars($advanced['todate'], ENT_QUOTES, 'UTF-8'); ?>" required>
-        </div>
-    </div>
     <table class="table table-bordered table-hover table-responsive">
         <thead class="tbg">
             <tr>
@@ -96,12 +81,12 @@ if ($action === 'SearchEmployees') {
 
 header('Content-Type: application/json');
 if ($action === 'AddAdvancedDetails') {
-    $companyId = isset($_POST['companyId']) ? (int) $_POST['companyId'] : 0;
+    $companyId = (int) $advanced['iCompanyId'];
     $date = isset($_POST['advancedDate']) ? trim($_POST['advancedDate']) : '';
     $details = json_decode(isset($_POST['details']) ? $_POST['details'] : '', true);
     $validCompany = mysqli_query($dbconn, "SELECT companymasterId FROM companymaster WHERE companymasterId=" . $companyId . " AND isDelete=0 AND istatus=1");
     if (!validDetailDate($date, $advanced) || !$validCompany || mysqli_num_rows($validCompany) === 0 || !is_array($details) || count($details) === 0 || count($details) > 100) {
-        echo json_encode(array('success' => false, 'message' => 'Select a valid company and date, and enter an amount for at least one employee.'));
+        echo json_encode(array('success' => false, 'message' => 'Select a valid date and enter an amount for at least one employee.'));
         exit;
     }
 

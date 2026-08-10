@@ -9,9 +9,10 @@ $rightsResult = mysqli_query($dbconn, "SELECT isAdvancedEntry FROM user_rights W
 $rights = mysqli_fetch_assoc($rightsResult);
 if ($_SESSION['AdminType'] != 1 && (!isset($rights['isAdvancedEntry']) || $rights['isAdvancedEntry'] != 1)) {
     http_response_code(403);
-    header('location:'.$web_url.'admin/login.php');	
-        exit;
+    header('location:' . $web_url . 'admin/login.php');
+    exit;
 }
+$companies = mysqli_query($dbconn, "SELECT companymasterId, companyname FROM companymaster WHERE isDelete=0 AND istatus=1 ORDER BY companyname");
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -43,12 +44,21 @@ if ($_SESSION['AdminType'] != 1 && (!isset($rights['isAdvancedEntry']) || $right
                                     </div>
                                     <div class="portlet-body form">
                                         <form method="post" id="advancedForm"><input type="hidden" name="action" id="action" value="AddAdvanced">
+                                            <div class="form-group">
+                                                <label for="iCompanyId">Company</label>
+                                                <select name="iCompanyId" id="iCompanyId" class="form-control" required>
+                                                    <option value="">Select company</option>
+                                                    <?php while ($companies && $company = mysqli_fetch_assoc($companies)) { ?>
+                                                        <option value="<?php echo (int) $company['companymasterId']; ?>"><?php echo htmlspecialchars($company['companyname'], ENT_QUOTES, 'UTF-8'); ?></option>
+                                                    <?php } ?>
+                                                </select>
+                                            </div>
                                             <div class="form-group"><label for="strMonthYear">Month / Year</label><input type="text" name="strMonthYear" id="strMonthYear" class="form-control" placeholder="Select month and year" autocomplete="off" required></div>
                                             <div class="form-group"><label for="fromdate">From Date</label><input type="date" name="fromdate" id="fromdate" class="form-control" required></div>
                                             <div class="form-group"><label for="todate">To Date</label><input type="date" name="todate" id="todate" class="form-control" required></div>
                                             <div class="form-actions noborder">
                                                 <!-- <button class="btn blue margin-top-20" type="submit" id="submitButton">Submit</button> -->
-                                                <input class="btn blue margin-top-20" type="submit" id="Btnmybtn"  value="Submit" name="submit">      
+                                                <input class="btn blue margin-top-20" type="submit" id="Btnmybtn" value="Submit" name="submit">
                                                 <button type="button" class="btn blue margin-top-20" onclick="resetForm()">Cancel</button>
                                             </div>
                                         </form>
@@ -96,7 +106,10 @@ if ($_SESSION['AdminType'] != 1 && (!isset($rights['isAdvancedEntry']) || $right
             var firstDate = prefix + '01';
             var lastDay = new Date(year, month, 0).getDate();
             var lastDate = prefix + String(lastDay).padStart(2, '0');
-            $('#fromdate, #todate').attr({min: firstDate, max: lastDate});
+            $('#fromdate, #todate').attr({
+                min: firstDate,
+                max: lastDate
+            });
             if (resetDates) {
                 $('#fromdate').val(firstDate);
                 $('#todate').val(lastDate);
@@ -115,6 +128,7 @@ if ($_SESSION['AdminType'] != 1 && (!isset($rights['isAdvancedEntry']) || $right
                 else if (response == 2) alert('Advanced edited successfully.');
                 else if (response == 3) alert('This month / year already exists.');
                 else if (response == 4) alert('From Date and To Date must be valid dates in the selected month / year.');
+                else if (response == 5) alert('Please select a valid company.');
                 else alert('Invalid request.');
                 if (response == 1 || response == 2) resetForm();
             });
@@ -129,6 +143,7 @@ if ($_SESSION['AdminType'] != 1 && (!isset($rights['isAdvancedEntry']) || $right
                 $('#loading').hide();
                 var data = JSON.parse(response);
                 $('#formTitle').text('Edit Advanced');
+                $('#iCompanyId').val(data.iCompanyId);
                 $('#strMonthYear').val(data.strMonthYear);
                 $('#fromdate').val(data.fromdate);
                 $('#todate').val(data.todate);

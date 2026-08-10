@@ -54,7 +54,14 @@ $advancedPeriod = mysqli_fetch_assoc($advancedResult);
                                         <div class="alert alert-info">Advanced period: <strong><?php echo htmlspecialchars($advancedPeriod['strMonthYear'], ENT_QUOTES, 'UTF-8'); ?></strong> (<?php echo date('d-m-Y', strtotime($advancedPeriod['fromdate'])); ?> to <?php echo date('d-m-Y', strtotime($advancedPeriod['todate'])); ?>)</div>
                                         <form id="searchForm" method="post" role="form">
                                             <input type="hidden" id="advancedId" value="<?php echo $advancedId; ?>">
+                                            <input type="hidden" id="companyId" value="<?php echo (int) $advancedPeriod['iCompanyId']; ?>">
                                             <hr>
+                                            <div class="row">
+                                                <div class="form-group col-md-4">
+                                                    <label for="advancedDate"><strong>Date</strong></label>
+                                                    <input class="form-control" type="date" id="advancedDate" min="<?php echo htmlspecialchars($advancedPeriod['fromdate'], ENT_QUOTES, 'UTF-8'); ?>" max="<?php echo htmlspecialchars($advancedPeriod['todate'], ENT_QUOTES, 'UTF-8'); ?>" required>
+                                                </div>
+                                            </div>
                                             <div class="row">
                                                 <div class="form-group col-md-4">
                                                     <label for="employeeSearch"><strong>Search Employee</strong></label>
@@ -113,7 +120,7 @@ $advancedPeriod = mysqli_fetch_assoc($advancedResult);
             var companyId = $('#companyId').val();
             var advancedDate = $('#advancedDate').val();
             if (!companyId || !advancedDate) {
-                showMessage('danger', 'Select a company and date.');
+                showMessage('danger', 'Select a date.');
                 return;
             }
             var details = [];

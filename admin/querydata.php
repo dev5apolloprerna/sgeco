@@ -2223,16 +2223,23 @@ switch ($action) {
 
     case "AddAdvanced":
         if (!hasAdvancedAccess($dbconn)) { http_response_code(403); echo '0'; break; }
+        $companyId = isset($_POST['iCompanyId']) ? (int) $_POST['iCompanyId'] : 0;
         $monthYear = trim($_POST['strMonthYear']);
         $fromDate = isset($_POST['fromdate']) ? trim($_POST['fromdate']) : '';
         $toDate = isset($_POST['todate']) ? trim($_POST['todate']) : '';
         $escapedMonthYear = mysqli_real_escape_string($dbconn, $monthYear);
-        $existing = mysqli_query($dbconn, "SELECT iAdvancedMasterId FROM advanced_master WHERE strMonthYear='" . $escapedMonthYear . "' AND isDelete=0");
+        $company = mysqli_query($dbconn, "SELECT companymasterId FROM companymaster WHERE companymasterId=" . $companyId . " AND isDelete=0 AND istatus=1");
+        if ($companyId < 1 || !$company || mysqli_num_rows($company) === 0) {
+            echo '5';
+            break;
+        }
+        $existing = mysqli_query($dbconn, "SELECT iAdvancedMasterId FROM advanced_master WHERE iCompanyId=" . $companyId . " AND strMonthYear='" . $escapedMonthYear . "' AND isDelete=0");
         if (!validAdvancedDates($monthYear, $fromDate, $toDate) || mysqli_num_rows($existing) > 0) {
             echo mysqli_num_rows($existing) > 0 ? '3' : '4';
             break;
         }
         $data = array(
+            "iCompanyId" => $companyId,
             "strMonthYear" => $monthYear,
             "fromdate" => $fromDate,
             "todate" => $toDate,
@@ -2255,16 +2262,23 @@ switch ($action) {
     case "EditAdvanced":
         if (!hasAdvancedAccess($dbconn)) { http_response_code(403); echo '0'; break; }
         $id = (int) $_POST['iAdvancedMasterId'];
+        $companyId = isset($_POST['iCompanyId']) ? (int) $_POST['iCompanyId'] : 0;
         $monthYear = trim($_POST['strMonthYear']);
         $fromDate = isset($_POST['fromdate']) ? trim($_POST['fromdate']) : '';
         $toDate = isset($_POST['todate']) ? trim($_POST['todate']) : '';
         $escapedMonthYear = mysqli_real_escape_string($dbconn, $monthYear);
-        $existing = mysqli_query($dbconn, "SELECT iAdvancedMasterId FROM advanced_master WHERE strMonthYear='" . $escapedMonthYear . "' AND iAdvancedMasterId!=" . $id . " AND isDelete=0");
+        $company = mysqli_query($dbconn, "SELECT companymasterId FROM companymaster WHERE companymasterId=" . $companyId . " AND isDelete=0 AND istatus=1");
+        if ($companyId < 1 || !$company || mysqli_num_rows($company) === 0) {
+            echo '5';
+            break;
+        }
+        $existing = mysqli_query($dbconn, "SELECT iAdvancedMasterId FROM advanced_master WHERE iCompanyId=" . $companyId . " AND strMonthYear='" . $escapedMonthYear . "' AND iAdvancedMasterId!=" . $id . " AND isDelete=0");
         if ($id < 1 || !validAdvancedDates($monthYear, $fromDate, $toDate) || mysqli_num_rows($existing) > 0) {
             echo mysqli_num_rows($existing) > 0 ? '3' : '4';
             break;
         }
         $data = array(
+            "iCompanyId" => $companyId,
             "strMonthYear" => $monthYear,
             "fromdate" => $fromDate,
             "todate" => $toDate,
