@@ -161,11 +161,12 @@ $advanced = array("advancedmaster.php", "AddAdvancedDetails.php",'viewAdvancedDe
                                 <a href="#">Advanced</a>
                                 <ul class="dropdown-menu pull-left">
                                     <li>
+                                        <a href="<?php echo $web_url; ?>admin/advancedmaster.php">Create Advanced</a>
+                                    </li>    
+                                    <li>
                                         <a href="<?php echo $web_url; ?>admin/viewAdvancedDetails.php">View Advanced</a>
                                     </li>
-                                    <li>
-                                        <a href="<?php echo $web_url; ?>admin/advancedmaster.php">Create Advanced</a>
-                                    </li>
+                                    
                                     <li>
                                         <a href="<?php echo $web_url; ?>admin/advancedPaymentReport.php">Advanced Payment Report</a>
                                     </li>

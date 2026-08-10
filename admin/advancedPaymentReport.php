@@ -59,14 +59,19 @@ requireAdvancedPaymentReportAccess($dbconn);
                                                                                         }
                                                                                         ?>
                                                 </select></div>
-                                            <div class="form-group col-md-2"><label for="bank">Bank</label><select class="form-control" id="bank">
-                                                    <option value="">All Banks</option><?php
-                                                                                        $banks = mysqli_query($dbconn, "SELECT bankmasterId, bankname FROM bankmaster WHERE isDelete=0 AND istatus=1 ORDER BY bankname");
-                                                                                        while ($bank = mysqli_fetch_assoc($banks)) {
-                                                                                            echo '<option value="' . (int) $bank['bankmasterId'] . '">' . htmlspecialchars($bank['bankname'], ENT_QUOTES, 'UTF-8') . '</option>';
-                                                                                        }
-                                                                                        ?>
-                                                </select></div>
+                                            <div class="form-group col-md-2"><label for="bank">Bank</label>
+                                                <?php
+                                                //$queryCom = "SELECT * FROM `bankmaster`  where  bankmasterId > 1 and isDelete='0'  and  istatus='1' order by  bankmasterId asc LIMIT 2";
+                                                $queryCom = "SELECT * FROM `bankmaster`  where isDelete='0'  and  istatus='1' order by  bankmasterId asc LIMIT 3";
+                                                $resultCom = mysqli_query($dbconn, $queryCom) or die(mysql_error());
+                                                echo '<select class="form-control" name="bank" id="bank" required="" >';
+                                                echo "<option value='' >Select Bank </option>";
+                                                while ($rowCom = mysqli_fetch_array($resultCom)) {
+                                                    echo "<option value='" . $rowCom['bankmasterId'] . "'>" . $rowCom['bankname'] . "</option>";
+                                                }
+                                                echo "</select>";
+                                                ?>
+                                            </div>
                                             <div class="col-md-3 margin-top-20">
                                                 <button type="submit" class="btn blue margin-bottom-20"><i class="fa fa-search"></i> Search</button>
                                                 <button type="button" class="btn btn-success margin-bottom-20" onclick="exportReport('exportAdvancedPaymentReportExcel.php')"><i class="fa fa-file-excel-o"></i> Export Excel</button>
