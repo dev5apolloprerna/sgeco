@@ -12,7 +12,13 @@ if (!isset($_POST['action']) || $_POST['action'] !== 'ListUser') {
 $filters = advancedPaymentReportFilters($dbconn, $_POST);
 $bankFormat = advancedPaymentReportUsesBankFormat($filters);
 $where = advancedPaymentReportWhere($dbconn, $filters);
-$countResult = mysqli_query($dbconn, "SELECT COUNT(*) AS TotalRow FROM advanced_details ad INNER JOIN advanced_master am ON am.iAdvancedMasterId=ad.iAdvancedMasterId WHERE " . $where);
+$countQuery = "SELECT COUNT(*) AS TotalRow FROM advanced_details ad " .
+    "INNER JOIN advanced_master am ON am.iAdvancedMasterId=ad.iAdvancedMasterId " .
+    "INNER JOIN employee e ON e.employeeId=ad.iEmployeeId " .
+    "INNER JOIN companymaster c ON c.companymasterId=ad.iCompanyId " .
+    "INNER JOIN bankmaster b ON b.bankmasterId=ad.iBankId " .
+    "WHERE " . $where;
+$countResult = mysqli_query($dbconn, $countQuery);
 $totalrecord = $countResult ? (int) mysqli_fetch_assoc($countResult)['TotalRow'] : 0;
 $per_page = $cateperpaging;
 $total_pages = max(1, (int) ceil($totalrecord / $per_page));
@@ -59,9 +65,9 @@ if (!$result || mysqli_num_rows($result) === 0) {
             </tr><?php } ?></tbody>
     <tfoot class="tbg">
         <tr>
-            <th colspan="3" class="text-right">Page Total</th>
+            <th colspan="9" class="text-right">Page Total</th>
             <th class="text-right"><?php echo number_format($total, 2); ?></th>
-            <th colspan="<?php echo $bankFormat ? 4 : 6; ?>"></th>
+            <th colspan="<?php echo $bankFormat ? 1 : 2; ?>"></th>
         </tr>
     </tfoot>
 </table>
