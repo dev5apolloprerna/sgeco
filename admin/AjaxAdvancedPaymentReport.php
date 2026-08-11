@@ -48,8 +48,13 @@ if (!$result || mysqli_num_rows($result) === 0) {
     </thead>
     <tbody><?php $serial = (($show_page - 1) * $per_page) + 1;
             $total = 0;
+            $totalCommission = 0;
             while ($row = mysqli_fetch_assoc($result)) {
-                $total += (float) $row['iAmount']; ?><tr>
+                $amount = (float) $row['iAmount'];
+                $commission = $amount <= 10000 ? 2.36 : 4.72;
+                $total += $amount;
+                $totalCommission += $commission; ?>
+            <tr>
                 <td><?php echo $serial++; ?></td>
                 <td><?php echo date('d-m-Y', strtotime($row['strDate'])); ?></td>
                 <td><?php echo htmlspecialchars($row['employeecode'], ENT_QUOTES, 'UTF-8'); ?></td>
@@ -61,13 +66,15 @@ if (!$result || mysqli_num_rows($result) === 0) {
                 <td><?php echo htmlspecialchars($row['ifsccode'], ENT_QUOTES, 'UTF-8'); ?></td>
                 <td class="text-right"><?php echo number_format($row['iAmount'], 2); ?></td>
                 <td><?php echo htmlspecialchars($row['strRemarks'], ENT_QUOTES, 'UTF-8'); ?></td>
-                <?php if (!$bankFormat) { ?><td class="text-right"><?php echo number_format($row['iAmount'] <= 10000 ? 2.36 : 4.72, 2); ?></td><?php } ?>
-            </tr><?php } ?></tbody>
+                <?php if (!$bankFormat) { ?><td class="text-right"><?php echo number_format($commission, 2); ?></td><?php } ?>
+            </tr><?php } ?>
+    </tbody>
     <tfoot class="tbg">
         <tr>
-            <th colspan="9" class="text-right">Page Total</th>
+            <th colspan="<?php echo $bankFormat ? 8 : 9; ?>" class="text-right">Page Total</th>
             <th class="text-right"><?php echo number_format($total, 2); ?></th>
-            <th colspan="<?php echo $bankFormat ? 1 : 2; ?>"></th>
+            <th></th>
+            <?php if (!$bankFormat) { ?><th class="text-right"><?php echo number_format($totalCommission, 2); ?></th><?php } ?>
         </tr>
     </tfoot>
 </table>

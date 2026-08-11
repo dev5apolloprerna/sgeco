@@ -45,7 +45,7 @@ include('IsLogin.php');
                                 <div class="portlet-body form">
                                     <form role="form" method="POST" action="" name="frmSearch" id="frmSearch" enctype="multipart/form-data">
                                         <div class="row">
-                                            <div class="form-group col-md-3">
+                                            <div class="form-group col-md-2">
                                                 <select class="form-control" name="Report" id="Report" required>
                                                     <option value="">Select Report</option>
                                                     <option value="form-c">Form C (Register of Loan / Recoveries / Damage / Loss / Fine / Advance / Absence)</option>
@@ -129,9 +129,9 @@ include('IsLogin.php');
                                                         ?>
                                                     </div>
                                                 </div> -->
-                                            <div class="col-md-6">
+                                            <div class="col-md-4">
                                                 <a href="#" class="btn blue margin-bottom-20" id="clickbutton" onclick="PageLoadData(1);">Search</a>
-                                                <a style="margin: 0 0 0 26px;" class="m-portlet__nav-link btn btn-success margin-bottom-20" onclick="exporttoexcel();"><i class="fa fa-file-excel-o"></i>&nbsp; Export Excel</a>
+                                                <a class="m-portlet__nav-link btn btn-success margin-bottom-20" onclick="exporttoexcel();"><i class="fa fa-file-excel-o"></i>&nbsp; Export Excel</a>
                                                 <a href="#" onclick="checkb4submit();" class="btn red pull-right margin-bottom-20"><i class="fa fa-file-pdf-o"></i>&nbsp;&nbsp;Download PDF</a>
                                             </div>
                                         </div>
