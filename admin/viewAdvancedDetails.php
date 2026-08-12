@@ -8,7 +8,7 @@ $rightsResult = mysqli_query($dbconn, "SELECT isAdvancedEntry FROM user_rights W
 $rights = $rightsResult ? mysqli_fetch_assoc($rightsResult) : null;
 if ($_SESSION['AdminType'] != 1 && (!isset($rights['isAdvancedEntry']) || $rights['isAdvancedEntry'] != 1)) {
     http_response_code(403);
-    header('location:'.$web_url.'admin/login.php');	
+    header('location:' . $web_url . 'admin/login.php');
     exit;
 }
 ?>
@@ -84,6 +84,38 @@ if ($_SESSION['AdminType'] != 1 && (!isset($rights['isAdvancedEntry']) || $right
             </div>
         </div>
     </div>
+    <div class="modal fade" id="editAdvancedDetailModal" tabindex="-1" role="dialog" aria-labelledby="editAdvancedDetailTitle">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form id="editAdvancedDetailForm">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="editAdvancedDetailTitle">Edit Advanced Detail</h4>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="editDetailId">
+                        <input type="hidden" id="editEmployeeId">
+                        <div class="form-group">
+                            <label for="editEmployeeSearch">Employee</label>
+                            <div class="dropdown">
+                                <input type="text" class="form-control" id="editEmployeeSearch" placeholder="Type employee name or code" autocomplete="off" required>
+                                <ul class="dropdown-menu" id="editEmployeeSuggestions" style="width:100%; max-height:220px; overflow-y:auto;"></ul>
+                            </div>
+                            <span class="help-block">Type at least two characters, then select an employee from the suggestions.</span>
+                        </div>
+                        <div class="form-group"><label for="editAdvancedDate">Date <small id="editAdvancedPeriod" class="text-muted"></small></label><input type="date" class="form-control" id="editAdvancedDate" required></div>
+                        <div class="form-group"><label for="editAdvancedAmount">Amount</label><input type="number" min="0.01" step="0.01" class="form-control" id="editAdvancedAmount" required></div>
+                        <div class="form-group"><label for="editAdvancedRemarks">Remarks</label><textarea class="form-control" id="editAdvancedRemarks" maxlength="1000" rows="3"></textarea></div>
+                        <div id="editAdvancedDetailMessage"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn default" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn blue"><i class="fa fa-save"></i> Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     <?php include_once './footer.php'; ?>
     <script>
         function PageLoadData(page) {
@@ -109,6 +141,112 @@ if ($_SESSION['AdminType'] != 1 && (!isset($rights['isAdvancedEntry']) || $right
         });
 
         // PageLoadData(1);
+$('#advancedDetailsList').on('click', '.edit-advanced-detail', function() {
+            var button = $(this);
+            $('#editDetailId').val(button.data('id'));
+            $('#editEmployeeId').val(button.attr('data-employee-id'));
+            $('#editEmployeeSearch').val(button.attr('data-employee-name'));
+            $('#editEmployeeSuggestions').empty().hide();
+            $('#editAdvancedDate')
+                .attr('min', button.attr('data-min-date'))
+                .attr('max', button.attr('data-max-date'))
+                .val(button.attr('data-date'));
+            $('#editAdvancedPeriod').text('(select a date within ' + button.attr('data-period') + ')');
+            $('#editAdvancedAmount').val(button.attr('data-amount'));
+            $('#editAdvancedRemarks').val(button.attr('data-remarks'));
+            $('#editAdvancedDetailMessage').empty();
+            $('#editAdvancedDetailModal').modal('show');
+        });
+
+        var employeeSearchTimer;
+        $('#editEmployeeSearch').on('input', function() {
+            var searchInput = $(this);
+            var search = $.trim(searchInput.val());
+            $('#editEmployeeId').val('');
+            clearTimeout(employeeSearchTimer);
+            if (search.length < 2) {
+                $('#editEmployeeSuggestions').empty().hide();
+                return;
+            }
+            employeeSearchTimer = setTimeout(function() {
+                $.post('AjaxViewAdvancedDetails.php', {
+                    action: 'SearchAdvancedEmployees',
+                    employeeSearch: search
+                }, function(response) {
+                    var suggestions = $('#editEmployeeSuggestions').empty();
+                    if (!response.success || response.employees.length === 0) {
+                        suggestions.append('<li class="disabled"><a href="#">No employees found</a></li>').show();
+                        return;
+                    }
+                    $.each(response.employees, function(index, employee) {
+                        $('<a href="#"></a>')
+                            .text(employee.name + ' (' + employee.code + ')')
+                            .data('employee', employee)
+                            .appendTo($('<li></li>').appendTo(suggestions));
+                    });
+                    suggestions.show();
+                }, 'json');
+            }, 250);
+        });
+
+        $('#editEmployeeSuggestions').on('click', 'a', function(event) {
+            event.preventDefault();
+            var employee = $(this).data('employee');
+            if (!employee) return;
+            $('#editEmployeeId').val(employee.id);
+            $('#editEmployeeSearch').val(employee.name + ' (' + employee.code + ')');
+            $('#editEmployeeSuggestions').empty().hide();
+        });
+
+        $('#editAdvancedDetailForm').on('submit', function(event) {
+            event.preventDefault();
+            if (!$('#editEmployeeId').val()) {
+                $('#editAdvancedDetailMessage').html('<div class="alert alert-danger">Select an employee from the suggestions.</div>');
+                return;
+            }
+            if (!this.checkValidity()) {
+                this.reportValidity();
+                return;
+            }
+            var submitButton = $(this).find('[type="submit"]');
+            submitButton.prop('disabled', true);
+            $.post('AjaxViewAdvancedDetails.php', {
+                action: 'UpdateAdvancedDetail',
+                detailId: $('#editDetailId').val(),
+                employeeId: $('#editEmployeeId').val(),
+                advancedDate: $('#editAdvancedDate').val(),
+                amount: $('#editAdvancedAmount').val(),
+                remarks: $('#editAdvancedRemarks').val()
+            }, function(response) {
+                submitButton.prop('disabled', false);
+                if (response.success) {
+                    $('#editAdvancedDetailModal').modal('hide');
+                    PageLoadData(1);
+                } else {
+                    $('#editAdvancedDetailMessage').html($('<div class="alert alert-danger"></div>').text(response.message));
+                }
+            }, 'json').fail(function(xhr) {
+                submitButton.prop('disabled', false);
+                $('#editAdvancedDetailMessage').html($('<div class="alert alert-danger"></div>').text(xhr.responseText || 'Unable to update advanced detail.'));
+            });
+        });
+
+        $('#advancedDetailsList').on('click', '.delete-advanced-detail', function() {
+            if (!confirm('Are you sure you want to delete this entry?')) return;
+            var detailId = $(this).data('id');
+            $('#loading').show();
+            $.post('AjaxViewAdvancedDetails.php', {
+                action: 'DeleteAdvancedDetail',
+                detailId: detailId
+            }, function(response) {
+                $('#loading').hide();
+                if (response.success) PageLoadData(1);
+                else alert(response.message);
+            }, 'json').fail(function(xhr) {
+                $('#loading').hide();
+                alert(xhr.responseText || 'Unable to delete advanced detail.');
+            });
+        });
     </script>
 </body>
 
