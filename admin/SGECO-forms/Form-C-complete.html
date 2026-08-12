@@ -14,7 +14,7 @@
         body {
             margin: 0;
             padding: 0;
-            background: #e9e9e9;
+            background: #fff; /* background: #e9e9e9; */
             color: #000;
             font-family: "Times New Roman", Times, serif;
         }
@@ -42,7 +42,7 @@
             text-align: center;
             font-size: 12px;
             line-height: 1.15;
-            font-weight: 700;
+            font-weight: bold;
         }
 
         .form-subtitle {
@@ -50,7 +50,7 @@
             text-align: center;
             font-size: 12px;
             line-height: 1.15;
-            font-weight: 700;
+            font-weight: bold;
         }
 
         table {
@@ -82,6 +82,12 @@
 
         .details-value {
             width: 30%;
+        }
+
+        .company-value {
+            font-weight: bold;
+            white-space: normal;
+            line-height: 1.2;
         }
 
         .principal-label {
@@ -220,9 +226,9 @@
 
     <!-- FORM C - PAGE 1 -->
     <section class="form-page">
-        <h1 class="form-title">FORM C</h1>
+        <h1 class="form-title"><strong>FORM C</strong></h1>
         <h2 class="form-subtitle">
-            Format of Register of Loan/Recoveries/Damage/Loss/Fine/Advance/Absence
+            <strong>Format of Register of Loan/Recoveries/Damage/Loss/Fine/Advance/Absence</strong>
         </h2>
 
         <table class="details-table" border="0" cellspacing="0" cellpadding="0" style="border: none; border-collapse: separate;">
@@ -234,9 +240,12 @@
             </colgroup>
             <tr>
                 <td class="details-label" ><strong>Name of the Establishment :-</strong></td>
-                <td class="details-value" >SHREE GANESH ENGINEERING CO.</td>
+                <!-- <td class="details-value" >SHREE GANESH ENGINEERING CO.</td>
                 <td class="principal-label" ><strong>Name and Address of Principal Employer:</strong></td>
-                <td>{{FORM_C_COMPANY}}</td>
+                <td>{{FORM_C_COMPANY}}</td> -->
+                <td class="details-value company-value"><strong>SHREE GANESH ENGINEERING CO.</strong></td>
+                <td class="principal-label"><strong>Name and Address of Principal Employer:</strong></td>
+                <td class="company-value" colspan="3"><strong>{{FORM_C_COMPANY}}</strong></td>
             </tr>
             <tr>
                 <td class="details-label" ><strong>Name of Owner :-</strong></td>
@@ -244,6 +253,10 @@
                 <td></td>
                 <td></td>
             </tr>
+            <!-- <tr>
+                <td class="principal-label"><strong>Name and Address of Principal Employer:</strong></td>
+                <td class="company-value" colspan="3"><strong>{{FORM_C_COMPANY}}</strong></td>
+            </tr> -->
             <tr>
                 <td class="details-label" ><strong>LIN</strong></td>
                 <td></td>
@@ -281,34 +294,34 @@
                     <tr>
                         <!-- TCPDF does not reliably apply colgroup widths, so
                              repeat them on the first row of cells. -->
-                        <th style="width: 6%;">Sr. <br>Number In<br>Employee<br>register</th>
-                        <th style="width: 28%;">Name</th>
-                        <th style="width: 6%;">Recovery <br> Type<br>(Damage/Loss/<br>Fine/Advance/<br>Loans/Absence)</th>
-                        <th style="width: 6%;">Particulars</th>
-                        <th style="width: 6%;">Date of<br>Damage/<br>Loss/<br>Absence</th>
-                        <th style="width: 6%;">Amount</th>
-                        <th style="width: 6%;">Whether <br>show<br>cause<br>issued</th>
-                        <th style="width: 6%;">Explanation<br>heard in<br>presence <br>of</th>
-                        <th style="width: 6%;">Number of<br>Instalments</th>
-                        <th style="width: 6%;">First<br>Month/<br>Year</th>
-                        <th style="width: 6%;">Last<br>Month/<br>Year</th>
-                        <th style="width: 6%;">Date of<br>Complete<br>Recovery</th>
-                        <th style="width: 6%;">Remarks</th>
+                        <th style="width: 6%;"><strong>Sr. <br>Number In<br>Employee<br>register</strong></th>
+                        <th style="width: 28%;"><strong>Name</strong></th>
+                        <th style="width: 6%;"><strong>Recovery <br> Type<br>(Damage/Loss/<br>Fine/Advance/<br>Loans/Absence)</strong></th>
+                        <th style="width: 6%;"><strong>Particulars</strong></th>
+                        <th style="width: 6%;"><strong>Date of<br>Damage/<br>Loss/<br>Absence</strong></th>
+                        <th style="width: 6%;"><strong>Amount</strong></th>
+                        <th style="width: 6%;"><strong>Whether <br>show<br>cause<br>issued</strong></th>
+                        <th style="width: 6%;"><strong>Explanation<br>heard in<br>presence <br>of</strong></th>
+                        <th style="width: 6%;"><strong>Number of<br>Instalments</strong></th>
+                        <th style="width: 6%;"><strong>First<br>Month/<br>Year</strong></th>
+                        <th style="width: 6%;"><strong>Last<br>Month/<br>Year</strong></th>
+                        <th style="width: 6%;"><strong>Date of<br>Complete<br>Recovery</strong></th>
+                        <th style="width: 6%;"><strong>Remarks</strong></th>
                     </tr>
                     <tr class="number-row">
-                        <th>1</th>
-                        <th>2</th>
-                        <th>3</th>
-                        <th>4</th>
-                        <th>5</th>
-                        <th>6</th>
-                        <th>7</th>
-                        <th>8</th>
-                        <th>9</th>
-                        <th>10</th>
-                        <th>11</th>
-                        <th>12</th>
-                        <th>13</th>
+                        <th><strong>1</strong></th>
+                        <th><strong>2</strong></th>
+                        <th><strong>3</strong></th>
+                        <th><strong>4</strong></th>
+                        <th><strong>5</strong></th>
+                        <th><strong>6</strong></th>
+                        <th><strong>7</strong></th>
+                        <th><strong>8</strong></th>
+                        <th><strong>9</strong></th>
+                        <th><strong>10</strong></th>
+                        <th><strong>11</strong></th>
+                        <th><strong>12</strong></th>
+                        <th><strong>13</strong></th>
                     </tr>
                 </tbody>
                 <tbody class="register-body">

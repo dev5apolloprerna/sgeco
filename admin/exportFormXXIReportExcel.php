@@ -1,16 +1,22 @@
 <?php
 
+ob_start();
+
 include('../config.php');
 include('IsLogin.php');
 require_once('FormXXIReport.php');
+require_once('../vendor/autoload.php');
+require_once('OtherReportExcelExport.php');
 
 try {
     $html = getFormXXIRequestData($dbconn);
-} catch (Exception $exception) {
-    exit(htmlspecialchars($exception->getMessage(), ENT_QUOTES, 'UTF-8'));
+} catch (Throwable $exception) {
+    while (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+    http_response_code(400);
+    header('Content-Type: text/plain; charset=UTF-8');
+    exit($exception->getMessage());
 }
 
-header('Content-Type: application/vnd.ms-excel; charset=UTF-8');
-header('Content-Disposition: attachment; filename="Form-XXI-Register-of-Fine.xls"');
-header('Cache-Control: max-age=0');
-echo $html;
+exportOtherReportExcel($html, 'Form-XXI-Register-of-Fine.xlsx', 'Form XXI');
