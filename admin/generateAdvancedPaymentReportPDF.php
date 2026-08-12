@@ -28,12 +28,13 @@ function advancedPaymentPdfEscape($value)
 
 $companyName = advancedPaymentPdfLookupName($dbconn, 'companymaster', 'companymasterId', 'companyname', $filters['companyId'], 'All Companies');
 $bankName = advancedPaymentPdfLookupName($dbconn, 'bankmaster', 'bankmasterId', 'bankname', $filters['bankId'], 'All Banks');
-$dateLabel = advancedPaymentReportDateLabel($filters);
+$monthLabel = advancedPaymentReportMonthLabel($filters);
 $bankFormat = advancedPaymentReportUsesBankFormat($filters);
+$showTransferNote = advancedPaymentReportShowsTransferNote($filters);
 
 $html = '<table width="100%" cellspacing="0" cellpadding="5" border="0" style="font-size:18px;color:#000">';
 $html .= '<tr><td align="right"><strong>Date : ' . date('d-m-Y') . '</strong></td></tr>';
-$html .= '<tr><td><strong>SUB : ADVANCE SHEET<br>SITE : ' . advancedPaymentPdfEscape($companyName) . '<br>Date Range : ' . advancedPaymentPdfEscape($dateLabel) . ' - ' . advancedPaymentPdfEscape($bankName) . ' - Bank Payment</strong></td></tr>';
+$html .= '<tr><td><strong>SUB : ADVANCE SHEET<br>SITE : ' . advancedPaymentPdfEscape($companyName) . '<br>Month : ' . advancedPaymentPdfEscape($monthLabel) . ' - ' . advancedPaymentPdfEscape($bankName) . '</strong></td></tr>';
 $html .= '<tr><td><table width="100%" cellspacing="0" cellpadding="5" border="1" style="font-size:18px;color:#000">';
 $html .= '<thead><tr style="background-color:#ccc;font-size:16px;font-weight:bold;text-align:center">';
 $html .= $bankFormat
@@ -75,7 +76,9 @@ $html .= '<tr><td>&nbsp;</td></tr><tr><td><table width="100%" cellspacing="0" ce
 $summary = $bankFormat ? '' : '<table width="100%" cellspacing="0" cellpadding="5" border="1"><tr><td>Amount</td><td align="right">' . number_format($total, 2) . '</td></tr><tr><td>Bank Comm.</td><td align="right">' . number_format($totalCommission, 2) . '</td></tr><tr style="font-weight:bold"><td>Total Amt.</td><td align="right">' . number_format($total + $totalCommission, 2) . '</td></tr></table>';
 $html .= '<tr><td width="38%">' . $summary . '</td><td width="62%" align="right"><strong>FOR, SHREE GANESH ENGINEERING CO.</strong><br><br><br>HITESH.K.SHAH (PARTNER)</td></tr>';
 $html .= '<tr><td width="38%"><br><table width="100%" cellspacing="0" cellpadding="5" border="0"><tr><td width="45%"><strong>Cheque No.</strong></td><td width="55%" height="28" border="1">&nbsp;</td></tr></table></td><td width="62%"></td></tr></table></td></tr>';
-$html .= '<tr><td style="font-size:15px"><strong>Note:</strong> Soft Copy of the Bulk Transfer will be Sent from <strong>hkshah@sgeco.in</strong> and we are solely responsible for any discrepancy in the soft copy and the hard copy sent to you.</td></tr>';
+if ($showTransferNote) {
+    $html .= '<tr><td style="font-size:15px"><strong>Note:</strong> Soft Copy of the Bulk Transfer will be Sent from <strong>hkshah@sgeco.in</strong> and we are solely responsible for any discrepancy in the soft copy and the hard copy sent to you.</td></tr>';
+}
 $html .= '</table>';
 
 $pdf = new TCPDF('P', PDF_UNIT, PDF_PAGE_FORMAT, 'UTF-8', false);

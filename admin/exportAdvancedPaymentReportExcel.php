@@ -35,8 +35,9 @@ function advancedPaymentReportLookupName($dbconn, $table, $idColumn, $nameColumn
 
 $companyName = advancedPaymentReportLookupName($dbconn, 'companymaster', 'companymasterId', 'companyname', $filters['companyId'], 'All Companies');
 $bankName = advancedPaymentReportLookupName($dbconn, 'bankmaster', 'bankmasterId', 'bankname', $filters['bankId'], 'All Banks');
-$dateLabel = advancedPaymentReportDateLabel($filters);
+$monthLabel = advancedPaymentReportMonthLabel($filters);
 $bankFormat = advancedPaymentReportUsesBankFormat($filters);
+$showTransferNote = advancedPaymentReportShowsTransferNote($filters);
 $lastColumn = $bankFormat ? 'E' : 'G';
 
 $spreadsheet = new Spreadsheet();
@@ -51,7 +52,7 @@ $spreadsheet->getProperties()
 $sheet->setCellValue($lastColumn . '1', 'Date: ' . date('d-m-Y'));
 $sheet->setCellValue('A3', 'SUB :ADVANCE SHEET');
 $sheet->setCellValue('A4', 'SITE :' . $companyName);
-$sheet->setCellValue('A5', 'Date Range : ' . $dateLabel . ' - ' . $bankName . ' - Bank Payment');
+$sheet->setCellValue('A5', 'Month : ' . $monthLabel . ' - ' . $bankName);
 $headers = $bankFormat
     ? array('Sr. No.', 'Beneficiary Account Number', 'Amount', 'Beneficiary Name', 'IFSC Code')
     : array('Sr. No.', 'Beneficiary Account Number', 'Amount', 'Beneficiary Name', 'Beneficiary Address', 'IFSC Code', 'Comm.');
@@ -157,12 +158,16 @@ $sheet->setCellValue('C' . $chequeRow, '');
 $sheet->getStyle('C' . $chequeRow)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
 $sheet->getRowDimension($chequeRow)->setRowHeight(25);
 
-$noteRow = $chequeRow + 2;
-$sheet->mergeCells('A' . $noteRow . ':' . $lastColumn . ($noteRow + 1));
-$sheet->setCellValue('A' . $noteRow, 'Note: Soft Copy of the Bulk Transfer will be Sent from hkshah@sgeco.in and we are solely responsible for any discrepancy in the soft copy and the hard copy sent to you.');
-$sheet->getStyle('A' . $noteRow)->getFont()->setBold(true)->setSize(9);
-$sheet->getStyle('A' . $noteRow)->getAlignment()->setWrapText(true)->setVertical(Alignment::VERTICAL_TOP);
-$sheet->getRowDimension($noteRow)->setRowHeight(32);
+$lastPrintRow = $chequeRow;
+if ($showTransferNote) {
+    $noteRow = $chequeRow + 2;
+    $sheet->mergeCells('A' . $noteRow . ':' . $lastColumn . ($noteRow + 1));
+    $sheet->setCellValue('A' . $noteRow, 'Note: Soft Copy of the Bulk Transfer will be Sent from hkshah@sgeco.in and we are solely responsible for any discrepancy in the soft copy and the hard copy sent to you.');
+    $sheet->getStyle('A' . $noteRow)->getFont()->setBold(true)->setSize(9);
+    $sheet->getStyle('A' . $noteRow)->getAlignment()->setWrapText(true)->setVertical(Alignment::VERTICAL_TOP);
+    $sheet->getRowDimension($noteRow)->setRowHeight(32);
+    $lastPrintRow = $noteRow + 1;
+}
 
 $sheet->getColumnDimension('A')->setWidth(5);
 $sheet->getColumnDimension('B')->setWidth(15);
@@ -177,7 +182,7 @@ $spreadsheet->getDefaultStyle()->getFont()->setSize(10);
 $sheet->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_A4);
 $sheet->getPageSetup()->setFitToWidth(1)->setFitToHeight(0);
 $sheet->getPageMargins()->setTop(0.4)->setBottom(0.4)->setLeft(0.3)->setRight(0.3);
-$sheet->getPageSetup()->setPrintArea('A1:' . $lastColumn . ($noteRow + 1));
+$sheet->getPageSetup()->setPrintArea('A1:' . $lastColumn . $lastPrintRow);
 $sheet->getHeaderFooter()->setOddHeader('');
 $spreadsheet->setActiveSheetIndex(0);
 
