@@ -66,32 +66,28 @@ function renderFormXXIHtml(array $employees, $salaryMonth)
         1
     );
 
-    // The supplied legal-landscape design comfortably holds twelve data rows.
-    $pages = count($employees) ? array_chunk($employees, 12) : array(array());
-    $sections = '';
+    // Keep the report header in a single section. The register table may flow
+    // onto additional PDF pages, but the form details must not be duplicated.
+    $rows = $columnNumberRow;
     $serialNumber = 1;
-    foreach ($pages as $pageEmployees) {
-        $rows = $columnNumberRow;
-        foreach ($pageEmployees as $employee) {
-            $dynamicCells = array(
-                $serialNumber++,
-                isset($employee['emp_name']) ? $employee['emp_name'] : '',
-                isset($employee['strFatherName']) ? $employee['strFatherName'] : '',
-                isset($employee['designation']) ? $employee['designation'] : ''
-            );
-            $rows .= '<tr class="data-row">';
-            foreach ($dynamicCells as $index => $value) {
-                $class = $index === 0 ? 'text-center' : 'text-left';
-                $rows .= '<td class="' . $class . '">' . htmlspecialchars($value, ENT_QUOTES, 'UTF-8') . '</td>';
-            }
-            $rows .= str_repeat('<td class="text-center">NIL</td>', 8) . '</tr>';
+    foreach ($employees as $employee) {
+        $dynamicCells = array(
+            $serialNumber++,
+            isset($employee['emp_name']) ? $employee['emp_name'] : '',
+            isset($employee['strFatherName']) ? $employee['strFatherName'] : '',
+            isset($employee['designation']) ? $employee['designation'] : ''
+        );
+        $rows .= '<tr class="data-row">';
+        foreach ($dynamicCells as $index => $value) {
+            $class = $index === 0 ? 'text-center' : 'text-left';
+            $rows .= '<td class="' . $class . '">' . htmlspecialchars($value, ENT_QUOTES, 'UTF-8') . '</td>';
         }
-        $sections .= $sectionPrefix . $rows . $sectionSuffix;
+        $rows .= str_repeat('<td class="text-center">NIL</td>', 8) . '</tr>';
     }
 
     $firstSection = strpos($template, $matches[0]);
     return substr($template, 0, $firstSection)
-        . $sections
+        . $sectionPrefix . $rows . $sectionSuffix
         . substr($template, $firstSection + strlen($matches[0]));
 }
 

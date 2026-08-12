@@ -28,11 +28,11 @@
          */
         .form-page {
             width: 14in;
-            height: 8.5in;
+            min-height: 8.5in;
             margin: 18px auto;
             padding: 20mm 12mm 20mm;
             background: #fff;
-            overflow: hidden;
+            overflow: visible;
             position: relative;
         }
 
@@ -57,15 +57,17 @@
             width: 100%;
             table-layout: fixed;
             margin-bottom: 0.10in;
+            font-weight: bold;
         }
 
         .header-table td {
             border: none;
             padding: 0;
             vertical-align: top;
+            font-weight: bold;
         }
 
-         /* TCPDF can otherwise inherit cell borders from the register table. */
+        /* TCPDF can otherwise inherit cell borders from the register table. */
         .header-table,
         .header-table tr,
         .header-table td,
@@ -96,7 +98,7 @@
 
         .main-title {
             margin-bottom: 10px;
-            font-size: 26px;
+            font-size: 16px;
             line-height: 1.05;
             font-weight: 700;
         }
@@ -130,6 +132,7 @@
             border: 0;
             padding: 0 0 0.06in 0;
             vertical-align: top;
+            font-weight: bold;
         }
 
         .info-label {
@@ -152,13 +155,13 @@
         }
 
         .normal-weight {
-            font-weight: 400;
+            font-weight: bold;
         }
 
         .work-title {
             margin: 0.04in 0 0.07in;
             font-size: 10.5pt;
-            font-weight: 700;
+            font-weight: bold;
         }
 
         /* Register table */
@@ -208,7 +211,7 @@
             text-align: center;
             font-size: 9.2pt;
             line-height: 1.08;
-            font-weight: 700;
+            font-weight: bold;
         }
 
         .register-table .column-number-row td {
@@ -251,27 +254,16 @@
 
             .form-page {
                 width: 14in;
-                height: 8.5in;
+                min-height: 8.5in;
                 margin: 0;
                 padding: 20mm 12mm 20mm;
-                overflow: hidden;
-                break-inside: avoid;
-                page-break-inside: avoid;
-            }
-
-            /*
-             * Every repeated form starts on a new page.
-             * No page-break-after is used, so no blank final page.
-             */
-            .form-page + .form-page {
-                break-before: page;
-                page-break-before: always;
+                overflow: visible;
             }
 
             .register-frame,
             .register-table {
-                break-inside: avoid;
-                page-break-inside: avoid;
+                break-inside: auto;
+                page-break-inside: auto;
             }
         }
 
@@ -297,7 +289,7 @@
             <tr>
                 <td>
                     <div class="main-title " style="text-align: center;">Register of Fines</div>
-                    <table class="header-table" border="0" cellspacing="0" cellpadding="0" style="border: none;">
+                    <table class="header-table" border="0" cellspacing="0" cellpadding="0" style="border: none; font-weight: bold;">
                         <colgroup>
                             <col style="width: 39%;">
                             <col style="width: 22%;">
@@ -370,7 +362,7 @@
                         </tr>
                     </table>
 
-                    <div class="work-title">
+                    <div class="work-title" style="font-weight: bold;">
                         NATURE AND LOCATION OF WORK
                     </div>
 
@@ -391,7 +383,7 @@
                                 <col style="width: 7%;">
                             </colgroup>
 
-                            <thead>
+                            <thead style="font-weight: bold;">
                                 <tr>
                                     <th style="width: 3%;">Sr.<br>No.</th>
                                     <th style="width: 18%;">Name of Workmen</th>

@@ -22,7 +22,7 @@ $pdf->SetTitle('Form XXI - Register of Fine');
 $pdf->setPrintHeader(false);
 $pdf->setPrintFooter(false);
 $pdf->SetMargins(0, 0, 0);
-$pdf->SetAutoPageBreak(false, 0);
+$pdf->SetAutoPageBreak(true, 0);
 $pdf->AddPage('L', 'LEGAL');
 $pdf->writeHTML($html, true, false, true, false, '');
 $pdf->Output('Form-XXI-Register-of-Fine.pdf', 'I');
