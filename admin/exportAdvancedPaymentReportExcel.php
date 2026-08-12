@@ -189,40 +189,34 @@ $spreadsheet->setActiveSheetIndex(0);
 // $temporaryFile = tempnam(sys_get_temp_dir(), 'advanced-payment-report-');
 $temporaryFile = tempnam(sys_get_temp_dir(), 'advanced-payment-report-');
 
+if ($temporaryFile === false) {
+    throw new RuntimeException('Unable to create a temporary Excel file.');
+}
+
 try {
     $writer = new Xlsx($spreadsheet);
     $writer->save($temporaryFile);
 
-    // Verify the XLSX file was actually created
     if (!file_exists($temporaryFile) || filesize($temporaryFile) === 0) {
-        throw new Exception('Excel file was not generated.');
+        throw new RuntimeException('Excel file was not generated.');
     }
 
-    // Remove ALL buffered output before sending XLSX
+    // Included legacy files can emit whitespace. Any bytes before the XLSX ZIP
+    // signature make Excel report that the file format and extension differ.
     while (ob_get_level() > 0) {
         ob_end_clean();
     }
 
-    // Clear any existing output headers
     header_remove();
 
     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    header(
-        'Content-Disposition: attachment; filename="AdvancedPaymentReport_' .
-        date('Ymd') .
-        '.xlsx"'
-    );
+    header('Content-Disposition: attachment; filename="AdvancedPaymentReport_' . date('Ymd') . '.xlsx"');
     header('Content-Length: ' . filesize($temporaryFile));
-    header('Cache-Control: max-age=0');
-    header('Cache-Control: max-age=1');
-    header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
-    header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
+    header('Cache-Control: private, max-age=0, must-revalidate');
     header('Pragma: public');
 
     readfile($temporaryFile);
-
 } catch (Throwable $e) {
-
     error_log(
         'Advanced Payment Excel Error: ' .
         $e->getMessage() .
@@ -237,31 +231,12 @@ try {
     }
 
     http_response_code(500);
+    header('Content-Type: text/plain; charset=UTF-8');
     echo 'Unable to generate Excel report.';
+}  finally {
+    if (file_exists($temporaryFile)) {
+        unlink($temporaryFile);
+    }
 }
 
-if (file_exists($temporaryFile)) {
-    unlink($temporaryFile);
-}
-
-exit;
-$writer = new Xlsx($spreadsheet);
-$writer->save($temporaryFile);
-
-$fileContent = file_get_contents($temporaryFile);
-
-error_log('Excel file size: ' . strlen($fileContent));
-error_log('Excel first bytes: ' . bin2hex(substr($fileContent, 0, 10)));
-
-// Included legacy files can emit whitespace, which would corrupt the XLSX ZIP response.
-while (ob_get_level() > 0) {
-    ob_end_clean();
-}
-
-header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-header('Content-Disposition: attachment; filename="AdvancedPaymentReport_' . date('Ymd') . '.xlsx"');
-header('Cache-Control: max-age=0');
-header('Content-Length: ' . filesize($temporaryFile));
-readfile($temporaryFile);
-unlink($temporaryFile);
 exit;
