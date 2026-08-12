@@ -120,15 +120,44 @@ if ($action === 'UpdateAdvancedDetail' || $action === 'DeleteAdvancedDetail') {
 $page = isset($_POST['Page']) ? max(1, (int) $_POST['Page']) : 1;
 $perPage = isset($cateperpaging) ? max(1, (int) $cateperpaging) : 15;
 $companyId = isset($_POST['companyId']) ? (int) $_POST['companyId'] : 0;
-$advancedId = isset($_POST['advancedId']) ? (int) $_POST['advancedId'] : 0;
+
+$month = isset($_POST['month']) && preg_match('/^(0[1-9]|1[0-2])$/', $_POST['month']) ? $_POST['month'] : '';
+$year = isset($_POST['year']) && preg_match('/^[0-9]{4}$/', $_POST['year']) ? $_POST['year'] : '';
+$monthStart = ($month !== '' && $year !== '') ? $year . '-' . $month . '-01' : '';
+$monthEnd = $monthStart !== '' ? date('Y-m-t', strtotime($monthStart)) : '';
+$fromDate = isset($_POST['fromDate']) ? trim($_POST['fromDate']) : '';
+$toDate = isset($_POST['toDate']) ? trim($_POST['toDate']) : '';
+if (!preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/', $fromDate) || ($monthStart !== '' && ($fromDate < $monthStart || $fromDate > $monthEnd))) {
+    $fromDate = '';
+}
+if (!preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/', $toDate) || ($monthStart !== '' && ($toDate < $monthStart || $toDate > $monthEnd))) {
+    $toDate = '';
+}
+if ($fromDate !== '' && $toDate !== '' && $fromDate > $toDate) {
+    $temporaryDate = $fromDate;
+    $fromDate = $toDate;
+    $toDate = $temporaryDate;
+}
+
 $employeeSearch = mysqli_real_escape_string($dbconn, isset($_POST['employeeSearch']) ? trim($_POST['employeeSearch']) : '');
 $where = array('1=1');
 if ($companyId > 0) {
     $where[] = 'ad.iCompanyId=' . $companyId;
 }
-if ($advancedId > 0) {
-    $where[] = 'ad.iAdvancedMasterId=' . $advancedId;
+
+if ($month !== '') {
+    $where[] = "DATE_FORMAT(ad.strDate, '%m')='" . mysqli_real_escape_string($dbconn, $month) . "'";
 }
+if ($year !== '') {
+    $where[] = "DATE_FORMAT(ad.strDate, '%Y')='" . mysqli_real_escape_string($dbconn, $year) . "'";
+}
+if ($fromDate !== '') {
+    $where[] = "DATE(ad.strDate)>='" . mysqli_real_escape_string($dbconn, $fromDate) . "'";
+}
+if ($toDate !== '') {
+    $where[] = "DATE(ad.strDate)<='" . mysqli_real_escape_string($dbconn, $toDate) . "'";
+}
+
 if ($employeeSearch !== '') {
     $where[] = "(e.emp_name LIKE '%" . $employeeSearch . "%' OR e.employeecode LIKE '%" . $employeeSearch . "%')";
 }

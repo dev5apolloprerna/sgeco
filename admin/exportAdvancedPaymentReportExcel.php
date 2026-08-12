@@ -1,6 +1,8 @@
 <?php
 ob_start();
+
 ini_set('display_errors', '0');
+ini_set('log_errors', '1');
 require '../vendor/autoload.php';
 include('../common.php');
 include('IsLogin.php');
@@ -179,9 +181,72 @@ $sheet->getPageSetup()->setPrintArea('A1:' . $lastColumn . ($noteRow + 1));
 $sheet->getHeaderFooter()->setOddHeader('');
 $spreadsheet->setActiveSheetIndex(0);
 
+// $temporaryFile = tempnam(sys_get_temp_dir(), 'advanced-payment-report-');
 $temporaryFile = tempnam(sys_get_temp_dir(), 'advanced-payment-report-');
+
+try {
+    $writer = new Xlsx($spreadsheet);
+    $writer->save($temporaryFile);
+
+    // Verify the XLSX file was actually created
+    if (!file_exists($temporaryFile) || filesize($temporaryFile) === 0) {
+        throw new Exception('Excel file was not generated.');
+    }
+
+    // Remove ALL buffered output before sending XLSX
+    while (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+
+    // Clear any existing output headers
+    header_remove();
+
+    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    header(
+        'Content-Disposition: attachment; filename="AdvancedPaymentReport_' .
+        date('Ymd') .
+        '.xlsx"'
+    );
+    header('Content-Length: ' . filesize($temporaryFile));
+    header('Cache-Control: max-age=0');
+    header('Cache-Control: max-age=1');
+    header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+    header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
+    header('Pragma: public');
+
+    readfile($temporaryFile);
+
+} catch (Throwable $e) {
+
+    error_log(
+        'Advanced Payment Excel Error: ' .
+        $e->getMessage() .
+        ' in ' .
+        $e->getFile() .
+        ':' .
+        $e->getLine()
+    );
+
+    while (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+
+    http_response_code(500);
+    echo 'Unable to generate Excel report.';
+}
+
+if (file_exists($temporaryFile)) {
+    unlink($temporaryFile);
+}
+
+exit;
 $writer = new Xlsx($spreadsheet);
 $writer->save($temporaryFile);
+
+$fileContent = file_get_contents($temporaryFile);
+
+error_log('Excel file size: ' . strlen($fileContent));
+error_log('Excel first bytes: ' . bin2hex(substr($fileContent, 0, 10)));
 
 // Included legacy files can emit whitespace, which would corrupt the XLSX ZIP response.
 while (ob_get_level() > 0) {

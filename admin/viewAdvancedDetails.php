@@ -58,19 +58,36 @@ if ($_SESSION['AdminType'] != 1 && (!isset($rights['isAdvancedEntry']) || $right
                                                     <?php } ?>
                                                 </select>
                                             </div>
-                                            <div class="form-group col-md-3">
-                                                <label for="advancedId">Advanced Period</label>
-                                                <select class="form-control" id="advancedId">
-                                                    <option value="">All periods</option>
+                                            <div class="form-group col-md-2">
+                                                <label for="month">Month</label>
+                                                <select class="form-control" id="month">
+                                                    <option value="">All Months</option>
                                                     <?php
-                                                    $periods = mysqli_query($dbconn, "SELECT iAdvancedMasterId, strMonthYear FROM advanced_master WHERE isDelete=0 AND istatus=1 ORDER BY fromdate DESC");
-                                                    while ($periods && $period = mysqli_fetch_assoc($periods)) {
+                                                    for ($month = 1; $month <= 12; $month++) {
+                                                        $monthValue = str_pad($month, 2, '0', STR_PAD_LEFT);
                                                     ?>
-                                                        <option value="<?php echo (int) $period['iAdvancedMasterId']; ?>"><?php echo htmlspecialchars($period['strMonthYear'], ENT_QUOTES, 'UTF-8'); ?></option>
+                                                        <option value="<?php echo $monthValue; ?>"><?php echo date('F', mktime(0, 0, 0, $month, 1)); ?></option>
                                                     <?php } ?>
                                                 </select>
                                             </div>
-                                            <div class="form-group col-md-3 margin-top-20">
+                                            <div class="form-group col-md-2">
+                                                <label for="year">Year</label>
+                                                <select class="form-control" id="year">
+                                                    <option value="">All Years</option>
+                                                    <?php for ($year = date('Y') + 1; $year >= date('Y') - 5; $year--) { ?>
+                                                        <option value="<?php echo $year; ?>" <?php echo $year == date('Y') ? ' selected' : ''; ?>><?php echo $year; ?></option>
+                                                    <?php } ?>
+                                                </select>
+                                            </div>
+                                            <div class="form-group col-md-2">
+                                                <label for="fromDate">From Date</label>
+                                                <input class="form-control" type="date" id="fromDate" disabled>
+                                            </div>
+                                            <div class="form-group col-md-2">
+                                                <label for="toDate">To Date</label>
+                                                <input class="form-control" type="date" id="toDate" disabled>
+                                            </div>
+                                            <div class="form-group col-md-2 margin-top-20">
                                                 <button type="submit" class="btn blue"><i class="fa fa-search"></i> Search</button>
                                             </div>
                                         </div>
@@ -125,7 +142,10 @@ if ($_SESSION['AdminType'] != 1 && (!isset($rights['isAdvancedEntry']) || $right
                 Page: page,
                 employeeSearch: $.trim($('#employeeSearch').val()),
                 companyId: $('#companyId').val(),
-                advancedId: $('#advancedId').val()
+                month: $('#month').val(),
+                year: $('#year').val(),
+                fromDate: $('#fromDate').val(),
+                toDate: $('#toDate').val()
             }, function(html) {
                 $('#advancedDetailsList').html(html);
                 $('#loading').hide();
@@ -140,8 +160,30 @@ if ($_SESSION['AdminType'] != 1 && (!isset($rights['isAdvancedEntry']) || $right
             PageLoadData(1);
         });
 
+        function updateDateRange() {
+            var month = $('#month').val();
+            var year = $('#year').val();
+            var fields = $('#fromDate, #toDate');
+            if (!month || !year) {
+                fields.val('').prop('disabled', true).removeAttr('min max');
+                return;
+            }
+            var lastDay = new Date(Number(year), Number(month), 0).getDate();
+            var minimum = year + '-' + month + '-01';
+            var maximum = year + '-' + month + '-' + ('0' + lastDay).slice(-2);
+            fields.prop('disabled', false).attr({
+                min: minimum,
+                max: maximum
+            });
+            if (!$('#fromDate').val() || $('#fromDate').val() < minimum || $('#fromDate').val() > maximum) $('#fromDate').val(minimum);
+            if (!$('#toDate').val() || $('#toDate').val() < minimum || $('#toDate').val() > maximum) $('#toDate').val(maximum);
+        }
+
+        $('#month, #year').on('change', updateDateRange);
+        updateDateRange();
+
         // PageLoadData(1);
-$('#advancedDetailsList').on('click', '.edit-advanced-detail', function() {
+        $('#advancedDetailsList').on('click', '.edit-advanced-detail', function() {
             var button = $(this);
             $('#editDetailId').val(button.data('id'));
             $('#editEmployeeId').val(button.attr('data-employee-id'));

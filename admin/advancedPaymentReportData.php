@@ -77,6 +77,11 @@ function advancedPaymentReportUsesBankFormat($filters)
     return $filters['bankId'] === 1 || $filters['bankId'] === 2;
 }
 
+function advancedPaymentReportShowsTransferNote($filters)
+{
+    return $filters['bankId'] === 3;
+}
+
 function advancedPaymentReportDateLabel($filters)
 {
     if ($filters['fromDate'] !== '' || $filters['toDate'] !== '') {
@@ -91,6 +96,17 @@ function advancedPaymentReportDateLabel($filters)
         return DateTime::createFromFormat('!m', $filters['month'])->format('F') . ' (All Years)';
     }
     return $filters['year'] !== '' ? $filters['year'] : 'All Dates';
+}
+
+function advancedPaymentReportMonthLabel($filters)
+{
+    if ($filters['month'] !== '' && $filters['year'] !== '') {
+        return DateTime::createFromFormat('!m/Y', $filters['month'] . '/' . $filters['year'])->format('M-Y');
+    }
+    if ($filters['month'] !== '') {
+        return DateTime::createFromFormat('!m', $filters['month'])->format('M') . ' (All Years)';
+    }
+    return $filters['year'] !== '' ? $filters['year'] : 'All Months';
 }
 
 function advancedPaymentReportQuery($where)
