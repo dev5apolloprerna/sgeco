@@ -174,29 +174,55 @@ include('IsLogin.php');
         });
 
         function PageLoadData(Page) {
+            var Report = $('#Report').val();
             var Company = $('#Company').val();
             var month = $('#month').val();
             var Year = $('#Year').val();
             //var salarymasterId = $('#salarymasterId').val();
             var salarymasterId = month + '/' + Year;
 
+            if (!Report || !$.trim(Company) || !month || !Year) {
+                $("#PlaceUsersDataHere").empty();
+                return;
+            }
+
             $('#loading').css("display", "block");
             $.ajax({
                 type: "POST",
-                url: "<?php echo $web_url; ?>admin/Ajaxreport.php",
+                url: "<?php echo $web_url; ?>admin/AjaxOtherReport.php",
                 data: {
-                    action: 'ListUser',
-                    Page: Page,
+                    Report: Report,
                     Company: Company,
                     salarymasterId: salarymasterId
                 },
                 success: function(msg) {
                     $('#loading').css("display", "none");
-                    $("#PlaceUsersDataHere").html(msg);
+                    var reportFrame = $('<iframe>', {
+                        title: 'Selected report preview',
+                        css: {
+                            width: '100%',
+                            height: '900px',
+                            border: '1px solid #ddd',
+                            background: '#fff'
+                        }
+                    });
+                    $("#PlaceUsersDataHere").empty().append(reportFrame);
+                    var frameDocument = reportFrame[0].contentWindow.document;
+                    frameDocument.open();
+                    frameDocument.write(msg);
+                    frameDocument.close();
                 },
+                error: function(xhr) {
+                    $('#loading').css("display", "none");
+                    $("#PlaceUsersDataHere").html(
+                        '<div class="alert alert-danger">' +
+                        $('<div>').text(xhr.responseText || 'Unable to load report.').html() +
+                        '</div>'
+                    );
+                }
             });
         } // end of filter
-        PageLoadData(1);
+        // PageLoadData(1);
 
         function checkb4submit() {
             var FormDate = $('#FormDate').val();

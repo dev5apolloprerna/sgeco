@@ -103,7 +103,8 @@ function renderFormXXIHtml(array $employees, $salaryMonth, $companyName)
         $rows .= '<tr class="data-row">';
         foreach ($dynamicCells as $index => $value) {
             $class = $index === 0 ? 'text-center' : 'text-left';
-            $rows .= '<td class="' . $class . '" style="padding: 2px 0px !important"> ' . htmlspecialchars($value, ENT_QUOTES, 'UTF-8') . '</td>';
+            // $rows .= '<td class="' . $class . '" style="padding: 2px 0px !important"> ' . htmlspecialchars($value, ENT_QUOTES, 'UTF-8') . '</td>';
+            $rows .= '<td class="' . $class . '"> ' . htmlspecialchars($value, ENT_QUOTES, 'UTF-8') . '</td>';
         }
         $rows .= str_repeat('<td class="text-center">NIL</td>', 8) . '</tr>';
     }
