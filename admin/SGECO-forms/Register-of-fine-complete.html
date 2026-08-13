@@ -187,23 +187,14 @@
             width: 100%;
             table-layout: fixed;
             border-collapse: collapse;
+            border: 1px solid #000;
         }
 
         .register-table th,
         .register-table td {
-            border-right: 1px solid #000;
-            border-bottom: 1px solid #000;
+            border: 1px solid #000;
             padding: 0.035in 0.025in;
             vertical-align: middle;
-        }
-
-        .register-table th:last-child,
-        .register-table td:last-child {
-            border-right: 0;
-        }
-
-        .register-table tr:last-child td {
-            border-bottom: 0;
         }
 
         .register-table thead th {
@@ -355,7 +346,7 @@
                                 <div class="right-line">
                                     Name and Address of the principal Employer :
                                     <span class="normal-weight">
-                                        TATA Chemicals Ltd., Mithapur
+                                         {{FORM_XXI_COMPANY}}
                                     </span>
                                 </div>
                             </td>
@@ -367,7 +358,7 @@
                     </div>
 
                     <div class="register-frame">
-                        <table class="register-table">
+                        <table class="register-table" border="1" cellspacing="0" cellpadding="0" style="border: 1px solid #000; border-collapse: collapse;">
                             <colgroup>
                                 <col style="width: 3%;">
                                 <col style="width: 18%;">

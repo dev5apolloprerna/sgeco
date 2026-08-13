@@ -35,7 +35,30 @@ function getFormXXIEmployees($dbconn, $companyId, $salaryMonth)
     return $employees;
 }
 
-function renderFormXXIHtml(array $employees, $salaryMonth)
+function getFormXXICompanyName($dbconn, $companyId)
+{
+    $companyId = mysqli_real_escape_string($dbconn, $companyId);
+    $sql = "SELECT companyname
+            FROM companymaster
+            WHERE companymasterId = '" . $companyId . "'
+              AND isDelete = '0'
+              AND istatus = '1'
+            LIMIT 1";
+
+    $result = mysqli_query($dbconn, $sql);
+    if ($result === false) {
+        throw new RuntimeException('Unable to retrieve the Form XXI company.');
+    }
+
+    $company = mysqli_fetch_assoc($result);
+    if (!$company) {
+        throw new RuntimeException('The selected company could not be found.');
+    }
+
+    return $company['companyname'];
+}
+
+function renderFormXXIHtml(array $employees, $salaryMonth, $companyName)
 {
     $templatePath = __DIR__ . '/SGECO-forms/Register-of-fine-complete.html';
     $template = file_get_contents($templatePath);
@@ -86,9 +109,15 @@ function renderFormXXIHtml(array $employees, $salaryMonth)
     }
 
     $firstSection = strpos($template, $matches[0]);
-    return substr($template, 0, $firstSection)
+    $html = substr($template, 0, $firstSection)
         . $sectionPrefix . $rows . $sectionSuffix
         . substr($template, $firstSection + strlen($matches[0]));
+
+    return str_replace(
+        '{{FORM_XXI_COMPANY}}',
+        htmlspecialchars($companyName, ENT_QUOTES, 'UTF-8'),
+        $html
+    );
 }
 
 function getFormXXIRequestData($dbconn)
@@ -99,5 +128,9 @@ function getFormXXIRequestData($dbconn)
         http_response_code(400);
         throw new InvalidArgumentException('A valid company, month, and year are required.');
     }
-    return renderFormXXIHtml(getFormXXIEmployees($dbconn, $companyId, $salaryMonth), $salaryMonth);
+    return renderFormXXIHtml(
+        getFormXXIEmployees($dbconn, $companyId, $salaryMonth),
+        $salaryMonth,
+        getFormXXICompanyName($dbconn, $companyId)
+    );
 }
