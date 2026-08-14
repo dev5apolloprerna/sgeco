@@ -4,9 +4,10 @@ ob_start();
 include('../config.php');
 include('IsLogin.php');
 require_once('FormXXIReport.php');
+require_once('OtherReportOutput.php');
 
 try {
-    $html = getFormXXIRequestData($dbconn);
+    $html = addOtherReportPdfSpacing(getFormXXIRequestData($dbconn));
 } catch (Exception $exception) {
     ob_clean();
     exit(htmlspecialchars($exception->getMessage(), ENT_QUOTES, 'UTF-8'));

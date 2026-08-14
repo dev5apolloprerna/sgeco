@@ -13,6 +13,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 function createOtherReportSpreadsheet($html, $worksheetTitle)
 {
     $formCDetails = $worksheetTitle === 'Form C' ? extractFormCDetails($html) : array();
+    $formXXIDetails = $worksheetTitle === 'Form XXI' ? extractFormXXIDetails($html) : array();
     // PhpSpreadsheet uses the HTML title as a worksheet name. Replace report
     // titles containing characters such as '/' before parsing the document.
     $safeTitle = htmlspecialchars($worksheetTitle, ENT_QUOTES, 'UTF-8');
@@ -33,10 +34,29 @@ function createOtherReportSpreadsheet($html, $worksheetTitle)
     if ($worksheetTitle === 'Form C') {
         formatFormCWorksheet($sheet, $formCDetails);
     } elseif ($worksheetTitle === 'Form XXI') {
-        formatFormXXIWorksheet($sheet);
+        formatFormXXIWorksheet($sheet, $formXXIDetails);
     }
 
     return $spreadsheet;
+}
+
+function extractFormXXIDetails($html)
+{
+    preg_match('/<span class="month-label">Month:<\/span>\s*<span>(.*?)<\/span>/is', $html, $month);
+    preg_match(
+        '/Name and Address of the principal Employer\s*:\s*<span[^>]*>(.*?)<\/span>/is',
+        $html,
+        $employer
+    );
+
+    $clean = function ($value) {
+        return trim(html_entity_decode(strip_tags($value), ENT_QUOTES, 'UTF-8'));
+    };
+
+    return array(
+        'month' => isset($month[1]) ? $clean($month[1]) : '',
+        'employer' => isset($employer[1]) ? $clean($employer[1]) : '',
+    );
 }
 
 function extractFormCDetails($html)
@@ -121,21 +141,15 @@ function formatFormCWorksheet($sheet, array $details)
         $sheet->getRowDimension($row)->setRowHeight(20);
     }
 
-    configureOtherReportPage($sheet, 'A1:M' . $lastRow, 10);
+    $sheet->getRowDimension($row)->setRowHeight(24);
 }
 
-function formatFormXXIWorksheet($sheet)
+function formatFormXXIWorksheet($sheet, array $details)
 {
-    $monthAndForm = $sheet->getCell('B6')->getValue();
-    $employerDetails = $sheet->getCell('C6')->getValue();
-    preg_match('/Month:\s*(.+)$/s', $monthAndForm, $monthMatch);
-    preg_match('/Employer\s*:\s*(.+)$/s', $employerDetails, $employerMatch);
-    $month = isset($monthMatch[1]) ? trim($monthMatch[1]) : '';
-    $employer = isset($employerMatch[1]) ? trim($employerMatch[1]) : '';
-
     // The HTML reader flattens the three-part report header into unrelated
-    // worksheet cells. Rebuild that area so Excel follows the PDF layout.
-    $sheet->removeRow(1, 9);
+    // worksheet cells. It creates seven heading rows, so remove exactly those
+    // rows; removing nine also discarded employees numbered 1 and 2.
+    $sheet->removeRow(1, 7);
     $sheet->insertNewRowBefore(1, 8);
     $sheet->mergeCells('A1:L1');
     $sheet->mergeCells('A2:B2');
@@ -161,9 +175,9 @@ function formatFormXXIWorksheet($sheet)
     $sheet->setCellValue('C5', 'Mithakhali, Ahmedabad - 380006');
     $sheet->setCellValue('E2', 'FORM NO. XXI');
     $sheet->setCellValue('E3', '[See rule 78 (2)(d)]');
-    $sheet->setCellValue('E4', 'Month: ' . $month);
+    $sheet->setCellValue('E4', 'Month: ' . $details['month']);
     $sheet->setCellValue('I2', 'Name and Address of establishment in/under which contract is carried on');
-    $sheet->setCellValue('I4', 'Name and Address of the principal Employer :  ' . $employer);
+    $sheet->setCellValue('I4', 'Name and Address of the principal Employer :  ' . $details['employer']);
     $sheet->setCellValue('A6', 'NATURE AND LOCATION OF WORK');
 
     $headings = array(
@@ -180,6 +194,11 @@ function formatFormXXIWorksheet($sheet)
     }
 
     $lastRow = $sheet->getHighestDataRow();
+    // Serial numbers are derived from the final worksheet row order rather
+    // than from HTML-reader offsets, guaranteeing an unbroken 1..N sequence.
+    for ($row = 9, $serialNumber = 1; $row <= $lastRow; $row++, $serialNumber++) {
+        $sheet->setCellValueByColumnAndRow(1, $row, $serialNumber);
+    }
     $sheet->getStyle('A1:L' . $lastRow)->getFont()->setName('Times New Roman')->setSize(10);
     $sheet->getStyle('A1:L6')->getFont()->setBold(true);
     $sheet->getStyle('A1')->getFont()->setSize(16);
@@ -209,7 +228,7 @@ function formatFormXXIWorksheet($sheet)
     $sheet->getRowDimension(7)->setRowHeight(82);
     $sheet->getRowDimension(8)->setRowHeight(22);
     for ($row = 9; $row <= $lastRow; $row++) {
-        $sheet->getRowDimension($row)->setRowHeight(20);
+        $sheet->getRowDimension($row)->setRowHeight(24);
     }
 
     $sheet->getPageSetup()->setRowsToRepeatAtTopByStartAndEnd(7, 8);
