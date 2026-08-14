@@ -28,7 +28,7 @@ $pdf->setPrintFooter(false);
 // the legal-landscape page can accommodate substantially more employee rows.
 $pdf->SetMargins(5, 5, 5);
 $pdf->SetAutoPageBreak(true, 5);
-$pdf->SetFont('helvetica', '', 8);
+$pdf->SetFont('helvetica', '', 12);
 $pdf->AddPage('L', 'LEGAL');
 $pdf->writeHTML($html, true, false, true, false, '');
 $pdf->Output('Form-C.pdf', 'I');
