@@ -80,6 +80,9 @@ if ($_POST['action'] == 'ListUser') {
                         <th class="desktop">Total<br /> Amt</th>
                         <th class="none">ADV</th>
                         <th class="none">ADV TWO</th>
+                        <th class="none">Adv. Paid By Bank</th>
+                        <th class="none">PF Amt.</th>
+                        <th class="none">ESIC Amt.</th>
                         <th class="desktop">Total</th>
                         <th class="none">F.A</th>
                         <th class="none">T.A</th>
@@ -109,6 +112,9 @@ if ($_POST['action'] == 'ListUser') {
                 <tbody>
                     <?php
                     $Total = array(0, 0, 0, 0);
+                    $TotalAdvPaidByBank = 0;
+                    $TotalPfAmount = 0;
+                    $TotalEsicAmount = 0;
                     while ($rowfilter = mysqli_fetch_array($resultfilter)) {
                         // SELECT salarydetails.netamountpaid FROM `salarydetails` WHERE salarydetails.companyId in (" . $_REQUEST['Company'][$iCounter] . ") and salarydetails.emp_id='" . $rowfilter['employeeId'] . "' and  salarydetails.salaryId = '" . $_POST['salarymasterId'] . "'
                         ?>
@@ -163,6 +169,18 @@ if ($_POST['action'] == 'ListUser') {
                                 <div class="form-group form-md-line-input "><?php echo $rowfilter['adv_two']; ?> 
                                 </div>
                             </td>
+                            <?php
+                            $advPaidByBank = (float) $rowfilter['adv_one_paid'] + (float) $rowfilter['adv_two_paid'];
+                            $statutoryAmounts = mysqli_fetch_array(mysqli_query($dbconn, "SELECT COALESCE(SUM(pf), 0) AS pfAmount, COALESCE(SUM(esi), 0) AS esicAmount FROM salarydetails WHERE isDelete=0 AND emp_id='" . $rowfilter['emp_id'] . "' AND salaryId IN (SELECT salarymasterId FROM salarymaster WHERE isDelete='0' AND istatus='1' AND month='" . $month . "' AND companymasterId IN (" . $companymasterId . "))"));
+                            $pfAmount = (float) $statutoryAmounts['pfAmount'];
+                            $esicAmount = (float) $statutoryAmounts['esicAmount'];
+                            $TotalAdvPaidByBank += $advPaidByBank;
+                            $TotalPfAmount += $pfAmount;
+                            $TotalEsicAmount += $esicAmount;
+                            ?>
+                            <td><div class="form-group form-md-line-input "><?php echo $advPaidByBank; ?></div></td>
+                            <td><div class="form-group form-md-line-input "><?php echo $pfAmount; ?></div></td>
+                            <td><div class="form-group form-md-line-input "><?php echo $esicAmount; ?></div></td>
                             <td>
                                 <div class="form-group form-md-line-input "><?php
                                     echo $rowfilter['total'];
@@ -356,6 +374,9 @@ if ($_POST['action'] == 'ListUser') {
                         <td></td>
                         <td></td>
                         <td></td>
+                        <td><?php echo $TotalAdvPaidByBank; ?></td>
+                        <td><?php echo $TotalPfAmount; ?></td>
+                        <td><?php echo $TotalEsicAmount; ?></td>
                         <td><?php echo $Total[0]; ?></td>
                         <td><?php echo $Total[1]; ?></td>
                         <td><?php echo $Total[2]; ?></td>           

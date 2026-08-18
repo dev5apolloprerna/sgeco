@@ -83,6 +83,9 @@ $fields = array(
     'Total Amount',
     'Adv',
     'ADV TWO',
+    'Adv. Paid By Bank',
+    'PF Amt.',
+    'ESIC Amt.',
     'Total',
     'F.A.',
     'T.A.',
@@ -144,7 +147,7 @@ $array[5][4] = 0;
 $array[5][5] = 0;
 
 $query = "SELECT * FROM `multicompany` where  companysalarymasterId='" . $_REQUEST['token'] . "' order by multicompanyid desc";
-$Total = array("Total", "", "", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0");
+$Total = array("Total", "", "", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0");
 $Total[0] = "Total";
 
 
@@ -167,6 +170,11 @@ while ($row = mysqli_fetch_assoc($result)) {
 
 //    $Total[0] = $bal2 + $Total[0];
     $CompanysTotal = '';
+    $companyIds = implode(',', array_map('intval', $comnymasid));
+    $statutoryAmounts = mysqli_fetch_array(mysqli_query($dbconn, "SELECT COALESCE(SUM(pf), 0) AS pfAmount, COALESCE(SUM(esi), 0) AS esicAmount FROM salarydetails WHERE isDelete=0 AND emp_id='" . $row['emp_id'] . "' AND salaryId IN (SELECT salarymasterId FROM salarymaster WHERE isDelete='0' AND istatus='1' AND month='" . $month . "' AND companymasterId IN (" . $companyIds . "))"));
+    $advPaidByBank = (float) $row['adv_one_paid'] + (float) $row['adv_two_paid'];
+    $pfAmount = (float) $statutoryAmounts['pfAmount'];
+    $esicAmount = (float) $statutoryAmounts['esicAmount'];
     $lineData = array(
         $desg['pfcode'],
         $desg['ecsno'],
@@ -179,6 +187,9 @@ while ($row = mysqli_fetch_assoc($result)) {
         $row['totalamt'],
         $row['adv'],
         $row['adv_two'],
+        $advPaidByBank,
+        $pfAmount,
+        $esicAmount,
         $row['total'],
         $row['Fa'],
         $row['Ta'],
@@ -192,10 +203,13 @@ while ($row = mysqli_fetch_assoc($result)) {
     $Total[8] += $row['totalamt'];
     $Total[9] += $row['adv'];
     $Total[10] += $row['adv_two'];
-    $Total[11] += $row['total'];
-    $Total[12] += $row['Fa'];
-    $Total[13] += $row['Ta'];
-    $Total[14] += $row['balance1'];
+    $Total[11] += $advPaidByBank;
+    $Total[12] += $pfAmount;
+    $Total[13] += $esicAmount;
+    $Total[14] += $row['total'];
+    $Total[15] += $row['Fa'];
+    $Total[16] += $row['Ta'];
+    $Total[17] += $row['balance1'];
 //    $Total=array_merge($Total, $PaidcompanyWiseTotal);
 
     $strPaymentDate = "";

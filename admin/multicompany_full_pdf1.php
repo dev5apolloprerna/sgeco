@@ -63,6 +63,10 @@ $TotalPresentAmount = 0;
 $Totalotamt = 0;
 $Totaltotalamt = 0;
 $Totaladv = 0;
+$TotaladvTwo = 0;
+$TotalAdvPaidByBank = 0;
+$TotalPfAmount = 0;
+$TotalEsicAmount = 0;
 $TotalBalance2 = 0;
 $companyWiseTotal = array();
 while ($rowapplication = mysqli_fetch_array($result)) {
@@ -80,6 +84,8 @@ while ($rowapplication = mysqli_fetch_array($result)) {
     $Totaltotalamt += (float) $rowapplication['totalamt'];
     $Totaladv += (float) $rowapplication['adv'];
     $TotaladvTwo += (float) $rowapplication['adv_two'];
+    $advPaidByBank = (float) $rowapplication['adv_one_paid'] + (float) $rowapplication['adv_two_paid'];
+    $TotalAdvPaidByBank += $advPaidByBank;
 
     $desg = mysqli_fetch_array(mysqli_query($dbconn, "SELECT * FROM `employee`  where isDelete='0' and employeeId='" . $rowapplication['emp_id'] . "'"));
 
@@ -97,6 +103,11 @@ while ($rowapplication = mysqli_fetch_array($result)) {
     $companymasterId = rtrim($companymasterId, ',');
 
     $companymasterId = rtrim($companymasterId, ", ");
+    $statutoryAmounts = mysqli_fetch_array(mysqli_query($dbconn, "SELECT COALESCE(SUM(pf), 0) AS pfAmount, COALESCE(SUM(esi), 0) AS esicAmount FROM salarydetails WHERE isDelete=0 AND emp_id='" . $rowapplication['emp_id'] . "' AND salaryId IN (SELECT salarymasterId FROM salarymaster WHERE isDelete='0' AND istatus='1' AND month='" . $month . "' AND companymasterId IN (" . $companymasterId . "))"));
+    $pfAmount = (float) $statutoryAmounts['pfAmount'];
+    $esicAmount = (float) $statutoryAmounts['esicAmount'];
+    $TotalPfAmount += $pfAmount;
+    $TotalEsicAmount += $esicAmount;
     $mailFormat_main = str_replace("#hedar#", ucfirst(urldecode($HeaderCompany)), $mailFormat_main);
     $mailFormat = file_get_contents("form_multicompany1_full_tr.html");
 
@@ -118,6 +129,9 @@ while ($rowapplication = mysqli_fetch_array($result)) {
     $mailFormat = str_replace("#totalamt#", ucfirst(urldecode($rowapplication['totalamt'])), $mailFormat);
     $mailFormat = str_replace("#adv#", ucfirst(urldecode($rowapplication['adv'])), $mailFormat);
     $mailFormat = str_replace("#advtTwo#", ucfirst(urldecode($rowapplication['adv_two'])), $mailFormat);
+    $mailFormat = str_replace("#advPaidByBank#", ucfirst(urldecode($advPaidByBank)), $mailFormat);
+    $mailFormat = str_replace("#pfAmount#", ucfirst(urldecode($pfAmount)), $mailFormat);
+    $mailFormat = str_replace("#esicAmount#", ucfirst(urldecode($esicAmount)), $mailFormat);
     $mailFormat = str_replace("#total#", ucfirst(urldecode($rowapplication['total'])), $mailFormat);
     $mailFormat = str_replace("#Fa#", ucfirst(urldecode($rowapplication['Fa'])), $mailFormat);
     $mailFormat = str_replace("#Ta#", ucfirst(urldecode($rowapplication['Ta'])), $mailFormat);
@@ -322,6 +336,9 @@ $mailFormat_main = str_replace("#OT amount#", ucfirst(urldecode($Totalotamt)), $
 $mailFormat_main = str_replace("#Total Amount#", ucfirst(urldecode($Totaltotalamt)), $mailFormat_main);
 $mailFormat_main = str_replace("#advt#", ucfirst(urldecode($Totaladv)), $mailFormat_main);
 $mailFormat_main = str_replace("#advtTwo#", ucfirst(urldecode($TotaladvTwo)), $mailFormat_main);
+$mailFormat_main = str_replace("#Total Adv Paid By Bank#", ucfirst(urldecode($TotalAdvPaidByBank)), $mailFormat_main);
+$mailFormat_main = str_replace("#Total PF Amount#", ucfirst(urldecode($TotalPfAmount)), $mailFormat_main);
+$mailFormat_main = str_replace("#Total ESIC Amount#", ucfirst(urldecode($TotalEsicAmount)), $mailFormat_main);
 
 $companymasterId1 = '';
 $month1 = '';
