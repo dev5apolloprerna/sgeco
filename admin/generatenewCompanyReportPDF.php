@@ -6,6 +6,7 @@ ob_clean();
 //include('common.php');
 //$connect = new connect();
 include('../config.php');
+include_once 'companyReportAdvance.php';
 error_reporting(E_ALL);
 
 //$sql = "SELECT * FROM `salarydetails` where  companyId='" . $_REQUEST['Company'] . "' and salaryId='" . $_REQUEST['salarymasterId'] . "' and  isDelete='0'  and  istatus='1' and workingdays > 0 order by salarydetailsId asc";
@@ -15,14 +16,15 @@ $wageMonth = date('F-y',strtotime("01-".$month));
 
 $sql = "SELECT * FROM `salarydetails` where  companyId='" . $_REQUEST['Company'] . "' and salaryId in (select salarymasterId from salarymaster where  month='" . $_REQUEST['salarymasterId'] . "' and isDelete='0' and  istatus='1') and  isDelete='0'  and  istatus='1' and workingdays > 0 order by salarydetailsId asc";
 
-$Total = array(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+$Total = array(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
 $deductiontotal = array(0, 0, 0, 0);
+$companyReportAdvances = getCompanyReportAdvances($dbconn, $_REQUEST['Company'], $_REQUEST['salarymasterId']);
 $result = mysqli_query($dbconn, $sql);
 $mailFormat_main = file_get_contents("newform.html");
 $i = 1;
 $mailFormat_rows = "";
 while ($rowapplication = mysqli_fetch_array($result)) {
-
+    $advanceAmount = getEmployeeCompanyReportAdvance($companyReportAdvances, $rowapplication['emp_id']);
 
     $desg = mysqli_fetch_array(mysqli_query($dbconn, "SELECT * FROM `employee`  where isDelete='0' and employeeId='" . $rowapplication['emp_id'] . "'"));
     $comp = mysqli_fetch_array(mysqli_query($dbconn, "SELECT * FROM `companymaster`  where isDelete='0'  and  istatus='1' and companymasterId='" . $_REQUEST['Company'] . "'"));
@@ -72,12 +74,14 @@ while ($rowapplication = mysqli_fetch_array($result)) {
 
     $mailFormat = str_replace("#Total#", ((number_format(round($rowapplication['total']),2,'.',''))), $mailFormat);
     $mailFormat = str_replace("#E.S.I.#", ((number_format($rowapplication['esi'],2,'.',''))), $mailFormat);
+    $mailFormat = str_replace("#Advance#", ((number_format($advanceAmount,2,'.',''))), $mailFormat);
     $mailFormat = str_replace("#P.F.#", ((($rowapplication['pf'] != '0.00') ? number_format($rowapplication['pf'],2,'.','') : '')), $mailFormat);
+
     $mailFormat = str_replace("#F.P.#", ((($rowapplication['pt'] != '0.00') ? (int)$rowapplication['pt'] : '')), $mailFormat);
     $mailFormat = str_replace("#Deductionifany#", (((int)$rowapplication['deductionifany'])), $mailFormat);
-    $Deduction_total = $rowapplication['pf'] + $rowapplication['esi'] + $rowapplication['pt'];
+    $Deduction_total = $rowapplication['pf'] + $rowapplication['esi'] + $advanceAmount + $rowapplication['pt'];
     $mailFormat = str_replace("#Deduction_total#", (( number_format($Deduction_total, 2, '.', '') )), $mailFormat);
-    $mailFormat = str_replace("#Net_Amount_Paid#", ((ceil((int)$rowapplication['netamountpaid']))), $mailFormat);
+    $mailFormat = str_replace("#Net_Amount_Paid#", ((ceil($rowapplication['netamountpaid'] - $advanceAmount))), $mailFormat);
     $mailFormat = str_replace("#Signature_Thumb_impression_of_Workman#", (('')), $mailFormat);
     $mailFormat = str_replace("#Initials_of_Contractor_of_his_Representive#", (('')), $mailFormat);
     $mailFormat = str_replace("#Account_No#", (((int)$desg['accountno'])), $mailFormat);
@@ -89,7 +93,7 @@ while ($rowapplication = mysqli_fetch_array($result)) {
     $Total[2] = $rowapplication['pf'] + $Total[2];
     $Total[4] = $rowapplication['pt'] + $Total[4];
     $Total[5] = $rowapplication['deductionifany'] + $Total[5];
-    $Total[3] = ceil($rowapplication['netamountpaid']) + $Total[3];
+    $Total[3] = ceil($rowapplication['netamountpaid'] - $advanceAmount) + $Total[3];
     //$Total[6] = (!empty($rowapplication['workingdays']) ? $rowapplication['workingdays'] : 0) + !empty($Total[6]) ? $Total[6] : 0;
     $Total[6] = $rowapplication['workingdays'] + $Total[6];
     //$Total[7] = $rowapplication['basicwages'] + !empty($Total[7]) ? $Total[7] : 0;
@@ -102,6 +106,7 @@ while ($rowapplication = mysqli_fetch_array($result)) {
     $Total[12] = $rowapplication['national_holiday_payment'] + $Total[12];
     $Total[13] = $rowapplication['iBonusAmt'] + $Total[13];
     $Total[14] = $rowapplication['iLeaveAmt'] + $Total[14];
+    $Total[15] = $advanceAmount + $Total[15];
     //$Total[1] = $rowapplication['esi'] + $Total[1];
     $deductiontotal[0] = $Deduction_total + $deductiontotal[0];
     $mailFormat_rows = $mailFormat_rows . $mailFormat;
@@ -121,6 +126,7 @@ $mailFormat_main = str_replace("#TotalBonusAmt#", (((int)$Total[13])), $mailForm
 $mailFormat_main = str_replace("#TotalLeaveAmt#", (((int)$Total[14])), $mailFormat_main);
 
 $mailFormat_main = str_replace("#esi#", ((number_format($Total[1],2,'.',''))), $mailFormat_main);
+$mailFormat_main = str_replace("#advance#", ((number_format($Total[15],2,'.',''))), $mailFormat_main);
 $mailFormat_main = str_replace("#pf#", ((number_format($Total[2],2,'.',''))), $mailFormat_main);
 $mailFormat_main = str_replace("#pt#", (((int)$Total[4])), $mailFormat_main);
 $mailFormat_main = str_replace("#deductiontotal#", (( number_format($deductiontotal[0], 2, '.', '') )), $mailFormat_main);

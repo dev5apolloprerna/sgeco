@@ -4,7 +4,7 @@ include('../common.php');
 include('IsLogin.php');
 $connect = new connect();
 include ('User_Paging.php');
-
+include_once 'companyReportAdvance.php';
 
 if ($_POST['action'] == 'ListUser') {
 
@@ -24,6 +24,7 @@ if ($_POST['action'] == 'ListUser') {
 
     $filterstr = $filterstr . " LIMIT $startpage, $per_page";
     $resultfilter = mysqli_query($dbconn, $filterstr);
+        $companyReportAdvances = getCompanyReportAdvances($dbconn, $_POST['Company'], $_POST['salarymasterId']);
     if (mysqli_num_rows($resultfilter) > 0) {
         $i = 1;
         ?>  
@@ -51,8 +52,9 @@ if ($_POST['action'] == 'ListUser') {
                         <th class="desktop">Bonus</th>
                         <th class="desktop">Leave</th>
                         <th class="desktop">Total</th>
-                        <th class="desktop">E.S.I.</th>
                         <th class="desktop">P.F.</th>
+                         <th class="desktop">E.S.I.</th>
+                        <th class="desktop">Advance</th>
                         <th class="desktop">P.T.</th>
                         <th class="none">Deduction<br />if any</th>
                         <th class="desktop">Net<br />Amount<br />Paid</th>
@@ -66,7 +68,7 @@ if ($_POST['action'] == 'ListUser') {
                     <?php
                          $Total=array(0,0,0,0);
                     while ($rowfilter = mysqli_fetch_array($resultfilter)) {
-    
+                            $advanceAmount = getEmployeeCompanyReportAdvance($companyReportAdvances, $rowfilter['emp_id']);
                             $desg = mysqli_fetch_array(mysqli_query($dbconn, "SELECT * FROM `employee`  where isDelete='0' and employeeId='" . $rowfilter['emp_id'] . "'"));
                             
                         ?>
@@ -158,15 +160,21 @@ if ($_POST['action'] == 'ListUser') {
                                 </div>
                             </td>
                             <td>
-                                <div class="form-group form-md-line-input "><?php echo $rowfilter['esi']; 
-                                  $Total[1] = $rowfilter['esi'] + $Total[1];
+                                <div class="form-group form-md-line-input "><?= ($rowfilter['pf'] != '0.00') ? $rowfilter['pf'] : ''; ?>
+                                  <?php $Total[2] = $rowfilter['pf'] + $Total[2];
                                 ?> 
                                 </div>
                             </td>
                             <td>
-                                <div class="form-group form-md-line-input "><?= ($rowfilter['pf'] != '0.00') ? $rowfilter['pf'] : ''; ?> 
-                                  <?php $Total[2] = $rowfilter['pf'] + $Total[2];
-                                ?> 
+                                <div class="form-group form-md-line-input "><?php echo $rowfilter['esi'];
+                                  $Total[1] = $rowfilter['esi'] + $Total[1];
+                                ?>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group form-md-line-input "><?php echo number_format($advanceAmount, 2, '.', '');
+                                  $Total[12] = $advanceAmount + $Total[12];
+                                ?>
                                 </div>
                             </td>
                             <td>
@@ -180,8 +188,8 @@ if ($_POST['action'] == 'ListUser') {
                                 </div>
                             </td>
                             <td>
-                                <div class="form-group form-md-line-input "><?php echo ceil($rowfilter['netamountpaid']); 
-                                  $Total[3] = ceil($rowfilter['netamountpaid']) + $Total[3];
+                                <div class="form-group form-md-line-input "><?php echo ceil($rowfilter['netamountpaid'] - $advanceAmount);
+                                  $Total[3] = ceil($rowfilter['netamountpaid'] - $advanceAmount) + $Total[3];
                                 ?>
                                   </div>
                             </td>
@@ -219,8 +227,9 @@ if ($_POST['action'] == 'ListUser') {
                 <td><?php echo $Total[10]; ?></td>
                 <td><?php echo $Total[11]; ?></td>
                 <td><?php echo number_format(round($Total[0]),2); ?></td>
-                <td><?php echo $Total[1]; ?></td>
                 <td><?php echo $Total[2]; ?></td>
+                <td><?php echo $Total[1]; ?></td>
+                <td><?php echo number_format($Total[12], 2, '.', ''); ?></td>
                 <td><?php echo $Total[4]; ?></td>
                 <td></td>
                 <td><?php echo $Total[3]; ?></td>

@@ -3,6 +3,7 @@
 //include database configuration file
 include('../config.php');
 include('IsLogin.php');
+include_once 'companyReportAdvance.php';
 //$connect = new connect();
 //get records from database
 
@@ -19,6 +20,7 @@ $wageMonth = date('F-y',strtotime("01-".$month));
 
 //$query1 = mysqli_query($dbconn, "SELECT * FROM `salarydetails` where  companyId='" . $_REQUEST['Company'] . "' and salaryId='" . $_REQUEST['salarymasterId'] . "'  and  isDelete='0'  and  istatus='1'and workingdays > 0 order by salarydetailsId asc");
 $query1 = mysqli_query($dbconn, "SELECT * FROM `salarydetails` where  companyId='" . $_REQUEST['Company'] . "' and salaryId in (select salarymasterId from salarymaster where  month='" . $_REQUEST['salarymasterId'] . "' and isDelete='0' and  istatus='1') and  isDelete='0'  and  istatus='1'and workingdays > 0 order by salarydetailsId asc");
+$companyReportAdvances = getCompanyReportAdvances($dbconn, $_REQUEST['Company'], $_REQUEST['salarymasterId']);
 if (mysqli_num_rows($query1) > 0) {
 $lineOne = "";
 $lineOne .= ""
@@ -367,9 +369,10 @@ $lineOne .='Sr. No'
         . "\t" . 'Gross Total'
         . "\t" . 'PF'
         . "\t" . 'ESIC'
+        . "\t" . 'Advance'
+        . "\t" . 'Professional Tax'
         . "\t" . 'Society'
         . "\t" . 'Income Tax'
-        . "\t" . 'Professional Tax'
         . "\t" . 'Insurance'
         . "\t" . 'Recoveries'
         . "\t" . 'Total Deduction'
@@ -378,7 +381,7 @@ $lineOne .='Sr. No'
         . "\t" . 'Signature /thumb impresssion of workman/Transaction ID'
         . "\t" . 'Date of Payment'
         . "\n";
-    $Total = array("Total", "", "","","0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", '0',"0","0","0","0","0","0","0","0","0",0,0);
+    $Total = array_fill(0, 28, 0);
     $Total[0] = "Total";
     $deductiontotal = array(0, 0, 0, 0);
     $comskill = mysqli_fetch_array(mysqli_query($dbconn, "SELECT unskill,semiskill,skil FROM companymaster where companymasterId = '" . $_REQUEST['Company'] . "'"));
@@ -395,7 +398,9 @@ $lineOne .='Sr. No'
         }
         // and  istatus='1'
         $desg = mysqli_fetch_array(mysqli_query($dbconn, "SELECT * FROM `employee`  where isDelete='0' and employeeId='" . $row['emp_id'] . "'"));
-        $Deduction_total = $row['pf'] + $row['esi'] + $row['pt'];
+        $advanceAmount = getEmployeeCompanyReportAdvance($companyReportAdvances, $row['emp_id']);
+        $Deduction_total = $row['pf'] + $row['esi'] + $advanceAmount + $row['pt'];
+        $netAmountPaid = ceil($row['netamountpaid'] - $advanceAmount);
         $emp_name="";
         if(isset($desg['emp_name']) && $desg['emp_name'] != ""){
             $emp_name = ucwords(strtolower($desg['emp_name']));
@@ -431,13 +436,14 @@ $lineOne .='Sr. No'
             . "\t" . number_format(round($row['total']), 2, '.', '')
             . "\t" . number_format($row['pf'],2,'.','')
             . "\t" . number_format($row['esi'],2,'.','')
-            . "\t" . ''
-            . "\t" . ''
+            . "\t" . number_format($advanceAmount,2,'.','')
             . "\t" . $pt
             . "\t" . ''
             . "\t" . ''
+            . "\t" . ''
+            . "\t" . ''
             . "\t" . $Deduction_total
-            . "\t" . ceil($row['netamountpaid'])
+            . "\t" . $netAmountPaid
             . "\t" . number_format($row['pf'],2,'.','')
             . "\t" . ''
             //. "\t" . ''
@@ -451,11 +457,12 @@ $lineOne .='Sr. No'
         $Total[14] += $row['total'];
         $Total[16] += $row['esi'];
         $Total[15] += $row['pf'];
-        $Total[19] += (int)$row['pt'];
-        $Total[22] += $Deduction_total;
+        $Total[17] += $advanceAmount;
+        $Total[18] += (int)$row['pt'];
+        $Total[23] += $Deduction_total;
         //$Total[16] += $row['deductionifany'];
-        $Total[23] += ceil($row['netamountpaid']);
-        $Total[24] += ceil($row['iBonusAmt']);
+        $Total[24] += $netAmountPaid;
+        $Total[25] += ceil($row['iBonusAmt']);
         $Total[12] += ceil($row['iLeaveAmt']);
         $Total[9] += $row['da'];
         $Total[11] += $row['hra'];
@@ -464,7 +471,7 @@ $lineOne .='Sr. No'
         $iCounter++;
     }
     $Total[14] = number_format(round($Total[14]),2,'.','');
-    $Total[23] = number_format($Total[23],2,'.','');
+    $Total[24] = number_format($Total[24],2,'.','');
     $lastLine = ""
     . "\t" . ""
     . "\t" . "Total"
@@ -476,21 +483,22 @@ $lineOne .='Sr. No'
     . "\t" . $Total[9]
     . "\t" . $Total[11]
     . "\t" . round($Total[10])
-    . "\t" . $Total[24]
+    . "\t" . $Total[25]
     . "\t" . $Total[12]
     . "\t" . $Total[13]
     . "\t" . number_format(round($Total[14]),2,'.','')
     . "\t" . number_format($Total[15],2,'.','')
     . "\t" . number_format($Total[16],2,'.','')
+    . "\t" . number_format($Total[17],2,'.','')
+    . "\t" . $Total[18]
     . "\t" . ""
     . "\t" . ""
     . "\t" . ""
     . "\t" . ""
     . "\t" . ""
-    . "\t" . $Total[22]
-    . "\t" . number_format($Total[23],2,'.','')
+    . "\t" . $Total[23]
+    . "\t" . number_format($Total[24],2,'.','')
     . "\t" . number_format($Total[15],2,'.','')
-    . "\t" . ""
     . "\t" . ""
     . "\t" . ""
     . "\n";
