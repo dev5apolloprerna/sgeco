@@ -14,6 +14,7 @@ function createOtherReportSpreadsheet($html, $worksheetTitle)
 {
     $formCDetails = $worksheetTitle === 'Form C' ? extractFormCDetails($html) : array();
     $formXXIDetails = $worksheetTitle === 'Form XXI' ? extractFormXXIDetails($html) : array();
+    $formXXDetails = $worksheetTitle === 'Form XX' ? extractFormXXDetails($html) : array();
     // PhpSpreadsheet uses the HTML title as a worksheet name. Replace report
     // titles containing characters such as '/' before parsing the document.
     $safeTitle = htmlspecialchars($worksheetTitle, ENT_QUOTES, 'UTF-8');
@@ -35,9 +36,102 @@ function createOtherReportSpreadsheet($html, $worksheetTitle)
         formatFormCWorksheet($sheet, $formCDetails);
     } elseif ($worksheetTitle === 'Form XXI') {
         formatFormXXIWorksheet($sheet, $formXXIDetails);
+    } elseif ($worksheetTitle === 'Form XX') {
+        formatFormXXWorksheet($sheet, $formXXDetails);
     }
 
     return $spreadsheet;
+}
+
+function extractFormXXDetails($html)
+{
+    preg_match('/<span class="month-label">Month:<\/span>\s*<span>(.*?)<\/span>/is', $html, $month);
+    preg_match(
+        '/Name and Address of the principal Employer\s*:\s*<span[^>]*>(.*?)<\/span>/is',
+        $html,
+        $employer
+    );
+    $clean = function ($value) {
+        return trim(html_entity_decode(strip_tags($value), ENT_QUOTES, 'UTF-8'));
+    };
+    return array(
+        'month' => isset($month[1]) ? $clean($month[1]) : '',
+        'employer' => isset($employer[1]) ? $clean($employer[1]) : '',
+    );
+}
+
+function formatFormXXWorksheet($sheet, array $details)
+{
+    // Rebuild the supplied three-part HTML header so it remains legible in Excel.
+    $sheet->removeRow(1, 7);
+    $sheet->insertNewRowBefore(1, 8);
+    $sheet->mergeCells('A1:K1');
+    $sheet->mergeCells('A2:B2');
+    $sheet->mergeCells('C2:D2');
+    $sheet->mergeCells('A3:B3');
+    $sheet->mergeCells('C3:D3');
+    $sheet->mergeCells('A4:B4');
+    $sheet->mergeCells('C4:D4');
+    $sheet->mergeCells('A5:B5');
+    $sheet->mergeCells('C5:D5');
+    $sheet->mergeCells('E2:G2');
+    $sheet->mergeCells('E3:G3');
+    $sheet->mergeCells('E4:G5');
+    $sheet->mergeCells('H2:K3');
+    $sheet->mergeCells('H4:K5');
+    $sheet->mergeCells('A6:K6');
+
+    $sheet->setCellValue('A1', 'Register of deductions for damage or loss');
+    $sheet->setCellValue('A2', 'NAME AND ADDRESS OF CONTRACTOR :');
+    $sheet->setCellValue('C2', 'SHREE GANESH ENGINEERING CO.');
+    $sheet->setCellValue('C3', 'FF-8, Devshruti Complex,');
+    $sheet->setCellValue('C4', 'Nr. HCG Hospital,');
+    $sheet->setCellValue('C5', 'Mithakhali, Ahmedabad - 380006');
+    $sheet->setCellValue('E2', 'FORM NO. XX');
+    $sheet->setCellValue('E3', '[See rule 78 (2)(c)]');
+    $sheet->setCellValue('E4', 'Month: ' . $details['month']);
+    $sheet->setCellValue('H2', 'Name and Address of establishment in/under which contract is carried on');
+    $sheet->setCellValue('H4', 'Name and Address of the principal Employer :  ' . $details['employer']);
+    $sheet->setCellValue('A6', 'NATURE AND LOCATION OF WORK');
+
+    $headings = array(
+        "Sr.\nNo.", 'Name of Workmen', "Father's / Husband's\nName",
+        "Designation / Nature\nof Employment", "Damage or loss caused\nwith date",
+        "Whether workman showed\ncause against deduction",
+        "Name of person in whose presence\nworkman's explanation was heard",
+        "Amount of deduction\nimposed", "Number of\ninstalments", "Date of\nrecovery", 'Remarks'
+    );
+    foreach ($headings as $index => $heading) {
+        $sheet->setCellValueByColumnAndRow($index + 1, 7, $heading);
+        $sheet->setCellValueByColumnAndRow($index + 1, 8, $index + 1);
+    }
+
+    $lastRow = $sheet->getHighestDataRow();
+    for ($row = 9, $serial = 1; $row <= $lastRow; $row++, $serial++) {
+        $sheet->setCellValueByColumnAndRow(1, $row, $serial);
+    }
+    $sheet->getStyle('A1:K' . $lastRow)->getFont()->setName('Times New Roman')->setSize(10);
+    $sheet->getStyle('A1:K6')->getFont()->setBold(true);
+    $sheet->getStyle('A1')->getFont()->setSize(16);
+    $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+    $sheet->getStyle('E2:G5')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+    $sheet->getStyle('A7:K8')->getFont()->setBold(true);
+    $sheet->getStyle('A7:K8')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)
+        ->setVertical(Alignment::VERTICAL_CENTER)->setWrapText(true);
+    $sheet->getStyle('A7:K' . $lastRow)->getBorders()->getAllBorders()
+        ->setBorderStyle(Border::BORDER_THIN)->getColor()->setRGB('000000');
+    $widths = array(5, 27, 23, 19, 16, 16, 18, 13, 11, 11, 11);
+    foreach (range('A', 'K') as $index => $column) {
+        $sheet->getColumnDimension($column)->setWidth($widths[$index]);
+    }
+    $sheet->getRowDimension(1)->setRowHeight(24);
+    $sheet->getRowDimension(7)->setRowHeight(82);
+    $sheet->getRowDimension(8)->setRowHeight(22);
+    for ($row = 9; $row <= $lastRow; $row++) {
+        $sheet->getRowDimension($row)->setRowHeight(24);
+    }
+    $sheet->getPageSetup()->setRowsToRepeatAtTopByStartAndEnd(7, 8);
+    configureOtherReportPage($sheet, 'A1:K' . $lastRow, 9);
 }
 
 function extractFormXXIDetails($html)

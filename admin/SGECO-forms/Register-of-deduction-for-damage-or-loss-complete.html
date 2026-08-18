@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register of Deduction for Damage or Loss - Form XX</title>
+
     <style>
         * {
             box-sizing: border-box;
@@ -18,47 +19,69 @@
 
         body {
             background: #fff;
+            /* background: #ececec; */
             color: #000;
             font-family: "Times New Roman", Times, serif;
+        }
+
+        /*
+         * Legal paper - Landscape
+         * 14in x 8.5in
+         */
+        .form-page {
+            width: 14in;
+            min-height: 8.5in;
+            margin: 18px auto;
+            padding: 20mm 12mm 20mm;
+            background: #fff;
+            overflow: visible;
+            position: relative;
         }
 
         table {
             border-collapse: collapse;
         }
 
-        .form-page {
-            width: 14in;
-            min-height: 8.5in;
-            margin: 18px auto;
-            padding: 20mm 12mm;
-            background: #fff;
+        .page-layout {
+            width: 100%;
+            height: 100%;
+            table-layout: fixed;
         }
 
-        .form-title {
-            margin: 0 0 2px;
-            text-align: center;
-            font-size: 16px;
-            line-height: 1;
-            font-weight: 700;
+        .page-layout>tbody>tr>td {
+            padding: 0;
+            vertical-align: top;
         }
+
+        /* Header */
 
         .header-table {
             width: 100%;
             table-layout: fixed;
-            margin-bottom: 0.08in;
+            margin-bottom: 0.10in;
+            font-weight: bold;
         }
 
-        .header-table td,
-        .info-table td {
-            border: 0;
+        .header-table td {
+            border: none;
             padding: 0;
             vertical-align: top;
-            font-weight: 700;
+            font-weight: bold;
+        }
+
+        /* TCPDF can otherwise inherit cell borders from the register table. */
+        .header-table,
+        .header-table tr,
+        .header-table td,
+        .info-table,
+        .info-table tr,
+        .info-table td {
+            border: none;
         }
 
         .left-header,
         .right-header {
-            font-size: 11px;
+            font-size: 12px;
             line-height: 1.45;
         }
 
@@ -72,6 +95,34 @@
 
         .center-header {
             text-align: center;
+            /* padding-top: 0.02in !important; */
+        }
+
+        .main-title {
+            margin-bottom: 10px;
+            font-size: 12px;
+            line-height: 1.05;
+            font-weight: 700;
+        }
+
+        .form-number {
+            /* margin-top: 0.08in; */
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .rule-text {
+            margin-top: 0.08in;
+            font-size: 12px;
+        }
+
+        .month-row {
+            margin-top: 0.35in;
+            font-size: 12px;
+        }
+
+        .month-label {
+            font-weight: 700;
         }
 
         .info-table {
@@ -80,46 +131,42 @@
         }
 
         .info-table td {
-            padding-bottom: 0.055in;
+            border: 0;
+            padding: 0 0 0.06in 0;
+            vertical-align: top;
+            font-weight: bold;
         }
 
         .info-label {
+            font-weight: 700;
             white-space: nowrap;
-            padding-right: 0.1in !important;
+            padding-right: 0.12in !important;
         }
 
         .address-line {
             padding-left: 0.02in;
         }
 
-        .form-number {
-            font-size: 13px;
-            line-height: 1.2;
-        }
-
-        .rule-text {
-            margin-top: 0.07in;
-            font-size: 11px;
-        }
-
-        .month-row {
-            margin-top: 0.34in;
-            font-size: 14px;
-        }
-
         .right-line {
-            margin-bottom: 0.27in;
+            margin-bottom: 0.25in;
+            font-weight: 700;
         }
 
         .right-line:last-child {
             margin-bottom: 0;
         }
 
-        .work-title {
-            margin: 0.04in 0 0.06in;
-            font-size: 12px;
-            font-weight: 700;
+        .normal-weight {
+            font-weight: bold;
         }
+
+        .work-title {
+            margin: 0.04in 0 0.07in;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* Register table */
 
         .register-frame {
             width: 100%;
@@ -127,6 +174,7 @@
             position: relative;
         }
 
+        /* Keeps the outer right border visible in Chrome PDF */
         .register-frame::after {
             content: "";
             position: absolute;
@@ -140,42 +188,37 @@
         .register-table {
             width: 100%;
             table-layout: fixed;
+            border-collapse: collapse;
             border: 1px solid #000;
         }
 
         .register-table th,
         .register-table td {
             border: 1px solid #000;
-            padding: 0.03in 0.02in;
+            padding: 0.035in 0.025in;
             vertical-align: middle;
         }
 
         .register-table thead th {
+            height: 0.78in;
             text-align: center;
-            font-size: 10.5px;
-            line-height: 1.06;
+            font-size: 12px;
+            line-height: 1.08;
+            font-weight: bold;
+        }
+
+        .register-table .column-number-row td {
+            height: 0.20in;
+            padding: 0.01in 0.02in;
+            text-align: center;
+            font-size: 12px;
+            line-height: 1;
             font-weight: 700;
         }
 
-        .register-table .main-header th {
-            height: 0.65in;
-        }
-
-        .register-table .recovery-header th {
-            height: 0.28in;
-        }
-
-        .register-table .column-number-row th {
-            height: 0.2in;
-            padding: 0.01in;
-            text-align: center;
-            font-size: 11px;
-            line-height: 1;
-        }
-
         .register-table .data-row td {
-            height: 0.26in;
-            font-size: 11px;
+            height: 0.24in;
+            font-size: 12px;
             line-height: 1.05;
         }
 
@@ -196,6 +239,8 @@
 
             html,
             body {
+                margin: 0;
+                padding: 0;
                 background: #fff;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
@@ -205,7 +250,8 @@
                 width: 14in;
                 min-height: 8.5in;
                 margin: 0;
-                padding: 20mm 12mm;
+                padding: 20mm 12mm 20mm;
+                overflow: visible;
             }
 
             .register-frame,
@@ -229,128 +275,171 @@
 </head>
 
 <body>
-    <section class="form-page">
-        <div class="form-title">Register of Deduction For Damage or Loss</div>
 
-        <table class="header-table" border="0" cellspacing="0" cellpadding="0">
-            <colgroup>
-                <col style="width: 40%;">
-                <col style="width: 20%;">
-                <col style="width: 40%;">
-            </colgroup>
+
+    <section class="form-page">
+
+        <table class="page-layout">
             <tr>
-                <td class="left-header">
-                    <table class="info-table" border="0" cellspacing="0" cellpadding="0">
+                <td>
+                    <div class="main-title " style="text-align: center;">Register of deductions for damage or loss</div>
+                    <table class="header-table" border="0" cellspacing="0" cellpadding="0"
+                        style="border: none; font-weight: bold;">
                         <colgroup>
-                            <col style="width: 54%;">
-                            <col style="width: 46%;">
+                            <col style="width: 39%;">
+                            <col style="width: 22%;">
+                            <col style="width: 39%;">
                         </colgroup>
+
                         <tr>
-                            <td class="info-label">NAME AND ADDRESS OF CONTRACTOR :</td>
-                            <td>SHREE GANESH ENGINEERING CO.</td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td class="address-line">FF-8, Devshruti Complex,</td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td class="address-line">Nr. HCG Hospital,</td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td class="address-line">Mithakhali, Ahmedabad - 380006</td>
+                            <!-- Left contractor details -->
+                            <td class="left-header" style="border: none;">
+                                <table class="info-table" border="0" cellspacing="0" cellpadding="0"
+                                    style="border: none;">
+                                    <colgroup>
+                                        <col style="width: 55%;">
+                                        <col style="width: 45%;">
+                                    </colgroup>
+
+                                    <tr>
+                                        <td class="info-label">
+                                            NAME AND ADDRESS OF CONTRACTOR :
+                                        </td>
+                                        <td>
+                                            SHREE GANESH ENGINEERING CO.
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td></td>
+                                        <td class="address-line">FF-8, Devshruti Complex,</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td></td>
+                                        <td class="address-line">Nr. HCG Hospital,</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td></td>
+                                        <td class="address-line">
+                                            Mithakhali, Ahmedabad - 380006
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+
+                            <!-- Centre title -->
+                            <td class="center-header" style="border: none;">
+                                <!-- <div class="main-title">Register of deductions for damage or loss</div> -->
+                                <div class="form-number">FORM NO. XX</div>
+                                <div class="rule-text">[See rule 78 (2)(c)]</div>
+
+                                <div class="month-row">
+                                    <span class="month-label">Month:</span>
+                                    <span>September-2024</span>
+                                </div>
+                            </td>
+
+                            <!-- Right establishment details -->
+                            <td class="right-header" style="border: none;">
+                                <div class="right-line">
+                                    Name and Address of establishment in/under which
+                                    contract is carried on
+                                </div>
+
+                                <div class="right-line">
+                                    Name and Address of the principal Employer :
+                                    <span class="normal-weight">
+                                        {{FORM_XX_COMPANY}}
+                                    </span>
+                                </div>
+                            </td>
                         </tr>
                     </table>
-                </td>
-                <td class="center-header">
-                    <div class="form-number">FORM NO. XX</div>
-                    <div class="rule-text">[See Rule 78 (2) (d)]</div>
-                    <div class="month-row"><strong>Month:</strong> September-2024</div>
-                </td>
-                <td class="right-header">
-                    <div class="right-line">Name and Address of establishment in/under which contract is carried on
+
+                    <div class="work-title" style="font-weight: bold;">
+                        NATURE AND LOCATION OF WORK
                     </div>
-                    <div class="right-line">Name and Address of the principal Employer :
-                        <span>{{FORM_XX_COMPANY}}</span></div>
+
+                    <div class="register-frame">
+                        <table class="register-table" border="1" cellspacing="0" cellpadding="0"
+                            style="border: 1px solid #000; border-collapse: collapse;">
+                            <colgroup>
+                                <col style="width: 4%;">
+                                <col style="width: 18%;">
+                                <col style="width: 15%;">
+                                <col style="width: 12%;">
+                                <col style="width: 10%;">
+                                <col style="width: 9%;">
+                                <col style="width: 9%;">
+                                <col style="width: 7%;">
+                                <col style="width: 6%;">
+                                <col style="width: 5%;">
+                                <col style="width: 5%;">
+                            </colgroup>
+
+                            <thead style="font-weight: bold;">
+                                <tr>
+                                    <th style="width: 4%;text-align: center;"><strong>Sr.<br>No.</strong></th>
+                                    <th style="width: 18%;text-align: center;"><strong>Name of Workmen</strong></th>
+                                    <th style="width: 15%;text-align: center;"><strong>Father's /
+                                            Husband's<br>Name</strong></th>
+                                    <th style="width: 12%;text-align: center;"><strong>Designation / Nature<br>of
+                                            Employment</strong></th>
+                                    <th style="width: 10%;text-align: center;"><strong>Damage or loss caused<br>with
+                                            date</strong></th>
+                                    <th style="width: 9%;text-align: center;"><strong>Whether workman<br>showed cause
+                                            against<br>deduction</strong></th>
+                                    <th style="width: 9%;text-align: center;"><strong>Name of person in
+                                            whose<br>presence workman's<br>explanation was heard</strong></th>
+                                    <th style="width: 7%;text-align: center;"><strong>Amount of
+                                            deduction<br>imposed</strong></th>
+                                    <th style="width: 6%;text-align: center;"><strong>Number of<br>instalments</strong>
+                                    </th>
+                                    <th style="width: 5%;text-align: center;"><strong>Date of<br>recovery</strong></th>
+                                    <th style="width: 5%;text-align: center;"><strong>Remarks</strong></th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr class="column-number-row">
+                                    <th style="text-align: center;"><strong>1</strong></th>
+                                    <th style="text-align: center;"><strong>2</strong></th>
+                                    <th style="text-align: center;"><strong>3</strong></th>
+                                    <th style="text-align: center;"><strong>4</strong></th>
+                                    <th style="text-align: center;"><strong>5</strong></th>
+                                    <th style="text-align: center;"><strong>6</strong></th>
+                                    <th style="text-align: center;"><strong>7</strong></th>
+                                    <th style="text-align: center;"><strong>8</strong></th>
+                                    <th style="text-align: center;"><strong>9</strong></th>
+                                    <th style="text-align: center;"><strong>10</strong></th>
+                                    <th style="text-align: center;"><strong>11</strong></th>
+                                </tr>
+
+                                <tr class="data-row">
+                                    <td class="text-center">1</td>
+                                    <td class="text-left">Dilip Yadav</td>
+                                    <td class="text-left">Mahendra Yadav</td>
+                                    <td class="text-left">Supervisor</td>
+                                    <td class="text-center">NIL</td>
+                                    <td class="text-center">NIL</td>
+                                    <td class="text-center">NIL</td>
+                                    <td class="text-center">NIL</td>
+                                    <td class="text-center">NIL</td>
+                                    <td class="text-center">NIL</td>
+                                    <td class="text-center">NIL</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
                 </td>
             </tr>
         </table>
 
-        <div class="work-title">NATURE AND LOCATION OF WORK</div>
-
-        <div class="register-frame">
-            <table class="register-table" border="1" cellspacing="0" cellpadding="0">
-                <colgroup>
-                    <col style="width: 3%;">
-                    <col style="width: 17%;">
-                    <col style="width: 12%;">
-                    <col style="width: 8%;">
-                    <col style="width: 8%;">
-                    <col style="width: 7%;">
-                    <col style="width: 9%;">
-                    <col style="width: 9%;">
-                    <col style="width: 5%;">
-                    <col style="width: 5%;">
-                    <col style="width: 5%;">
-                    <col style="width: 5%;">
-                    <col style="width: 7%;">
-                </colgroup>
-                <thead>
-                    <tr class="main-header">
-                        <th rowspan="2">Sr.<br>No.</th>
-                        <th rowspan="2">Name of Workmen</th>
-                        <th rowspan="2">Father's / Husband's<br>Name</th>
-                        <th rowspan="2">Designation/<br>Nature of<br>Employment</th>
-                        <th rowspan="2">Particulars of<br>Damage or Loss</th>
-                        <th rowspan="2">Date of Damage<br>or Loss</th>
-                        <th rowspan="2">Whether workman<br>showed cause against<br>Deduction</th>
-                        <th rowspan="2">Name of Person in<br>whose Presence<br>employees explanation<br>was heard</th>
-                        <th rowspan="2">Amount of<br>Deduction<br>imposed</th>
-                        <th rowspan="2">No. of<br>Installments</th>
-                        <th colspan="2">Date of recovery</th>
-                        <th rowspan="2">Remarks</th>
-                    </tr>
-                    <tr class="recovery-header">
-                        <th>First<br>Installment</th>
-                        <th>Last<br>Installment</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr class="column-number-row">
-                        <th>1</th>
-                        <th>2</th>
-                        <th>3</th>
-                        <th>4</th>
-                        <th>5</th>
-                        <th>6</th>
-                        <th>7</th>
-                        <th>8</th>
-                        <th>9</th>
-                        <th>10</th>
-                        <th>11</th>
-                        <th>12</th>
-                        <th>13</th>
-                    </tr>
-                    <tr class="data-row">
-                        <td class="text-center">1</td>
-                        <td class="text-left">Dilip Yadav</td>
-                        <td class="text-left">Mahendra Yadav</td>
-                        <td class="text-left">Supervisor</td>
-                        <td class="text-center">NIL</td>
-                        <td class="text-center">NIL</td>
-                        <td class="text-center">NIL</td>
-                        <td class="text-center">NIL</td>
-                        <td class="text-center">NIL</td>
-                        <td class="text-center">NIL</td>
-                        <td class="text-center">NIL</td>
-                        <td class="text-center">NIL</td>
-                        <td class="text-center">NIL</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
     </section>
+
 </body>
 
 </html>
