@@ -15,46 +15,96 @@ function summaryHtml($value)
 ?>
 <style>
     .summary-advance {
-        white-space: nowrap
+        margin-bottom: 0;
+        white-space: nowrap;
+        background: #fff;
+        color: #34495e
     }
 
     .summary-advance th {
+        padding: 10px 8px !important;
         text-align: center;
-        vertical-align: middle !important
+        vertical-align: middle !important;
+        border-color: #b8c4ce !important
+    }
+
+    .summary-advance td {
+        padding: 8px !important;
+        vertical-align: middle !important;
+        border-color: #d7dfe6 !important
+    }
+
+    .summary-advance thead tr:first-child th:first-child,
+    .summary-advance thead tr:first-child th:nth-child(2) {
+        background: #658397;
+        color: #ffffff
     }
 
     .summary-advance .date-header {
-        background: #70d5ed
+        background: #658397;
+        color: #ffffff
     }
 
     .summary-advance .company-header {
-        background: #a9df73
+        /* background: #a8dc70;
+        color: #294416 */
+        background: #658397;
+        color: #ffffff;
     }
 
     .summary-advance .total-header {
-        background: #00ed18
+        /* background: #19c63b;
+        color: #fff */
+        background: #658397;
+        color: #ffffff;
     }
 
     .summary-advance .group-row {
-        background: #d9e2f3;
-        color: #9c2525;
+        background: #658397 !important;
+        color: #ffffff !important;
         font-style: italic;
         font-weight: bold
     }
 
+    .summary-advance tbody tr:not(.group-row):nth-child(odd) {
+        background: #f8fafc
+    }
+
+    .summary-advance tbody tr:not(.group-row):hover {
+        background: #eaf6ff
+    }
+
+    .summary-advance tbody td:last-child {
+        background: #658397;
+        color: #ffffff
+    }
+
+    .summary-advance tfoot th {
+        font-size: 12px
+    }
+
     .summary-report-heading {
-        font-family: serif;
-        font-size: 16px;
-        font-weight: bold
+        padding: 14px 18px;
+        border-left: 4px solid #3598dc;
+        border-radius: 3px;
+        background: #f4f8fb;
+        color: #2c3e50;
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 1.7
     }
 
     .summary-scroll {
-        overflow-x: auto
+        margin-top: 15px;
+        overflow-x: auto;
+        border: 1px solid #d7dfe6;
+        border-radius: 4px;
+        box-shadow: 0 2px 8px rgba(44, 62, 80, .08)
     }
 </style>
-<div class="summary-report-heading">SUB: Summary Advance Payment<br>SITE: <?php echo summaryHtml(implode(', ', $report['sites'])); ?><br>MONTH: <?php echo summaryHtml(summaryAdvancePaymentMonth($report['filters'])); ?></div><br>
+<div class="summary-report-heading">SUB: Summary Advance Payment<br>SITE: <?php echo summaryHtml(implode(', ', $report['sites'])); ?><br>MONTH: <?php echo summaryHtml(summaryAdvancePaymentMonth($report['filters'])); ?></div>
 <div class="summary-scroll">
-    <table class="table table-bordered summary-advance">
+    <table class="table table-striped table-bordered table-hover summary-advance">
         <thead>
             <tr>
                 <th rowspan="2">Sr.<br>No.</th>
