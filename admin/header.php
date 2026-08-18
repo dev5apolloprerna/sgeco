@@ -3,7 +3,7 @@ $MasterEntry = array("State.php", "City.php", "Location.php", "ExcelFormMaster.p
 $salary = array("salarydetails.php", "salarymaster.php");
 $report = array("paypayment.php", "paidpayment.php");
 $reportHistory = array("MultiCompanyPaymentHistory.php", "CompanyPaymentHistory.php");
-$advanced = array("advancedmaster.php", "AddAdvancedDetails.php",'viewAdvancedDetails.php');
+$advanced = array("advancedmaster.php", "AddAdvancedDetails.php", 'viewAdvancedDetails.php', 'advancedPaymentReport.php', 'summaryAdvancePayment.php');
 ?>
 <div class="page-header">
     <div class="page-header-top">
@@ -169,6 +169,9 @@ $advanced = array("advancedmaster.php", "AddAdvancedDetails.php",'viewAdvancedDe
                                     
                                     <li>
                                         <a href="<?php echo $web_url; ?>admin/advancedPaymentReport.php">Advanced Payment Report</a>
+                                    </li>
+                                    <li>
+                                        <a href="<?php echo $web_url; ?>admin/summaryAdvancePayment.php">Summary Advance Payment</a>
                                     </li>
                                 </ul>
                             </li>
