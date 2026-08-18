@@ -15,13 +15,17 @@ function getCompanyReportAdvances($dbconn, $companyId, $wageMonth)
         return $advances;
     }
 
-    $month = mysqli_real_escape_string($dbconn, $matches[1]);
-    $year = mysqli_real_escape_string($dbconn, $matches[2]);
+    $month = (int) $matches[1];
+    $year = (int) $matches[2];
+    $periodStart = sprintf('%04d-%02d-01', $year, $month);
+    $periodEnd = date('Y-m-d', strtotime($periodStart . ' +1 month'));
+    $periodStart = mysqli_real_escape_string($dbconn, $periodStart);
+    $periodEnd = mysqli_real_escape_string($dbconn, $periodEnd);
     $sql = "SELECT iEmployeeId, COALESCE(SUM(iAmount), 0) AS advanceAmount
             FROM advanced_details
             WHERE iCompanyId=" . $companyId . "
-              AND DATE_FORMAT(strDate, '%m')='" . $month . "'
-              AND DATE_FORMAT(strDate, '%Y')='" . $year . "'
+              AND strDate >= '" . $periodStart . "'
+              AND strDate < '" . $periodEnd . "'
             GROUP BY iEmployeeId";
     $result = mysqli_query($dbconn, $sql);
 

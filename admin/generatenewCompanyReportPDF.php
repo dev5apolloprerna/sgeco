@@ -137,13 +137,13 @@ require_once('tcpdf/config/tcpdf_config.php');
 require_once('tcpdf/tcpdf.php');
 // require_once('tcpdf_13072023/examples/tcpdf_include.php');
 // require_once('tcpdf_13072023/tcpdf.php');
-$width = "600";
-$height = "210";
+$width = 600;
+$height = 210;
 $pageLayout = array($width, $height);
 
 ob_clean();
 
-$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+$pdf = new TCPDF('L', PDF_UNIT, $pageLayout, true, 'UTF-8', false);
 
 /*$pdf = new CUSTOMPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);  
 //Add a custom size  
@@ -171,17 +171,20 @@ $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
 
 // set margins
 //$pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
+$pdf->SetMargins(5, 5, 5);
 //$pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
 //$pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
+$pdf->setPrintHeader(false);
+$pdf->setPrintFooter(false);
 // set auto page breaks
-$pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+$pdf->SetAutoPageBreak(TRUE, 5);
 
 // Set font
 // dejavusans is a UTF-8 Unicode font, if you only need to
 // print standard ASCII chars, you can use core fonts like
 // helvetica or times to reduce file size.
 //$pdf->SetFont('dejavusans', '', 0, '', true);
-     $pdf->SetFont('helvetica', '', 8);
+     $pdf->SetFont('helvetica', '', 7);
 // Add a page
 // This method has several options, check the source code documentation for more information.
 $pdf->AddPage();
