@@ -154,7 +154,7 @@ function formatFormXXIIIWorksheet($sheet, array $details)
     for ($row = 9; $row <= $lastRow; $row++) {
         $sheet->getRowDimension($row)->setRowHeight(28);
     }
-    $sheet->getPageSetup()->setRowsToRepeatAtTopByStartAndEnd(7, 8);
+    // $sheet->getPageSetup()->setRowsToRepeatAtTopByStartAndEnd(7, 8);
     configureOtherReportPage($sheet, 'A1:L' . $lastRow, 9);
 }
 
