@@ -53,6 +53,7 @@ include('IsLogin.php');
                                                     <option value="form-xx">From XX (Register of deduction for damage or Loss)</option>
                                                     <option value="form-xiii">From XIII (Register of Workmen Employed by Contractor)</option>
                                                     <option value="form-xxii">FORM NO. XXII (Register of Advance)</option>
+                                                    <option value="form-xxiii">FORM NO. XXIII (Register of Overtime)</option>
                                                 </select>
                                             </div>
                                             <div class="form-group col-md-2">
@@ -253,7 +254,8 @@ include('IsLogin.php');
                 'form-xx': 'generateFormXXReportPDF.php',
                 'form-xxi': 'generateFormXXIReportPDF.php',
                 'form-xiii': 'generateFormXIIIReportPDF.php',
-                'form-xxii': 'generateFormXXIIReportPDF.php'
+                'form-xxii': 'generateFormXXIIReportPDF.php',
+                'form-xxiii': 'generateFormXXIIIReportPDF.php'
             };
             var reportUrl = reportUrls[$('#Report').val()];
             window.open(reportUrl + "?Company=" + encodeURIComponent(Company) + "&salarymasterId=" + encodeURIComponent(salarymasterId), '_blank');
@@ -276,6 +278,7 @@ include('IsLogin.php');
                 'form-xxi': 'exportFormXXIReportExcel.php',
                 'form-xiii': 'exportFormXIIIReportExcel.php',
                 'form-xxii': 'exportFormXXIIReportExcel.php',
+                'form-xxiii': 'exportFormXXIIIReportExcel.php',
             };
             var reportUrl = reportUrls[$('#Report').val()];
             window.open(reportUrl + "?Company=" + encodeURIComponent(Company) + "&salarymasterId=" + encodeURIComponent(salarymasterId), '_blank');
