@@ -48,12 +48,21 @@ function getFormXXIIEmployees($dbconn, $companyId, $salaryMonth)
     }
     $periodStart = $period->format('Y-m-01');
     $periodEnd = (clone $period)->modify('+1 month')->format('Y-m-01');
-    $advanceSql = "SELECT iEmployeeId, strDate, iAmount
-                   FROM advanced_details
-                   WHERE iCompanyId = " . $companyId . "
-                     AND strDate >= '" . mysqli_real_escape_string($dbconn, $periodStart) . "'
-                     AND strDate < '" . mysqli_real_escape_string($dbconn, $periodEnd) . "'
-                   ORDER BY strDate ASC";
+    // An advance belongs to a reporting period through advanced_master; the
+    // monetary/date/remarks entries for that period live in advanced_details.
+    // Keep both sides of that relationship in this query instead of inferring
+    // a period from advanced_details alone.
+    $advanceSql = "SELECT ad.iEmployeeId, ad.strDate, ad.iAmount, ad.strRemarks
+                   FROM advanced_master am
+                   INNER JOIN advanced_details ad
+                     ON ad.iAdvancedMasterId = am.iAdvancedMasterId
+                    AND ad.iCompanyId = am.iCompanyId
+                   WHERE am.iCompanyId = " . $companyId . "
+                     AND am.strMonthYear = '" . $salaryMonthSql . "'
+                     AND am.isDelete = 0 AND am.istatus = 1
+                     AND ad.strDate >= '" . mysqli_real_escape_string($dbconn, $periodStart) . "'
+                     AND ad.strDate < '" . mysqli_real_escape_string($dbconn, $periodEnd) . "'
+                   ORDER BY ad.strDate ASC";
     $advanceResult = mysqli_query($dbconn, $advanceSql);
     if ($advanceResult === false) {
         throw new RuntimeException('Unable to retrieve Form XXII advance details.');
@@ -66,12 +75,28 @@ function getFormXXIIEmployees($dbconn, $companyId, $salaryMonth)
         $index = $employeeIndexes[$employeeId];
         $employees[$index]['instalments'][] = array(
             'date' => $advance['strDate'],
-            'amount' => (float) $advance['iAmount']
+            'amount' => (float) $advance['iAmount'],
+            'purpose' => formXXIIAdvancePurpose($advance['strRemarks'])
         );
         $employees[$index]['advance_total'] += (float) $advance['iAmount'];
         $employees[$index]['last_advance_date'] = $advance['strDate'];
     }
     return $employees;
+}
+
+function formXXIIAdvancePurpose($remarks)
+{
+    $remarks = trim((string) $remarks);
+    if ($remarks === '') {
+        return '';
+    }
+    if (preg_match('/\bpersonal\b/i', $remarks)) {
+        return 'Personal';
+    }
+    if (preg_match('/\bfood\s*(allowance|allow\.?|allow)?\b/i', $remarks)) {
+        return 'Food Allowance';
+    }
+    return '';
 }
 
 function getFormXXIICompanyName($dbconn, $companyId)
@@ -115,16 +140,23 @@ function renderFormXXIIHtml(array $employees, $salaryMonth, $companyName)
             return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
         };
         $lastDate = formXXIIFormatDate($employee['last_advance_date']);
+        $wageTotal = (float) $employee['workingdays'] * (float) $employee['wage_rate'];
         $wages = formXXIIFormatNumber($employee['workingdays']) . ' Days &times; Rs. '
-            . formXXIIFormatNumber($employee['wage_rate']) . '/-';
+            . formXXIIFormatNumber($employee['wage_rate']) . ' = Rs. '
+            . formXXIIFormatNumber($wageTotal) . '/-';
         $advance = $lastDate === '' ? '' : $lastDate . '<br>Rs. '
             . formXXIIFormatNumber($employee['advance_total']) . '/-';
         $instalments = '';
+        $purposes = array();
         foreach ($employee['instalments'] as $instalment) {
             $instalments .= '<tr><td><span class="installment-date">'
                 . $esc(formXXIIFormatDate($instalment['date'])) . '</span>Rs. '
                 . $esc(formXXIIFormatNumber($instalment['amount'])) . '/-</td></tr>';
+            if ($instalment['purpose'] !== '') {
+                $purposes[$instalment['purpose']] = true;
+            }
         }
+        $purpose = implode(' / ', array_keys($purposes));
         $rows .= '<tr class="data-row">'
             . '<td class="center">' . ($index + 1) . '</td>'
             . '<td class="left">' . $esc($employee['emp_name']) . '</td>'
@@ -132,7 +164,7 @@ function renderFormXXIIHtml(array $employees, $salaryMonth, $companyName)
             . '<td class="left">' . $esc($employee['designation']) . '</td>'
             . '<td class="center">' . $wages . '</td>'
             . '<td class="center">' . $advance . '</td>'
-            . '<td class="center">Personal /<br>Food Allow.</td>'
+            . '<td class="center">' . $esc($purpose) . '</td>'
             . '<td class="center">' . count($employee['instalments']) . '</td>'
             . '<td><table class="installments">' . $instalments . '</table></td>'
             . '<td class="center">' . $esc($lastDate) . '</td><td></td></tr>';

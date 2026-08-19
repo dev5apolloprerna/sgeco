@@ -139,7 +139,7 @@ include('IsLogin.php');
                                             </div>
                                         </div>
                                     </form>
-                                    <div id="PlaceUsersDataHere">
+                                    <div id="PlaceUsersDataHere" style="max-width: 100%; overflow-x: auto;">
 
                                     </div>
                                 </div>
@@ -202,11 +202,13 @@ include('IsLogin.php');
                     $('#loading').css("display", "none");
                     var reportFrame = $('<iframe>', {
                         title: 'Selected report preview',
+                        scrolling: 'yes',
                         css: {
                             width: '100%',
                             height: '900px',
                             border: '1px solid #ddd',
-                            background: '#fff'
+                            background: '#fff',
+                            display: 'block'
                         }
                     });
                     $("#PlaceUsersDataHere").empty().append(reportFrame);
