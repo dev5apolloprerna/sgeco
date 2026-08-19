@@ -117,10 +117,15 @@
                         </td>
                     </tr>
                 </table>
-                <!-- Fixed layout makes TCPDF reuse the same 28-column grid for the
-                         repeated THEAD and for every TBODY row on subsequent pages. -->
-                <table width="100%" cellspacing="0" cellpadding="1" border="1"
-                    style="table-layout: fixed; font-size: 8px; text-align: center; color: #000;">
+                <!--
+                    Keep this as one 28-column table.  TCPDF calculates a colspan by
+                    splitting its declared width across the covered columns, so both
+                    grouped sections deliberately use equal-width leaf columns.  The
+                    98% table width also leaves room for TCPDF's cell padding and the
+                    enclosing page cell instead of clipping the final border.
+                -->
+                <table width="98%" align="center" cellspacing="0" cellpadding="1" border="1"
+                    style="table-layout: fixed; font-size: 7px; text-align: center; color: #000;">
                     <thead>
                         <tr>
                             <th rowspan="2" width="2%" style="text-align: center;"><strong>Sr.<br />No</strong></th>
@@ -150,18 +155,11 @@
                             <td rowspan="2" style="text-align: center;"><strong>Leave</strong></td>
 
                             <td rowspan="2" style="text-align: center;"><strong>*Others</strong></td> -->
-                            <!-- Do not set a width on spanning cells. TCPDF otherwise divides
-                                 that width evenly across the span and overrides the unequal
-                                 widths declared by the six leaf columns below. -->
-                            <th colspan="6" style="text-align: center;"><strong>Amount of Wages Earned</strong></th>
-
+                            <th colspan="6" width="21%" style="text-align: center;"><strong>Amount of Wages Earned</strong></th>
                             <!-- <td rowspan="2" style="width: 70px;text-align: center;"><strong>Total</strong></td> -->
                             <th rowspan="2" width="4%" style="text-align: center;"><strong>Total <br /> Gross <br />
                                     Amount</strong></th>
-                            <!-- These nine leaf columns are mirrored 1-to-1 in
-                                 newform_tr.html. Let their widths define this span so the
-                                 repeated PDF header stays aligned with every body row. -->
-                            <th colspan="9" style="text-align: center;"><strong>Deduction</strong></th>
+                            <th colspan="9" width="27%" style="text-align: center;"><strong>Deduction</strong></th>
                             <th rowspan="2" width="4%" style="text-align: center;"><strong>Net<br />Payment</strong>
                             </th>
                             <th rowspan="2" width="4%" style="text-align: center;"><strong>Employer <br />Share<br />PF
@@ -178,12 +176,12 @@
                         </tr>
                         <tr>
                             <!--<td style="text-align: center;"><strong>Special<br />Basic</strong></td>-->
-                            <th width="3%" style="text-align: center;"><strong>DA</strong></th>
-                            <th width="3%" style="text-align: center;"><strong>HRA</strong></th>
-                            <th width="4%" style="text-align: center;"><strong>Payments<br /> OT</strong></th>
-                            <th width="3%" style="text-align: center;"><strong>Bonus</strong></th>
-                            <th width="3%" style="text-align: center;"><strong>Leave</strong></th>
-                            <th width="4%" style="text-align: center;"><strong>National <br /> Holiday
+                            <th width="3.5%" style="text-align: center;"><strong>DA</strong></th>
+                            <th width="3.5%" style="text-align: center;"><strong>HRA</strong></th>
+                            <th width="3.5%" style="text-align: center;"><strong>Payments<br /> OT</strong></th>
+                            <th width="3.5%" style="text-align: center;"><strong>Bonus</strong></th>
+                            <th width="3.5%" style="text-align: center;"><strong>Leave</strong></th>
+                            <th width="3.5%" style="text-align: center;"><strong>National <br /> Holiday
                                     <br />Payment</strong></th>
                             <!--<td style="text-align: center;"><strong>*Others</strong></td>-->
 
@@ -197,7 +195,7 @@
 
                             <th width="3%" style="text-align: center;"><strong>Insurance</strong></th>                            <!--<td style="text-align: center;"><strong>Others</strong></td>-->
                             <th width="3%" style="text-align: center;"><strong>Recoveries</strong></th>
-                            <th width="4%" style="text-align: center;"><strong>Total <br />Deduction</strong></th>
+                            <th width="3%" style="text-align: center;"><strong>Total <br />Deduction</strong></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -213,12 +211,12 @@
                             <td width="3%" style="text-align: right;">#TotalOTHours#</td>
                             <td width="4%" style="text-align: right;">#basic#</td>
                             <!--<td></td>-->
-                            <td width="3%" style="text-align: right;">#TotalDA#</td>
-                            <td width="3%" style="text-align: right;">#TotalHRA#</td>
-                            <td width="4%" style="text-align: right;">#OTPay#</td>
-                            <td width="3%" style="text-align: right;">#TotalBonusAmt#</td>
-                            <td width="3%" style="text-align: right;">#TotalLeaveAmt#</td>
-                            <td width="4%" style="text-align: right;">#TotalNationalHolidayPayment#</td>
+                            <td width="3.5%" style="text-align: right;">#TotalDA#</td>
+                            <td width="3.5%" style="text-align: right;">#TotalHRA#</td>
+                            <td width="3.5%" style="text-align: right;">#OTPay#</td>
+                            <td width="3.5%" style="text-align: right;">#TotalBonusAmt#</td>
+                            <td width="3.5%" style="text-align: right;">#TotalLeaveAmt#</td>
+                            <td width="3.5%" style="text-align: right;">#TotalNationalHolidayPayment#</td>
                             <!--<td></td>-->
                             <td width="4%" style="text-align: right;">#total#</td>
 
@@ -232,7 +230,7 @@
                             <td width="3%"></td>
                             <td width="3%"></td>
                             <!--<td></td>-->
-                            <td width="4%" style="text-align: right;">#deductiontotal#</td>
+                            <td width="3%" style="text-align: right;">#deductiontotal#</td>
                             <td width="4%" style="text-align: right;">#netamountpaid#</td>
                             <td width="4%" style="text-align: right;">#pf#</td>
                             <td width="4%"></td>
