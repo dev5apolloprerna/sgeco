@@ -205,7 +205,12 @@ include('IsLogin.php');
                         scrolling: 'yes',
                         css: {
                             width: '100%',
-                            height: '900px',
+                            // Keep the preview inside the visible page. The
+                            // iframe owns both scrollbars instead of making the
+                            // entire Other Reports page grow with the report.
+                            height: '65vh',
+                            minHeight: '420px',
+                            maxHeight: '700px',
                             border: '1px solid #ddd',
                             background: '#fff',
                             display: 'block'
