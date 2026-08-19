@@ -135,11 +135,17 @@
                             <td rowspan="2" style="text-align: center;"><strong>Leave</strong></td>
 
                             <td rowspan="2" style="text-align: center;"><strong>*Others</strong></td> -->
-                            <th colspan="6" width="360" style="text-align: center;"><strong>Amount of Wages Earned</strong></th>
+                            <!-- Do not set a width on spanning cells. TCPDF otherwise divides
+                                 that width evenly across the span and overrides the unequal
+                                 widths declared by the six leaf columns below. -->
+                            <th colspan="6" style="text-align: center;"><strong>Amount of Wages Earned</strong></th>
 
                             <!-- <td rowspan="2" style="width: 70px;text-align: center;"><strong>Total</strong></td> -->
                             <th rowspan="2" width="60" style="text-align: center;"><strong>Total <br /> Gross <br /> Amount</strong></th>
-                            <th colspan="9" width="450" style="text-align: center;"><strong>Deduction</strong></th>
+<!-- These nine leaf columns are mirrored 1-to-1 in
+                                 newform_tr.html. Let their widths define this span so the
+                                 repeated PDF header stays aligned with every body row. -->
+                            <th colspan="9" style="text-align: center;"><strong>Deduction</strong></th>
                             <th rowspan="2" width="60" style="text-align: center;"><strong>Net<br />Payment</strong></th>
                             <th rowspan="2" width="60" style="text-align: center;"><strong>Employer <br />Share<br />PF Welfare<br /> Fund</strong></th>
                             
