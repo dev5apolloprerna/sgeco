@@ -71,6 +71,10 @@ function formXXIIIFormatDate($date)
 
 function renderFormXXIIIHtml(array $entries, $salaryMonth, $companyName)
 {
+    // The fixed-height legal landscape template can display at most 17 detail
+    // rows.  Render additional entries on repeated form pages instead of
+    // allowing them to be clipped by the template's overflow rule.
+    $rowsPerPage = 17;
     $template = file_get_contents(__DIR__ . '/SGECO-forms/Register_of_Overtime_Form_XXIII_Legal_Landscape.html');
     if ($template === false || !preg_match('/(<section class="form-page">.*?<tbody>)(.*?)(<\/tbody>.*?<\/section>)/s', $template, $matches)) {
         throw new RuntimeException('The Form XXIII template could not be loaded.');
@@ -81,7 +85,7 @@ function renderFormXXIIIHtml(array $entries, $salaryMonth, $companyName)
     $esc = function ($value) {
         return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
     };
-    $rows = $numberRow[0];
+    $detailRows = array();
     foreach ($entries as $index => $entry) {
         // This intermediate amount is the template's "Overtime of wages":
         // daily normal wage multiplied by the stored payroll OT multiplier.
@@ -100,12 +104,12 @@ function renderFormXXIIIHtml(array $entries, $salaryMonth, $companyName)
             formXXIIIFormatDate($entry['salarypaiddate']),
             ''
         );
-        $rows .= '<tr class="data-row">';
+        $row = '<tr class="data-row">';
         foreach ($values as $column => $value) {
-            $rows .= '<td class="' . (in_array($column, array(1, 2, 4), true) ? 'text-left' : 'text-center')
+            $row .= '<td class="' . (in_array($column, array(1, 2, 4), true) ? 'text-left' : 'text-center')
                 . '">' . $esc($value) . '</td>';
         }
-        $rows .= '</tr>';
+        $detailRows[] = $row . '</tr>';
     }
 
     $period = DateTime::createFromFormat('!m/Y', $salaryMonth);
@@ -124,8 +128,13 @@ function renderFormXXIIIHtml(array $entries, $salaryMonth, $companyName)
         $prefix,
         1
     );
+    $rowPages = $detailRows ? array_chunk($detailRows, $rowsPerPage) : array(array());
+    $sections = array();
+    foreach ($rowPages as $pageRows) {
+        $sections[] = $prefix . $numberRow[0] . implode('', $pageRows) . $matches[3];
+    }
     $firstSection = strpos($template, $matches[0]);
-    return substr($template, 0, $firstSection) . $prefix . $rows . $matches[3]
+     return substr($template, 0, $firstSection) . implode('', $sections)
         . substr($template, $firstSection + strlen($matches[0]));
 }
 
