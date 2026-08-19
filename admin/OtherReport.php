@@ -139,7 +139,7 @@ include('IsLogin.php');
                                             </div>
                                         </div>
                                     </form>
-                                    <div id="PlaceUsersDataHere" style="max-width: 100%; overflow-x: auto;">
+                                    <div id="PlaceUsersDataHere" style="max-width: 100%; overflow: hidden;">
 
                                     </div>
                                 </div>
@@ -213,7 +213,8 @@ include('IsLogin.php');
                             maxHeight: '700px',
                             border: '1px solid #ddd',
                             background: '#fff',
-                            display: 'block'
+                            display: 'block',
+                            boxSizing: 'border-box'
                         }
                     });
                     $("#PlaceUsersDataHere").empty().append(reportFrame);

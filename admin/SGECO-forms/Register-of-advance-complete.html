@@ -24,12 +24,13 @@
 
         .form-page {
             width: 14in;
-            height: 8.5in;
+            min-height: 8.5in;
+            height: auto;
             margin: 18px auto;
             padding: 20mm 12mm 20mm;
             background: #fff;
             position: relative;
-            overflow: hidden
+            overflow: visible
         }
 
         table {
@@ -38,7 +39,7 @@
 
         .page-table {
             width: 100%;
-            height: 100%;
+            min-height: 100%;
             table-layout: fixed
         }
 
@@ -247,12 +248,13 @@
 
             .form-page {
                 width: 14in;
-                height: 8.5in;
+                min-height: 8.5in;
+                height: auto;
                 margin: 0;
                 padding: 20mm 12mm 20mm;
-                overflow: hidden;
-                break-inside: avoid;
-                page-break-inside: avoid
+                overflow: visible;
+                break-inside: auto;
+                page-break-inside: auto
             }
 
             .form-page+.form-page {
@@ -260,8 +262,7 @@
                 page-break-before: always
             }
 
-            .register-frame,
-            .register-table {
+            .register-table tr {
                 break-inside: avoid;
                 page-break-inside: avoid
             }
