@@ -16,6 +16,7 @@ function createOtherReportSpreadsheet($html, $worksheetTitle)
     $formXXIDetails = $worksheetTitle === 'Form XXI' ? extractFormXXIDetails($html) : array();
     $formXXDetails = $worksheetTitle === 'Form XX' ? extractFormXXDetails($html) : array();
     $formXIIIDetails = $worksheetTitle === 'Form XIII' ? extractFormXIIIDetails($html) : array();
+    $formXXIIDetails = $worksheetTitle === 'Form XXII' ? extractFormXXIIDetails($html) : array();
     // PhpSpreadsheet uses the HTML title as a worksheet name. Replace report
     // titles containing characters such as '/' before parsing the document.
     $safeTitle = htmlspecialchars($worksheetTitle, ENT_QUOTES, 'UTF-8');
@@ -41,9 +42,128 @@ function createOtherReportSpreadsheet($html, $worksheetTitle)
         formatFormXXWorksheet($sheet, $formXXDetails);
     } elseif ($worksheetTitle === 'Form XIII') {
         formatFormXIIIWorksheet($sheet, $formXIIIDetails);
+    } elseif ($worksheetTitle === 'Form XXII') {
+        formatFormXXIIWorksheet($sheet, $formXXIIDetails);
     }
 
     return $spreadsheet;
+}
+
+function extractFormXXIIDetails($html)
+{
+    preg_match('/<span class="month-label">Month:<\/span>\s*([^<]*)/is', $html, $month);
+    preg_match(
+        '/Name and Address of the principal Employer\s*:\s*<span[^>]*>(.*?)<\/span>/is',
+        $html,
+        $employer
+    );
+    $details = array(
+        'month' => isset($month[1]) ? trim(strip_tags($month[1])) : '',
+        'employer' => isset($employer[1]) ? trim(html_entity_decode(strip_tags($employer[1]), ENT_QUOTES, 'UTF-8')) : '',
+        'rows' => array()
+    );
+
+    $document = new DOMDocument();
+    $previous = libxml_use_internal_errors(true);
+    $document->loadHTML('<?xml encoding="UTF-8">' . $html);
+    libxml_clear_errors();
+    libxml_use_internal_errors($previous);
+    $xpath = new DOMXPath($document);
+    foreach ($xpath->query('//tr[contains(concat(" ", normalize-space(@class), " "), " data-row ")]') as $row) {
+        $values = array();
+        foreach ($xpath->query('./td', $row) as $cell) {
+            if (count($values) === 8) {
+                $parts = array();
+                foreach ($xpath->query('.//table[contains(@class, "installments")]/tr/td', $cell) as $instalment) {
+                    $dateNode = $xpath->query('.//span[contains(@class, "installment-date")]', $instalment)->item(0);
+                    $date = $dateNode ? trim($dateNode->textContent) : '';
+                    $text = trim(preg_replace('/\s+/', ' ', $instalment->textContent));
+                    $amount = trim(substr($text, strlen($date)));
+                    $parts[] = trim($date . "\n" . $amount);
+                }
+                $values[] = implode("\n\n", $parts);
+            } else {
+                $values[] = trim(preg_replace('/\s+/', ' ', $cell->textContent));
+            }
+        }
+        $details['rows'][] = array_slice(array_pad($values, 11, ''), 0, 11);
+    }
+    return $details;
+}
+
+function formatFormXXIIWorksheet($sheet, array $details)
+{
+    $sheet->removeRow(1, max(1, $sheet->getHighestRow()));
+    $sheet->mergeCells('A1:K1');
+    $sheet->mergeCells('A2:B2');
+    $sheet->mergeCells('C2:D2');
+    $sheet->mergeCells('A3:B3');
+    $sheet->mergeCells('C3:D3');
+    $sheet->mergeCells('A4:B4');
+    $sheet->mergeCells('C4:D4');
+    $sheet->mergeCells('A5:B5');
+    $sheet->mergeCells('C5:D5');
+    $sheet->mergeCells('E2:G2');
+    $sheet->mergeCells('E3:G3');
+    $sheet->mergeCells('E4:G5');
+    $sheet->mergeCells('H2:K3');
+    $sheet->mergeCells('H4:K5');
+    $sheet->mergeCells('A6:K6');
+    $sheet->setCellValue('A1', 'Register of Advance');
+    $sheet->setCellValue('A2', 'NAME AND ADDRESS OF CONTRACTOR :');
+    $sheet->setCellValue('C2', 'SHREE GANESH ENGINEERING CO.');
+    $sheet->setCellValue('C3', 'FF-8, Devshruti Complex,');
+    $sheet->setCellValue('C4', 'Nr. HCG Hospital,');
+    $sheet->setCellValue('C5', 'Mithakhali, Ahmedabad - 380006');
+    $sheet->setCellValue('E2', 'FORM NO. XXII');
+    $sheet->setCellValue('E3', '[See Rule 78 (1) (a) (ii)]');
+    $sheet->setCellValue('E4', 'Month: ' . $details['month']);
+    $sheet->setCellValue('H2', 'Name and Address of establishment in/under which contract is carried on');
+    $sheet->setCellValue('H4', 'Name and Address of the principal Employer : ' . $details['employer']);
+    $sheet->setCellValue('A6', 'NATURE AND LOCATION OF WORK');
+    $headings = array(
+        'Sr. No.',
+        'Name',
+        "Father's / Husband's Name",
+        'Name of employment / Designation',
+        'Wage Period and wages payable',
+        'Date and amount of advance given',
+        'Purpose(s) for which advance made',
+        'No. of instalments by which advance to be paid',
+        'Date and amount of each instalment repaid',
+        'Date on which last instalment was repaid',
+        'Remarks'
+    );
+    foreach ($headings as $column => $heading) {
+        $sheet->setCellValueByColumnAndRow($column + 1, 7, $heading);
+        $sheet->setCellValueByColumnAndRow($column + 1, 8, $column + 1);
+    }
+    foreach ($details['rows'] as $rowIndex => $values) {
+        foreach ($values as $column => $value) {
+            $sheet->setCellValueByColumnAndRow($column + 1, $rowIndex + 9, $value);
+        }
+    }
+    $lastRow = max(8, count($details['rows']) + 8);
+    $sheet->getStyle('A1:K' . $lastRow)->getFont()->setName('Times New Roman')->setSize(9);
+    $sheet->getStyle('A1:K6')->getFont()->setBold(true);
+    $sheet->getStyle('A1')->getFont()->setSize(18);
+    $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+    $sheet->getStyle('E2:G5')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+    $sheet->getStyle('A7:K8')->getFont()->setBold(true);
+    $sheet->getStyle('A7:K' . $lastRow)->getAlignment()->setWrapText(true)->setVertical(Alignment::VERTICAL_CENTER);
+    $sheet->getStyle('A7:K' . $lastRow)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+    $widths = array(5, 24, 20, 16, 15, 17, 18, 17, 19, 18, 11);
+    foreach (range('A', 'K') as $index => $column) {
+        $sheet->getColumnDimension($column)->setWidth($widths[$index]);
+    }
+    $sheet->getRowDimension(1)->setRowHeight(26);
+    $sheet->getRowDimension(7)->setRowHeight(70);
+    $sheet->getRowDimension(8)->setRowHeight(20);
+    for ($row = 9; $row <= $lastRow; $row++) {
+        $sheet->getRowDimension($row)->setRowHeight(60);
+    }
+    $sheet->getPageSetup()->setRowsToRepeatAtTopByStartAndEnd(7, 8);
+    configureOtherReportPage($sheet, 'A1:K' . $lastRow, 9);
 }
 
 function extractFormXIIIDetails($html)

@@ -52,6 +52,7 @@ include('IsLogin.php');
                                                     <option value="form-xxi">Form XXI (Register of Fine)</option>
                                                     <option value="form-xx">From XX (Register of deduction for damage or Loss)</option>
                                                     <option value="form-xiii">From XIII (Register of Workmen Employed by Contractor)</option>
+                                                    <option value="form-xxii">FORM NO. XXII (Register of Advance)</option>
                                                 </select>
                                             </div>
                                             <div class="form-group col-md-2">
@@ -243,7 +244,8 @@ include('IsLogin.php');
                 'form-c': 'generateFormCReportPDF.php',
                 'form-xx': 'generateFormXXReportPDF.php',
                 'form-xxi': 'generateFormXXIReportPDF.php',
-                'form-xiii': 'generateFormXIIIReportPDF.php'
+                'form-xiii': 'generateFormXIIIReportPDF.php',
+                'form-xxii': 'generateFormXXIIReportPDF.php'
             };
             var reportUrl = reportUrls[$('#Report').val()];
             window.open(reportUrl + "?Company=" + encodeURIComponent(Company) + "&salarymasterId=" + encodeURIComponent(salarymasterId), '_blank');
@@ -264,7 +266,8 @@ include('IsLogin.php');
                 'form-c': 'exportFormCReportExcel.php',
                 'form-xx': 'exportFormXXReportExcel.php',
                 'form-xxi': 'exportFormXXIReportExcel.php',
-                'form-xiii': 'exportFormXIIIReportExcel.php'
+                'form-xiii': 'exportFormXIIIReportExcel.php',
+                'form-xxii': 'exportFormXXIIReportExcel.php',
             };
             var reportUrl = reportUrls[$('#Report').val()];
             window.open(reportUrl + "?Company=" + encodeURIComponent(Company) + "&salarymasterId=" + encodeURIComponent(salarymasterId), '_blank');
