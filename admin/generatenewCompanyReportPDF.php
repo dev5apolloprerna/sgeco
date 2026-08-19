@@ -184,7 +184,10 @@ $pdf->SetAutoPageBreak(TRUE, 5);
 // print standard ASCII chars, you can use core fonts like
 // helvetica or times to reduce file size.
 //$pdf->SetFont('dejavusans', '', 0, '', true);
-     $pdf->SetFont('helvetica', '', 7);
+// Use the available page height for a larger, more legible wage register.
+// The table template uses the same size explicitly so TCPDF applies it to
+// headers and employee rows consistently across automatic page breaks.
+$pdf->SetFont('helvetica', '', 9);
 // Add a page
 // This method has several options, check the source code documentation for more information.
 $pdf->AddPage();

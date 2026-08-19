@@ -51,6 +51,7 @@ include('IsLogin.php');
                                                     <option value="form-c">Form C (Register of Loan / Recoveries / Damage / Loss / Fine / Advance / Absence)</option>
                                                     <option value="form-xxi">Form XXI (Register of Fine)</option>
                                                     <option value="form-xx">From XX (Register of deduction for damage or Loss)</option>
+                                                    <option value="form-xiii">From XIII (Register of Workmen Employed by Contractor)</option>
                                                 </select>
                                             </div>
                                             <div class="form-group col-md-2">
@@ -241,10 +242,11 @@ include('IsLogin.php');
             var reportUrls = {
                 'form-c': 'generateFormCReportPDF.php',
                 'form-xx': 'generateFormXXReportPDF.php',
-                'form-xxi': 'generateFormXXIReportPDF.php'
+                'form-xxi': 'generateFormXXIReportPDF.php',
+                'form-xiii': 'generateFormXIIIReportPDF.php'
             };
             var reportUrl = reportUrls[$('#Report').val()];
-            window.open(reportUrl + "?Company=" + encodeURIComponent(Company) + "&salarymasterId=" + encodeURIComponent(salarymasterId), '_blank');            
+            window.open(reportUrl + "?Company=" + encodeURIComponent(Company) + "&salarymasterId=" + encodeURIComponent(salarymasterId), '_blank');
         }
         //foreach($attr_array[1] as $id => $name) {
 
@@ -261,7 +263,8 @@ include('IsLogin.php');
             var reportUrls = {
                 'form-c': 'exportFormCReportExcel.php',
                 'form-xx': 'exportFormXXReportExcel.php',
-                'form-xxi': 'exportFormXXIReportExcel.php'
+                'form-xxi': 'exportFormXXIReportExcel.php',
+                'form-xiii': 'exportFormXIIIReportExcel.php'
             };
             var reportUrl = reportUrls[$('#Report').val()];
             window.open(reportUrl + "?Company=" + encodeURIComponent(Company) + "&salarymasterId=" + encodeURIComponent(salarymasterId), '_blank');
