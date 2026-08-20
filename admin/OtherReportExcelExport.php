@@ -261,7 +261,7 @@ function formatFormXXIIWorksheet($sheet, array $details)
     $sheet->getStyle('A7:K8')->getFont()->setBold(true);
     $sheet->getStyle('A7:K' . $lastRow)->getAlignment()->setWrapText(true)->setVertical(Alignment::VERTICAL_CENTER);
     $sheet->getStyle('A7:K' . $lastRow)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-    $widths = array(5, 24, 20, 16, 15, 17, 18, 17, 19, 18, 11);
+    $widths = array(4, 28, 24, 16, 15, 17, 18, 17, 19, 18, 9);
     foreach (range('A', 'K') as $index => $column) {
         $sheet->getColumnDimension($column)->setWidth($widths[$index]);
     }

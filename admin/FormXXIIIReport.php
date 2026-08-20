@@ -16,9 +16,18 @@ function getFormXXIIIEntries($dbconn, $companyId, $salaryMonth)
         throw new InvalidArgumentException('A valid company is required.');
     }
 
+    $genderExpression = "''";
+    foreach (array('gender', 'strGender', 'sex', 'strSex', 'employeeGender') as $genderColumn) {
+        $columnResult = mysqli_query($dbconn, "SHOW COLUMNS FROM employee LIKE '" . $genderColumn . "'");
+        if ($columnResult && mysqli_num_rows($columnResult) > 0) {
+            $genderExpression = 'e.`' . $genderColumn . '`';
+            break;
+        }
+    }
     $sql = "SELECT sd.salarydetailsId, sd.strEntryDate, sd.othours, sd.otrate,
                    sd.skillrate, sd.totalovertime, sd.salarypaiddate,
-                   e.emp_name, e.strFatherName, e.designation
+                    e.emp_name, e.strFatherName, e.designation,
+                   " . $genderExpression . " AS gender
             FROM salarydetails sd
             INNER JOIN employee e ON e.employeeId = sd.emp_id AND e.isDelete = '0'
             WHERE sd.companyId = " . $companyId . "
@@ -75,6 +84,7 @@ function renderFormXXIIIHtml(array $entries, $salaryMonth, $companyName)
     // rows.  Render additional entries on repeated form pages instead of
     // allowing them to be clipped by the template's overflow rule.
     $rowsPerPage = 17;
+    $columnWidths = array('3%', '20%', '17%', '4%', '7%', '9%', '9%', '6%', '7%', '5%', '8%', '5%');
     $template = file_get_contents(__DIR__ . '/SGECO-forms/Register_of_Overtime_Form_XXIII_Legal_Landscape.html');
     if ($template === false || !preg_match('/(<section class="form-page">.*?<tbody>)(.*?)(<\/tbody>.*?<\/section>)/s', $template, $matches)) {
         throw new RuntimeException('The Form XXIII template could not be loaded.');
@@ -94,7 +104,7 @@ function renderFormXXIIIHtml(array $entries, $salaryMonth, $companyName)
             $index + 1,
             $entry['emp_name'],
             $entry['strFatherName'],
-            '',
+            $entry['gender'],
             $entry['designation'],
             formXXIIIFormatDate($entry['strEntryDate']),
             formXXIIIFormatNumber($entry['othours']),
@@ -106,7 +116,8 @@ function renderFormXXIIIHtml(array $entries, $salaryMonth, $companyName)
         );
         $row = '<tr class="data-row">';
         foreach ($values as $column => $value) {
-            $row .= '<td class="' . (in_array($column, array(1, 2, 4), true) ? 'text-left' : 'text-center')
+            $row .= '<td width="' . $columnWidths[$column] . '" class="'
+                . (in_array($column, array(1, 2, 4), true) ? 'text-left' : 'text-center')
                 . '">' . $esc($value) . '</td>';
         }
         $detailRows[] = $row . '</tr>';

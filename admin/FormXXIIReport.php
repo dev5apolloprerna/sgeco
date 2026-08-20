@@ -126,6 +126,9 @@ function formXXIIFormatDate($date)
 
 function renderFormXXIIHtml(array $employees, $salaryMonth, $companyName)
 {
+    // TCPDF does not reliably apply CSS-only colgroup widths, so keep the
+    // register proportions on each outer cell as well as in the template.
+    $columnWidths = array('3%', '18%', '15%', '9%', '9%', '9%', '8%', '8%', '8%', '8%', '5%');
     $template = file_get_contents(__DIR__ . '/SGECO-forms/Register-of-advance-complete.html');
     if ($template === false || !preg_match('/(<section class="form-page">.*?<tbody>)(.*?)(<\/tbody>.*?<\/section>)/s', $template, $matches)) {
         throw new RuntimeException('The Form XXII template could not be loaded.');
@@ -158,16 +161,17 @@ function renderFormXXIIHtml(array $employees, $salaryMonth, $companyName)
         }
         $purpose = implode(' / ', array_keys($purposes));
         $rows .= '<tr class="data-row">'
-            . '<td class="center">' . ($index + 1) . '</td>'
-            . '<td class="left">' . $esc($employee['emp_name']) . '</td>'
-            . '<td class="left">' . $esc($employee['strFatherName']) . '</td>'
-            . '<td class="left">' . $esc($employee['designation']) . '</td>'
-            . '<td class="center">' . $wages . '</td>'
-            . '<td class="center">' . $advance . '</td>'
-            . '<td class="center">' . $esc($purpose) . '</td>'
-            . '<td class="center">' . count($employee['instalments']) . '</td>'
-            . '<td><table class="installments">' . $instalments . '</table></td>'
-            . '<td class="center">' . $esc($lastDate) . '</td><td></td></tr>';
+            . '<td width="' . $columnWidths[0] . '" class="center">' . ($index + 1) . '</td>'
+            . '<td width="' . $columnWidths[1] . '" class="left">' . $esc($employee['emp_name']) . '</td>'
+            . '<td width="' . $columnWidths[2] . '" class="left">' . $esc($employee['strFatherName']) . '</td>'
+            . '<td width="' . $columnWidths[3] . '" class="left">' . $esc($employee['designation']) . '</td>'
+            . '<td width="' . $columnWidths[4] . '" class="center">' . $wages . '</td>'
+            . '<td width="' . $columnWidths[5] . '" class="center">' . $advance . '</td>'
+            . '<td width="' . $columnWidths[6] . '" class="center">' . $esc($purpose) . '</td>'
+            . '<td width="' . $columnWidths[7] . '" class="center">' . count($employee['instalments']) . '</td>'
+            . '<td width="' . $columnWidths[8] . '"><table class="installments">' . $instalments . '</table></td>'
+            . '<td width="' . $columnWidths[9] . '" class="center">' . $esc($lastDate) . '</td>'
+            . '<td width="' . $columnWidths[10] . '"></td></tr>';
     }
 
     $period = DateTime::createFromFormat('!m/Y', $salaryMonth);

@@ -8,7 +8,7 @@ function getFormXIIIEmployees($dbconn, $companyId, $salaryMonth)
     $companyId = mysqli_real_escape_string($dbconn, $companyId);
     $salaryMonth = mysqli_real_escape_string($dbconn, $salaryMonth);
     $genderExpression = "''";
-    foreach (array('gender', 'strGender', 'sex') as $genderColumn) {
+    foreach (array('gender', 'strGender', 'sex', 'strSex', 'employeeGender') as $genderColumn) {
         $columnResult = mysqli_query($dbconn, "SHOW COLUMNS FROM employee LIKE '" . $genderColumn . "'");
         if ($columnResult && mysqli_num_rows($columnResult) > 0) {
             $genderExpression = 'employee.`' . $genderColumn . '`';
@@ -97,6 +97,7 @@ function getFormXIIIAge($dateOfBirth, $salaryMonth)
 
 function renderFormXIIIHtml(array $employees, $salaryMonth, $companyName)
 {
+    $columnWidths = array('3%', '12%', '5%', '14%', '7%', '16%', '13%', '7%', '6.5%', '7%', '6%', '5%');
     $template = file_get_contents(__DIR__ . '/SGECO-forms/Register-of-workmen-complete.html');
     if ($template === false) {
         throw new RuntimeException('The Form XIII template could not be loaded.');
@@ -144,7 +145,8 @@ function renderFormXIIIHtml(array $employees, $salaryMonth, $companyName)
         $rows .= '<tr class="data-row">';
         foreach ($cells as $cellIndex => $value) {
             $class = in_array($cellIndex, array(0, 2, 7, 8, 9), true) ? 'text-center' : 'text-left';
-            $rows .= '<td class="' . $class . '">' . htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8') . '</td>';
+            $rows .= '<td width="' . $columnWidths[$cellIndex] . '" class="' . $class . '">'
+                . htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8') . '</td>';
         }
         $rows .= '</tr>';
     }
