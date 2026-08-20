@@ -11,7 +11,7 @@ function getBonusFormCEmployees($dbconn, $companyId, $salaryMonth, $employeeId =
     $month = mysqli_real_escape_string($dbconn, $salaryMonth);
     $employeeFilter = $employeeId > 0 ? ' AND e.employeeId=' . $employeeId : '';
     $sql = "SELECT sd.salarydetailsId, sd.workingdays, sd.skillrate, sd.basicwages,
-                   sd.iBonusAmt, sd.salarypaiddate, e.employeeId, e.emp_name,
+                   sd.iBonusAmt, sd.salarypaiddate, e.employeeId, e.employeecode, e.emp_name,
                    e.strFatherName, e.dateofbirth, e.designation
             FROM salarydetails sd
             INNER JOIN employee e ON e.employeeId=sd.emp_id
@@ -151,10 +151,18 @@ function renderBonusFormCList(array $employees, $companyId, $salaryMonth)
         return htmlspecialchars(bonusFormCText($value), ENT_QUOTES, 'UTF-8');
     };
     $query = 'Company=' . rawurlencode($companyId) . '&salarymasterId=' . rawurlencode($salaryMonth);
-    $html = '<style>body{font-family:Arial;padding:15px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:9px;text-align:left}th{background:#f3f3f3}.exports{margin-bottom:14px}a{color:#337ab7;text-decoration:none}</style><div class="exports"><a target="_blank" href="generateBonusFormCReportPDF.php?' . $query . '">Export All PDF</a> | <a target="_blank" href="exportBonusFormCReportExcel.php?' . $query . '">Export All Excel</a></div><table><thead><tr><th>Sr. No.</th><th>Employee Name</th><th>Action</th></tr></thead><tbody>';
+    $html = '<style>body{font-family:Arial,sans-serif;padding:15px}table{border-collapse:collapse;width:100%}' .
+        'th,td{border:1px solid #ddd;padding:9px;text-align:left}th{background:#f3f3f3}.exports{margin-bottom:14px}' .
+        'a{color:#337ab7;text-decoration:none}</style><div class="exports"><a target="_blank" href="generateBonusFormCReportPDF.php?' .
+        $query . '">Export All PDF</a> | <a target="_blank" href="exportBonusFormCReportExcel.php?' . $query .
+        '">Export All Excel</a></div><table><thead><tr><th>Sr. No.</th><th>Worker No.</th>' .
+        '<th>Employee Name</th><th>Action</th></tr></thead><tbody>';
     foreach ($employees as $index => $employee) {
         $one = $query . '&employeeId=' . rawurlencode($employee['employeeId']);
-        $html .= '<tr><td>' . ($index + 1) . '</td><td>' . $e($employee['emp_name']) . '</td><td><a target="_blank" href="generateBonusFormCReportPDF.php?' . $one . '">PDF</a> | <a target="_blank" href="exportBonusFormCReportExcel.php?' . $one . '">Excel</a></td></tr>';
+        $html .= '<tr><td>' . ($index + 1) . '</td><td>' . $e($employee['employeecode']) . '</td><td>' .
+            $e($employee['emp_name']) . '</td><td><a target="_blank" href="generateBonusFormCReportPDF.php?' . $one .
+            '">PDF</a> | <a target="_blank" href="exportBonusFormCReportExcel.php?' . $one . '">Excel</a></td></tr>';
     }
-    return $html . ($employees ? '' : '<tr><td colspan="3" style="text-align:center">No Data Found !</td></tr>') . '</tbody></table>';
+    return $html . ($employees ? '' : '<tr><td colspan="4" style="text-align:center">No Data Found !</td></tr>') .
+        '</tbody></table>';
 }

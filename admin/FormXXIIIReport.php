@@ -78,6 +78,38 @@ function formXXIIIFormatDate($date)
     return '';
 }
 
+function formXXIIIFormatMonth($salaryMonth)
+{
+    $period = DateTime::createFromFormat('!m/Y', $salaryMonth);
+    if (!$period || $period->format('m/Y') !== $salaryMonth) {
+        throw new InvalidArgumentException('A valid salary month is required.');
+    }
+    return $period->format('F-Y');
+}
+
+/**
+ * Bind the selected month to the template without depending on the example
+ * value currently present in the HTML file.
+ */
+function formXXIIIApplyMonth($html, $salaryMonth)
+{
+    $formattedMonth = formXXIIIFormatMonth($salaryMonth);
+    $replacementCount = 0;
+    $html = preg_replace_callback(
+        '/(<span\s+class=(?:"|\')month-label(?:"|\')>\s*Month\s*:\s*<\/span>\s*<span[^>]*>).*?(<\/span>)/is',
+        function ($matches) use ($formattedMonth) {
+            return $matches[1] . htmlspecialchars($formattedMonth, ENT_QUOTES, 'UTF-8') . $matches[2];
+        },
+        $html,
+        -1,
+        $replacementCount
+    );
+    if ($html === null || $replacementCount === 0) {
+        throw new RuntimeException('The Form XXIII month field could not be populated.');
+    }
+    return $html;
+}
+
 function renderFormXXIIIHtml(array $entries, $salaryMonth, $companyName)
 {
     // The fixed-height legal landscape template can display at most 17 detail
@@ -123,16 +155,7 @@ function renderFormXXIIIHtml(array $entries, $salaryMonth, $companyName)
         $detailRows[] = $row . '</tr>';
     }
 
-    $period = DateTime::createFromFormat('!m/Y', $salaryMonth);
-    if (!$period || $period->format('m/Y') !== $salaryMonth) {
-        throw new InvalidArgumentException('A valid salary month is required.');
-    }
-    $prefix = preg_replace(
-        '/(<span class="month-label">Month :<\/span>)\s*<span>.*?<\/span>/s',
-        '$1<span>' . $esc($period->format('F-Y')) . '</span>',
-        $matches[1],
-        1
-    );
+    $prefix = formXXIIIApplyMonth($matches[1], $salaryMonth);
     $prefix = preg_replace(
         '/(Name and Address of the principal Employer\s*:\s*<span class="normal">).*?(<\/span>)/s',
         '$1' . $esc($companyName) . '$2',

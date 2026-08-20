@@ -7,6 +7,10 @@ require_once('OtherReportOutput.php');
 
 try {
     $html = addOtherReportPdfSpacing(getFormXXIIIRequestData($dbconn), false);
+    // Apply the request month to the final PDF document as well. This keeps
+    // the export dynamic even if PDF-only preprocessing changes the header.
+    $salaryMonth = isset($_GET['salarymasterId']) ? trim($_GET['salarymasterId']) : '';
+    $html = formXXIIIApplyMonth($html, $salaryMonth);
 } catch (Throwable $exception) {
     ob_clean();
     exit(htmlspecialchars($exception->getMessage(), ENT_QUOTES, 'UTF-8'));
