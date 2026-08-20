@@ -119,14 +119,15 @@ function renderFormXIXSlipTable(array $slip)
     $lines = function (array $labels, array $values) use ($esc) {
         $html = '';
         foreach ($labels as $index => $label) {
-            $html .= $esc($label) . '<br>';
+            $html .= '&nbsp;&nbsp;' . $esc($label) . '<br>';
         }
         return $html;
     };
     $amountLines = function (array $values) {
         $html = '';
         foreach ($values as $value) {
-            $html .= formXIXAmount($value) . '<br>';
+            // Keep figures away from the following column rule in TCPDF.
+            $html .= formXIXAmount($value) . '&nbsp;&nbsp;<br>';
         }
         return $html;
     };
@@ -149,6 +150,8 @@ function renderFormXIXSlipTable(array $slip)
     $deductionLabels = array('Prof. Tax', 'PF', 'ESIC', 'GL.W.F.', 'Other Deduction', 'Advance');
 
     $sideBorders = 'border-left:1px solid #000;border-right:1px solid #000;';
+    //$totalBorder = 'border-top:1px solid #000;border-left:1px solid #000;border-right:1px solid #000;';
+    $totalBorder = 'border-top:1px solid #000;border-right:1px solid #000;';
 
     /*
      * TCPDF supports a deliberately small subset of browser CSS.  Keep this
@@ -158,7 +161,7 @@ function renderFormXIXSlipTable(array $slip)
      */
     return '<style>table{font-family:helvetica;font-size:9pt;color:#000}td{line-height:1.25}</style>' .
         '<table width="100%" border="0" cellpadding="0" cellspacing="0" nobr="true">' .
-        '<tr><td colspan="7" height="34" align="center" valign="middle" style="border:1px solid #000;border-bottom:0;font-size:16pt;font-weight:bold">' .
+        '<tr><td colspan="7" height="34" align="center" valign="middle" style="border-top:1px solid #000;border-left:1px solid #000;border-right:1px solid #000;font-size:16pt;font-weight:bold">' .
         'FORM - XIX - [ SEE RULE - 78(I)(B) ] - WAGES SLIP</td></tr>' .
         '<tr><td colspan="7" height="30" valign="middle" style="' . $sideBorders . '"><table width="100%" cellpadding="4"><tr>' .
         '<td width="25%">Sr. No.: <b>' . $esc($slip['serial']) . '</b></td>' .
@@ -177,31 +180,33 @@ function renderFormXIXSlipTable(array $slip)
         '<td width="22%"><b>Nature and Location of Work :</b></td><td width="78%">' . $esc($slip['company']) .
         '</td></tr></table></td></tr>' .
         '<tr style="font-weight:bold;text-align:center">' .
-        '<td width="14%" height="25" align="left" style="border:1px solid #000">Head</td>' .
-        '<td width="8%" align="right" style="border:1px solid #000">Wages</td>' .
+        '<td width="14%" height="25" align="left" style="border-top:1px solid #000;border-bottom:1px solid #000;border-left:1px solid #000">&nbsp;&nbsp;Head</td>' .
+        '<td width="8%" align="right" style="border-top:1px solid #000;border-bottom:1px solid #000">Wages&nbsp;&nbsp;</td>' .
         '<td width="27%" colspan="2" style="border:1px solid #000">Earning</td>' .
         '<td width="24%" colspan="2" style="border:1px solid #000">Deduction</td>' .
         '<td width="27%" style="border:1px solid #000">Signature</td></tr>' .
-        '<tr><td width="14%" height="250" style="border:1px solid #000">' . $lines($wageLabels, $slip['wages']) . '</td>' .
-        '<td width="8%" align="right" style="border:1px solid #000">' . $amountLines($slip['wages']) . '</td>' .
-        '<td width="17%" style="border:1px solid #000">' . $lines($earningLabels, $slip['earnings']) . '</td>' .
-        '<td width="10%" align="right" style="border:1px solid #000">' . $amountLines($slip['earnings']) . '</td>' .
-        '<td width="14%" style="border:1px solid #000">' . $lines($deductionLabels, $slip['deductions']) . '</td>' .
-        '<td width="10%" align="right" style="border:1px solid #000">' . $amountLines($slip['deductions']) . '</td>' .
-        '<td width="27%" style="border:1px solid #000">Bank Name:&nbsp;&nbsp; ' . $esc($slip['bank_name']) . '<br>' .
-        'IFSC Code:&nbsp;&nbsp; ' . $esc($slip['ifsc']) . '<br>UAN No.:&nbsp;&nbsp; ' . $esc($slip['uan']) . '</td></tr>' .
-        '<tr style="font-weight:bold"><td width="14%" height="26" style="border:1px solid #000">Work Days</td>' .
-        '<td width="8%" align="right" style="border:1px solid #000">' .
-        formXIXAmount($slip['work_days']) . '</td><td width="17%" style="border:1px solid #000">Gross Earn.</td>' .
-        '<td width="10%" align="right" style="border:1px solid #000">' . formXIXAmount($slip['gross']) .
-        '</td><td width="14%" style="border:1px solid #000">Total Deduction</td>' .
-        '<td width="10%" align="right" style="border:1px solid #000">' .
-        formXIXAmount($slip['total_deduction']) . '</td><td width="27%" style="border:1px solid #000">' .
+        '<tr><td width="14%" height="250" style="border-left:1px solid #000">' . $lines($wageLabels, $slip['wages']) . '</td>' .
+        '<td width="8%" align="right" style="border: none">' . $amountLines($slip['wages']) . '</td>' .
+        '<td width="17%" style="border-left:1px solid #000">' . $lines($earningLabels, $slip['earnings']) . '</td>' .
+        '<td width="10%" align="right" style="none">' . $amountLines($slip['earnings']) . '</td>' .
+        '<td width="14%" style="border-left:1px solid #000">' . $lines($deductionLabels, $slip['deductions']) . '</td>' .
+        '<td width="10%" align="right" style="border:none">' . $amountLines($slip['deductions']) . '</td>' .
+        '<td width="27%" style="border:1px solid #000">&nbsp;&nbsp;Bank Name:&nbsp;&nbsp; ' . $esc($slip['bank_name']) . '<br>' .
+        '&nbsp;&nbsp;IFSC Code:&nbsp;&nbsp; ' . $esc($slip['ifsc']) . '<br>&nbsp;&nbsp;UAN No.:&nbsp;&nbsp; ' .
+        $esc($slip['uan']) . '</td></tr>' .
+        '<tr style="font-weight:bold"><td width="14%" height="26" style="border-top:1px solid #000;border-left:1px solid #000;border-bottom:1px solid #000;">&nbsp;&nbsp;Work Days</td>' .
+        '<td width="8%" align="right" style="border-right:1px solid #000;border-top:1px solid #000;border-bottom:1px solid #000;">' .
+        formXIXAmount($slip['work_days']) . '&nbsp;&nbsp;</td> <td width="17%" style="border-top:1px solid #000;border-left:1px solid #000;border-bottom:1px solid #000;">&nbsp;&nbsp;Gross Earn.</td>' .
+        '<td width="10%" align="right" style="border-right:1px solid #000;border-top:1px solid #000;border-bottom:1px solid #000;">' . formXIXAmount($slip['gross']) . '&nbsp;&nbsp;' .
+        '</td><td width="14%" style="border-top:1px solid #000;border-left:1px solid #000;border-bottom:1px solid #000;">&nbsp;&nbsp;Total Deduction</td>' .
+        '<td width="10%" align="right" style="border-right:1px solid #000;border-top:1px solid #000;border-bottom:1px solid #000;">' .
+        formXIXAmount($slip['total_deduction']) . '&nbsp;&nbsp;</td><td width="27%" style="' . $totalBorder . ';border-left:1px solid #000;border-bottom:1px solid #000;">' .
         '<table width="100%"><tr>' .
-        '<td width="50%"><b>Net Pay.</b></td><td width="50%" align="right"><b>' .
-        formXIXAmount($slip['net_pay']) . '</b></td></tr></table></td></tr>' .
-        '<tr><td colspan="7" height="52" align="right" style="border:1px solid #000;border-top:0"><br>Initials of the Contractor or his Representative' .
-        '&nbsp;&nbsp;&nbsp;____________________________</td></tr></table>';
+        '<td width="50%"><b>&nbsp;&nbsp;Net Pay.</b></td><td width="50%" align="right"><b>' .
+        formXIXAmount($slip['net_pay']) . '&nbsp;&nbsp;</b></td></tr></table></td></tr>' .
+        '<tr><td colspan="7" height="58" align="right" style="border-left:1px solid #000;border-right:1px solid #000;border-bottom:1px solid #000;border-bottom:1px solid #000;border-top:0.5px solid #777"><br><br><br><br>' .
+        'Initials of the Contractor or his Representative&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' .
+        '____________________________&nbsp;&nbsp;&nbsp;&nbsp;</td></tr></table>';
 }
 
 function renderFormXIXHtml(array $employees, $salaryMonth, $companyName, array $advances = array())
