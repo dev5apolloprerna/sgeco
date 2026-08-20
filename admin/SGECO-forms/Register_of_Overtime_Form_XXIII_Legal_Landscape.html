@@ -60,14 +60,14 @@
         }
 
         .header-table td {
-            border: 0;
+            border: none;
             padding: 0;
             vertical-align: top;
         }
 
         .left-header {
             padding-right: 0.18in !important;
-            font-size: 9.5pt;
+            font-size: 12px;
             line-height: 1.45;
         }
 
@@ -78,32 +78,32 @@
 
         .right-header {
             padding-left: 0.18in !important;
-            font-size: 10pt;
+            font-size: 12px;
             line-height: 1.45;
         }
 
         .title {
             margin-bottom: 10px;
-            font-size: 19pt;
+            font-size: 12px;
             line-height: 1.05;
             font-weight: 700;
         }
 
         .form-number {
             /* margin-top: 0.06in; */
-            font-size: 14pt;
+            font-size: 12px;
             line-height: 1.05;
             font-weight: 700;
         }
 
         .rule-text {
             margin-top: 0.07in;
-            font-size: 10pt;
+            font-size: 12px;
         }
 
         .month-row {
             margin-top: 0.28in;
-            font-size: 12pt;
+            font-size: 12px;
         }
 
         .month-label {
@@ -116,7 +116,7 @@
         }
 
         .contractor-table td {
-            border: 0;
+            border: none;
             padding: 0 0 0.055in 0;
             vertical-align: top;
         }
@@ -142,7 +142,7 @@
 
         .nature-title {
             margin: 0.05in 0 0.07in;
-            font-size: 10pt;
+            font-size: 12px;
             font-weight: 700;
         }
 
@@ -150,7 +150,8 @@
 
         .register-frame {
             width: 100%;
-            border: 1px solid #000;
+            /* border: 1px solid #000; */
+            border: none;
             position: relative;
         }
 
@@ -161,7 +162,7 @@
             top: 0;
             right: 0;
             bottom: 0;
-            border-right: 1px solid #000;
+            /* border-right: 1px solid #000; */
             pointer-events: none;
         }
 
@@ -171,10 +172,11 @@
             border-collapse: collapse;
         }
 
+        
         .register-table th,
         .register-table td {
-            border-right: 1px solid #000;
-            border-bottom: 1px solid #000;
+            border: 1px solid #000;
+            /* border-bottom: 1px solid #000; */
             padding: 0.035in 0.025in;
             vertical-align: middle;
         }
@@ -191,23 +193,25 @@
         .register-table thead th {
             height: 0.82in;
             text-align: center;
-            font-size: 9.2pt;
+            font-size: 12px;
             line-height: 1.08;
             font-weight: 700;
         }
 
         .column-number-row td {
-            height: 0.20in;
+            /* height: 0.20in; */
+            height: auto;
             padding: 0.01in 0.02in;
             text-align: center;
-            font-size: 9.3pt;
+            font-size: 12px;
             line-height: 1;
             font-weight: 700;
         }
 
         .data-row td {
-            height: 0.30in;
-            font-size: 9.5pt;
+            /* height: 0.30in; */
+            height: auto;
+            font-size: 12px;
             line-height: 1.05;
         }
 
@@ -281,7 +285,7 @@
         <table class="page-layout">
             <tr>
                 <td>
-                    <div class="title" style="text-align: center;">Register of Overtime</div>
+                    <div class="title" style="text-align: center;"><strong>Register of Overtime</strong></div>
                     <table class="header-table">
                         <colgroup>
                             <col style="width: 42%;">
@@ -299,68 +303,69 @@
 
                                     <tr>
                                         <td class="contractor-label">
-                                            NAME AND ADDRESS OF CONTRACTOR :
+                                            <strong>NAME AND ADDRESS OF CONTRACTOR :</strong>
                                         </td>
-                                        <td>SHREE GANESH ENGINEERING CO.</td>
+                                        <td><strong>SHREE GANESH ENGINEERING CO.</strong></td>
                                     </tr>
 
                                     <tr>
                                         <td></td>
-                                        <td>FF-8, Devshruti Complex,</td>
+                                        <td><strong>FF-8, Devshruti Complex,</strong></td>
                                     </tr>
 
                                     <tr>
                                         <td></td>
-                                        <td>Nr. HCG Hospital,</td>
+                                        <td><strong>Nr. HCG Hospital,</strong></td>
                                     </tr>
 
                                     <tr>
                                         <td></td>
-                                        <td>Mithakhali, Ahmedabad - 380006</td>
+                                        <td><strong>Mithakhali, Ahmedabad - 380006</strong></td>
                                     </tr>
                                 </table>
                             </td>
 
                             <td class="center-header">
                                 <!-- <div class="title">Register of Overtime</div> -->
-                                <div class="form-number">FORM NO. XXIII</div>
-                                <div class="rule-text">[See Rule 78 (1) (a) (iii)]</div>
+                                <div class="form-number"><strong>FORM NO. XXIII</strong></div>
+                                <div class="rule-text"><strong>[See Rule 78 (1) (a) (iii)]</strong></div>
 
                                 <div class="month-row">
-                                    <span class="month-label">Month :</span>
-                                    <span>September-2024</span>
+                                    <span class="month-label"><strong>Month :</span>
+                                    <span>September-2024</span></strong>
                                 </div>
                             </td>
 
                             <td class="right-header">
                                 <div class="right-heading">
-                                    Name and Address of establishment in/under which
-                                    contract is carried on
+                                    <strong>Name and Address of establishment in/under which
+                                    contract is carried on</strong>
                                 </div>
 
                                 <div class="right-heading">
-                                    Name and Address of the principal Employer :
+                                    <strong>Name and Address of the principal Employer :
                                     <span class="normal">
                                         TATA Chemicals Ltd., Mithapur
                                     </span>
+                                    </strong>
                                 </div>
                             </td>
                         </tr>
                     </table>
 
                     <div class="nature-title">
-                        NATURE AND LOCATION OF WORK
+                        <strong>NATURE AND LOCATION OF WORK</strong>
                     </div>
 
                     <div class="register-frame">
                         <table class="register-table">
 
                             <colgroup>
-                                <col style="width: 2.5%;">
-                                <col style="width: 16.5%;">
-                                <col style="width: 13.5%;">
+                                <col style="width: 2%;">
+                                <col style="width: 19%;">
+                                <col style="width: 16%;">
                                 <col style="width: 5%;">
-                                <col style="width: 9.5%;">
+                                <col style="width: 5%;">
                                 <col style="width: 9%;">
                                 <col style="width: 10%;">
                                 <col style="width: 6.5%;">
@@ -372,25 +377,24 @@
 
                             <thead>
                                 <tr>
-                                    <th>Sr.<br>No.</th>
-                                    <th>Name of Workmen</th>
-                                    <th>Father's / Husband's Name</th>
-                                    <th>Sex</th>
-                                    <th>Designation/Nature<br>of<br>Employment</th>
-                                    <th>Date on Which<br>Overtime worked</th>
-                                    <th>
-                                        Total overtime<br>
+                                    <th style="text-align: center;"><strong>Sr.<br>No.</strong></th>
+                                    <th style="text-align: center;"><strong>Name of Workmen</strong></th>
+                                    <th style="text-align: center;"><strong>Father's / Husband's Name</strong></th>
+                                    <th style="text-align: center;"><strong>Sex</strong></th>
+                                    <th style="text-align: center;"><strong>Designation/Nature<br>of<br>Employment</strong></th>
+                                    <th style="text-align: center;"><strong>Date on Which<br>Overtime worked</strong></th>
+                                    <th style="text-align: center;">
+                                        <strong>Total overtime<br>
                                         worked or Production<br>
-                                        in case of piece-rated
+                                        in case of piece-rated</strong>
                                     </th>
-                                    <th>Normal rate<br>of wages</th>
-                                    <th>Overtime of<br>wages</th>
-                                    <th>Overtime<br>earning</th>
-                                    <th>Date on which<br>overtime wages<br>paid</th>
-                                    <th>Remarks</th>
+                                    <th style="text-align: center;"><strong>Normal rate<br>of wages</strong></th>
+                                    <th style="text-align: center;"><strong>Overtime of<br>wages</strong></th>
+                                    <th style="text-align: center;"><strong>Overtime<br>earning</strong></th>
+                                    <th style="text-align: center;"><strong>Date on which<br>overtime wages<br>paid</strong></th>
+                                    <th style="text-align: center;"><strong>Remarks</strong></th>
                                 </tr>
                             </thead>
-
                             <tbody>
                                 <tr class="column-number-row">
                                     <td>1</td>
