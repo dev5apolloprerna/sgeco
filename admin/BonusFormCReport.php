@@ -105,20 +105,32 @@ function getBonusFormCRows(array $employees, $salaryMonth)
     return $rows;
 }
 
-function renderBonusFormCHtml(array $employees, $salaryMonth, $companyName)
+function getBonusFormCPeriod($salaryMonth)
 {
     $period = DateTime::createFromFormat('!m/Y', $salaryMonth);
+    if (!$period || $period->format('m/Y') !== $salaryMonth) {
+        throw new InvalidArgumentException('A valid salary month is required.');
+    }
     $startYear = (int) $period->format('Y') - ((int) $period->format('n') < 4 ? 1 : 0);
+     return array(
+        'month_number' => $period->format('m'),
+        'accounting_year' => $startYear . '-' . substr((string) ($startYear + 1), -2)
+    );
+}
+
+function renderBonusFormCHtml(array $employees, $salaryMonth, $companyName)
+{
+    $period = getBonusFormCPeriod($salaryMonth);
     $rows = getBonusFormCRows($employees, $salaryMonth);
     $e = function ($value) {
         return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
     };
-    $css = 'body{font-family:"Times New Roman";font-size:11px}table{border-collapse:collapse}.head{width:100%;margin-bottom:12px}.title{text-align:center;font-size:20px;font-weight:bold;border-top:3px double #000;border-bottom:3px double #000}.main{width:100%;table-layout:fixed}.main th,.main td{border:1px solid #000;padding:4px;text-align:center}.left{text-align:left}.info{font-size:12px;line-height:1.6}';
+    $css = '@page{size:A4 landscape;margin:15mm 10mm}body{font-family:"Times New Roman",Times,serif;color:#000;margin:0;padding:0;font-size:11px}table{border-collapse:collapse}.head{width:100%;margin-bottom:10px}.head td{vertical-align:top;padding:0;font-size:13px}.contractor{white-space:nowrap;font-weight:bold}.title{text-align:center;font-size:20px;font-weight:bold;letter-spacing:1px;border-top:3px double #000;border-bottom:3px double #000;padding:4px 0}.main{width:100%;border:1px solid #000;margin-top:15px;table-layout:fixed}.main th,.main td{border:1px solid #000;padding:4px;text-align:center;vertical-align:middle;font-size:11px}.left{text-align:left!important;padding-left:6px!important}.info{font-size:13px!important;line-height:1.6}.note{width:100%;margin-top:6px;text-align:right;font-family:"Brush Script MT",cursive;font-style:italic;font-size:16px;padding-right:260px}';
     $html = '<html><head><meta charset="UTF-8"><style>' . $css . '</style></head><body><table class="head"><tr>' .
-        '<td width="38%"><b>NAME &amp; ADDRESS OF CONTRACTOR</b><br>SHREE GANESH ENGINEERING CO.<br>FF-8, Devshruti Complex,<br>Nr. HCG Hospital,<br>Mithakhali, Ahmedabad - 380006</td>' .
-        '<td width="28%"><div class="title">REGISTER OF BONUS</div><div style="text-align:center;font-size:16px;font-weight:bold">FORM C</div><div style="text-align:center;text-decoration:underline">See rule 4(b)</div></td>' .
-        '<td width="34%" class="info">Bonus paid to the employees for the accounting year ' . $startYear . '-' . substr((string) ($startYear + 1), -2) . '<br><br>Month No. ' . $e($period->format('m')) . '<br><br>Name &amp; Address of the principal Employers : ' . $e($companyName) . '</td></tr></table>' .
-        '<table class="main"><tr><th rowspan="2">Sr.<br>No.</th><th rowspan="2">Name of Workmen</th><th rowspan="2">Father Name</th><th rowspan="2">Whether he has Completed 15 years of age at the beginning of the accounting year</th><th rowspan="2">Designation/ Nature of Work</th><th rowspan="2">No. of days Worked</th><th rowspan="2">Daily Rate</th><th rowspan="2">Total salary or wage in respect of the accounting year</th><th rowspan="2">Amount of Bonus Payable under section 10/11 as the case may be</th><th colspan="3">Deduction</th><th rowspan="2">Actually Amount Paid</th><th rowspan="2">Date of Payment</th><th rowspan="2">Signature / Thumb impression of workmen</th></tr><tr><th>Puja or other customary bonus paid during the accounting year</th><th>Interim bonus or bonus paid in advance</th><th>Amount of income tax deducted 10-A</th></tr>' .
+        '<td width="45%"><span class="contractor">NAME &amp; ADDRESS OF CONTRACTOR</span>&nbsp;&nbsp;SHREE GANESH ENGINEERING CO.<br><span style="margin-left:214px">FF-8, Devshruti Complex,</span><br><span style="margin-left:214px">Nr. HCG Hospital,</span><br><span style="margin-left:214px">Mithakhali, Ahmedabad - 380006</span></td>' .
+        '<td width="25%"><div class="title">REGISTER OF BONUS</div><div style="text-align:center;font-size:16px;font-weight:bold;padding-top:6px">FORM C</div><div style="text-align:center;text-decoration:underline;font-size:12px">See rule 4(b)</div></td>' .
+        '<td width="30%" class="info">Bonus paid to the employees for the accounting year ' . $e($period['accounting_year']) . '<br><br>Month No. ' . $e($period['month_number']) . '<br><br>Name &amp; Address of the principal Employers : ' . $e($companyName) . '</td></tr></table>' .
+        '<table class="main"><colgroup><col style="width:3%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:7%"><col style="width:5%"><col style="width:5%"><col style="width:8%"><col style="width:8%"><col style="width:10%"><col style="width:7%"><col style="width:6%"><col style="width:6%"><col style="width:6%"><col style="width:6%"></colgroup><tr><th rowspan="2">Sr.<br>No.</th><th rowspan="2">Name of Workmen</th><th rowspan="2">Father Name</th><th rowspan="2">Whether he has Completed 15 years of age at the beginning of the accounting year</th><th rowspan="2">Designation/ Nature of Work</th><th rowspan="2">No. of days Worked</th><th rowspan="2">Daily Rate</th><th rowspan="2">Total salary or wage in respect of the accounting year</th><th rowspan="2">Amount of Bonus Payable under section 10/11 as the case may be</th><th colspan="3">Deduction</th><th rowspan="2">Actually Amount Paid</th><th rowspan="2">Date of Payment</th><th rowspan="2">Signature / Thumb impression of workmen</th></tr><tr><th>Puja or other customary bonus paid during the accounting year</th><th>Interim bonus or bonus paid in advance</th><th>Amount of income tax deducted 10-A</th></tr>' .
         '<tr>' . implode('', array_map(function ($n) {
             return '<td>' . $n . '</td>';
         }, range(1, 15))) . '</tr>';
@@ -129,7 +141,7 @@ function renderBonusFormCHtml(array $employees, $salaryMonth, $companyName)
         }
         $html .= '<tr><td>' . ($index + 1) . '</td><td class="left">' . $e($row['name']) . '</td><td class="left">' . $e($row['father']) . '</td><td>' . $e($row['adult']) . '</td><td>' . $e($row['designation']) . '</td><td>' . $row['days'] . '</td><td>' . $row['rate'] . '</td><td>' . $row['salary'] . '</td><td>' . $row['bonus'] . '</td><td>' . $row['customary'] . '</td><td>' . $row['advance'] . '</td><td>' . $row['tax'] . '</td><td>' . $row['paid'] . '</td><td>' . $row['payment_date'] . '</td><td></td></tr>';
     }
-    $html .= '<tr><td></td><td colspan="2"><b>TOTAL</b></td><td></td><td></td><td>' . bonusFormCNumber($totals['days']) . '</td><td>0.00</td><td>' . bonusFormCNumber($totals['salary']) . '</td><td>' . bonusFormCNumber($totals['bonus']) . '</td><td>0.00</td><td>0.00</td><td>0.00</td><td>' . bonusFormCNumber($totals['paid']) . '</td><td>0</td><td></td></tr></table><div style="text-align:right;font-style:italic">i.e. Basic x 8.33 %</div></body></html>';
+    $html .= '<tr><td></td><td colspan="2"><b>TOTAL</b></td><td></td><td></td><td>' . bonusFormCNumber($totals['days']) . '</td><td>0.00</td><td>' . bonusFormCNumber($totals['salary']) . '</td><td>' . bonusFormCNumber($totals['bonus']) . '</td><td>0.00</td><td>0.00</td><td>0.00</td><td>' . bonusFormCNumber($totals['paid']) . '</td><td>0</td><td></td></tr></table><div class="note">i.e. Basic x 8.33 %</div></body></html>';
     return $html;
 }
 
