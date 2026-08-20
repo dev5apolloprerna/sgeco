@@ -7,7 +7,16 @@ function getFormXIIIEmployees($dbconn, $companyId, $salaryMonth)
 {
     $companyId = mysqli_real_escape_string($dbconn, $companyId);
     $salaryMonth = mysqli_real_escape_string($dbconn, $salaryMonth);
-    $sql = "SELECT employee.emp_name, employee.dateofbirth, employee.strFatherName,
+    $genderExpression = "''";
+    foreach (array('gender', 'strGender', 'sex') as $genderColumn) {
+        $columnResult = mysqli_query($dbconn, "SHOW COLUMNS FROM employee LIKE '" . $genderColumn . "'");
+        if ($columnResult && mysqli_num_rows($columnResult) > 0) {
+            $genderExpression = 'employee.`' . $genderColumn . '`';
+            break;
+        }
+    }
+    $sql = "SELECT employee.emp_name, employee.dateofbirth, " . $genderExpression . " AS gender,
+                   employee.strFatherName,
                    employee.designation, employee.strPermanentAddress, employee.address,
                    employee.dateofjoining, employee.strExitDate
             FROM salarydetails
@@ -34,6 +43,16 @@ function getFormXIIIEmployees($dbconn, $companyId, $salaryMonth)
         $employees[] = $row;
     }
     return $employees;
+}
+
+function formatFormXIIIAgeAndSex($dateOfBirth, $gender, $salaryMonth)
+{
+    $age = getFormXIIIAge($dateOfBirth, $salaryMonth);
+    $gender = trim((string) $gender);
+    if ($age === '') {
+        return $gender;
+    }
+    return $gender === '' ? $age : $age . ' / ' . $gender;
 }
 
 function getFormXIIICompanyName($dbconn, $companyId)
@@ -111,7 +130,7 @@ function renderFormXIIIHtml(array $employees, $salaryMonth, $companyName)
         $cells = array(
             $index + 1,
             $employee['emp_name'],
-            getFormXIIIAge($employee['dateofbirth'], $salaryMonth),
+            formatFormXIIIAgeAndSex($employee['dateofbirth'], $employee['gender'], $salaryMonth),
             $employee['strFatherName'],
             $employee['designation'],
             $employee['strPermanentAddress'],
