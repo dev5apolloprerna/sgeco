@@ -28,12 +28,12 @@
          */
         .form-page {
             width: 14in;
-            height: 8.5in;
+            min-height: 8.5in;
             margin: 18px auto;
             padding: 20mm 12mm 20mm;
             background: #fff;
             position: relative;
-            overflow: hidden;
+            /* overflow: hidden; */
         }
 
         table {
@@ -236,12 +236,13 @@
 
             .form-page {
                 width: 14in;
-                height: 8.5in;
+                min-height: 8.5in;
+                height: auto;
                 margin: 0;
                 padding: 20mm 12mm 20mm;
-                overflow: hidden;
+                /* overflow: hidden;
                 break-inside: avoid;
-                page-break-inside: avoid;
+                page-break-inside: avoid; */
             }
 
             /*
@@ -253,11 +254,11 @@
                 page-break-before: always;
             }
 
-            .register-frame,
+            /* .register-frame,
             .register-table {
                 break-inside: avoid;
                 page-break-inside: avoid;
-            }
+            } */
         }
 
         @media screen and (max-width: 1450px) {

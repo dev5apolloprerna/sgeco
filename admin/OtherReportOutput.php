@@ -7,7 +7,7 @@
  * Letting the cells grow with their content also prevents wrapped names from
  * overlapping the following row.
  */
-function addOtherReportPdfSpacing($html)
+function addOtherReportPdfSpacing($html, $repeatTableHeaders = true)
 {
     $style = '<style type="text/css">'
         . '.register-table tbody.register-body td,'
@@ -27,6 +27,15 @@ function addOtherReportPdfSpacing($html)
         '<tr class="data-row" nobr="true">',
         $html
     );
+
+    // TCPDF automatically repeats every THEAD when a table flows onto a new
+    // page. Some registers, including Form XXIII, must continue as one list
+    // without printing the column header again. Use a regular table body for
+    // PDF rendering in that case; the browser and Excel HTML stay unchanged.
+    if (!$repeatTableHeaders) {
+        $html = preg_replace('/<thead\b([^>]*)>/i', '<tbody$1>', $html);
+        $html = preg_replace('/<\/thead>/i', '</tbody>', $html);
+    }
 
     if (stripos($html, '</head>') !== false) {
         return preg_replace('/<\/head>/i', $style . '</head>', $html, 1);
