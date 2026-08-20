@@ -9,6 +9,7 @@ require_once('FormXXReport.php');
 require_once('FormXIIIReport.php');
 require_once('FormXXIIReport.php');
 require_once('FormXXIIIReport.php');
+require_once('FormXIXReport.php');
 
 header('Content-Type: text/html; charset=UTF-8');
 
@@ -17,7 +18,7 @@ $companyId = isset($_POST['Company']) ? trim($_POST['Company']) : '';
 $salaryMonth = isset($_POST['salarymasterId']) ? trim($_POST['salarymasterId']) : '';
 
 if (
-    !in_array($report, array('form-c', 'form-xx', 'form-xxi', 'form-xxii', 'form-xxiii', 'form-xiii'), true) ||
+    !in_array($report, array('form-c', 'form-xx', 'form-xxi', 'form-xxii', 'form-xxiii', 'form-xiii', 'form-xix'), true) ||
     $companyId === '' ||
     !preg_match('/^(0[1-9]|1[0-2])\/\d{4}$/', $salaryMonth)
 ) {
@@ -26,7 +27,13 @@ if (
 }
 
 try {
-    if ($report === 'form-xiii') {
+    if ($report === 'form-xix') {
+        echo renderFormXIXList(
+            getFormXIXEmployees($dbconn, $companyId, $salaryMonth),
+            $companyId,
+            $salaryMonth
+        );
+    } elseif ($report === 'form-xiii') {
         echo renderFormXIIIHtml(
             getFormXIIIEmployees($dbconn, $companyId, $salaryMonth),
             $salaryMonth,
