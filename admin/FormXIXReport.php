@@ -60,138 +60,142 @@ function formXIXAmount($value)
     return number_format((float) formXIXValue($value), 2, '.', '');
 }
 
-function renderFormXIXHtml(array $employees, $salaryMonth, $companyName, array $advances = array())
+function getFormXIXSlipData(array $employees, $salaryMonth, $companyName, array $advances = array())
 {
-    $template = file_get_contents(__DIR__ . '/SGECO-forms/wages-complete.html');
-    if ($template === false || !preg_match('/<body[^>]*>(.*)<\/body>/is', $template, $body)) {
-        throw new RuntimeException('The Form XIX template could not be loaded.');
-    }
-    $headEnd = stripos($template, '</head>');
-    $documentHead = substr($template, 0, $headEnd + 7);
-    $page = trim($body[1]);
     $period = DateTime::createFromFormat('!m/Y', $salaryMonth);
+    $slips = array();
+    foreach ($employees as $index => $employee) {
+        $advance = getEmployeeCompanyReportAdvance($advances, $employee['employeeId']);
+        $fatherName = formXIXValue($employee['strFatherName']);
+        $slips[] = array(
+            'serial' => $index + 1,
+            'pf_number' => formXIXValue($employee['pfcode']),
+            'worker_number' => formXIXValue($employee['employeecode']),
+            'period' => $period ? $period->format('F-Y') : '0',
+            'company' => formXIXValue($companyName),
+            'workman' => trim(formXIXValue($employee['emp_name']) . ($fatherName === '0' ? '' : ' ' . $fatherName)),
+            'wages' => array($employee['skillrate'], 0, 0, 0, 0, 0, $employee['othours']),
+            'earnings' => array(
+                $employee['basicwages'],
+                $employee['hra'],
+                0,
+                0,
+                $employee['MedicalAllowanceamt'],
+                0,
+                $employee['totalovertime'],
+                0,
+                0,
+                0,
+                $employee['iBonusAmt'],
+                $employee['iLeaveAmt'],
+                $employee['national_holiday_payment']
+            ),
+            'deductions' => array(
+                $employee['pt'],
+                $employee['pf'],
+                $employee['esi'],
+                0,
+                $employee['deductionifany'],
+                $advance
+            ),
+            'bank_name' => formXIXValue($employee['bankname']),
+            'ifsc' => formXIXValue($employee['ifsccode']),
+            'uan' => formXIXValue($employee['uan']),
+            'work_days' => $employee['workingdays'],
+            'gross' => (float) $employee['total'] + (float) $employee['MedicalAllowanceamt'],
+            'total_deduction' => (float) $employee['pt'] + (float) $employee['pf'] +
+                (float) $employee['esi'] + (float) $employee['deductionifany'] + (float) $advance,
+            'net_pay' => (float) $employee['netamountpaid'] - (float) $advance
+        );
+    }
+    return $slips;
+}
+
+function renderFormXIXSlipTable(array $slip)
+{
     $esc = function ($value) {
         return htmlspecialchars(formXIXValue($value), ENT_QUOTES, 'UTF-8');
     };
-    $pages = array();
-    foreach ($employees as $index => $employee) {
-        $advance = getEmployeeCompanyReportAdvance($advances, $employee['employeeId']);
-        $gross = (float) $employee['total'] + (float) $employee['MedicalAllowanceamt'];
-        $deductions = (float) $employee['pt'] + (float) $employee['pf'] + (float) $employee['esi'] +
-            (float) $employee['deductionifany'] + (float) $advance;
-        $net = (float) $employee['netamountpaid'] - (float) $advance;
-        $name = trim(formXIXValue($employee['emp_name']) . ' ' .
-            (formXIXValue($employee['strFatherName']) === '0' ? '' : $employee['strFatherName']));
-        $wages = array($employee['skillrate'], 0, 0, 0, 0, 0, $employee['othours']);
-        $earnings = array(
-            $employee['basicwages'],
-            $employee['hra'],
-            0,
-            0,
-            $employee['MedicalAllowanceamt'],
-            0,
-            $employee['totalovertime'],
-            0,
-            0,
-            0,
-            $employee['iBonusAmt'],
-            $employee['iLeaveAmt'],
-            $employee['national_holiday_payment']
-        );
-        $deductionValues = array(
-            $employee['pt'],
-            $employee['pf'],
-            $employee['esi'],
-            0,
-            $employee['deductionifany'],
-            $advance
-        );
-        $current = $page;
-        $replacements = array(
-            '5',
-            '12443',
-            'September-2024',
-            'SHREE GANESH ENGINEERING COMPANY',
-            'Dilip Mahendra Yadav',
-            'TATA Chemicals Limited, Mithapur'
-        );
-        $values = array(
-            $index + 1,
-            $employee['pfcode'],
-            $period ? $period->format('F-Y') : '0',
-            $companyName,
-            $name,
-            $companyName
-        );
-        foreach ($replacements as $key => $literal) {
-            $current = preg_replace('/' . preg_quote($literal, '/') . '/', $esc($values[$key]), $current, 1);
+    $lines = function (array $labels, array $values) use ($esc) {
+        $html = '';
+        foreach ($labels as $index => $label) {
+            $html .= $esc($label) . '<br>';
         }
-        // Worker number is the second literal 5 in the header after Sr. No.
-        $current = preg_replace(
-            '/(<span class="field-title">Worker No\.:<\/span>\s*<span class="field-value">).*?(<\/span>)/s',
-            '$1' . $esc($employee['employeecode']) . '$2',
-            $current,
-            1
-        );
-        $amounts = array_merge($wages, $earnings, $deductionValues);
-        $position = 0;
-        $current = preg_replace_callback(
-            '/<table class="payroll-lines amount-column">(.*?)<\/table>/s',
-            function ($match) use (&$position, $amounts) {
-                return preg_replace_callback('/(<td>).*?(<\/td>)/s', function ($cell) use (&$position, $amounts) {
-                    $value = isset($amounts[$position]) ? formXIXAmount($amounts[$position]) : '0.00';
-                    $position++;
-                    return $cell[1] . $value . $cell[2];
-                }, $match[0]);
-            },
-            $current
-        );
-        $bankValues = array($employee['bankname'], $employee['ifsccode'], $employee['uan']);
-        $bankPosition = 0;
-        $current = preg_replace_callback(
-            '/(<td class="bank-value">).*?(<\/td>)/s',
-            function ($match) use (&$bankPosition, $bankValues, $esc) {
-                return $match[1] . $esc($bankValues[$bankPosition++]) . $match[2];
-            },
-            $current
-        );
-        $totals = array($employee['workingdays'], $gross, $deductions, $net);
-        $totalPosition = 0;
-        $current = preg_replace_callback(
-            '/(<td class="total-value"[^>]*>).*?(<\/td>)/s',
-            function ($match) use (&$totalPosition, $totals) {
-                return $match[1] . formXIXAmount($totals[$totalPosition++]) . $match[2];
-            },
-            $current
-        );
-        $current = preg_replace_callback(
-            '/(<td style="text-align: right;">)\s*17086\.00\s*(<\/td>)/s',
-            function ($match) use ($net) {
-                return $match[1] . formXIXAmount($net) . $match[2];
-            },
-            $current,
-            1
-        );
-        // The supplied address and work description have no Employee/Salary fields.
-        $current = preg_replace(
-            '/FF-8, DEVSHRUTI COMPLEX, NR\. HCG HOSPITAL,\s*MITHAKHALI, AHMEDABAD-380006\./',
-            '0',
-            $current,
-            1
-        );
-        $current = str_replace('Work of HPB-4 Boiler Valve/Piping Replacement.', '0', $current);
-        if ($index < count($employees) - 1) {
-            $current = preg_replace(
-                '/class="print-page"/',
-                'class="print-page" style="page-break-after:always"',
-                $current,
-                1
-            );
+        return $html;
+    };
+    $amountLines = function (array $values) {
+        $html = '';
+        foreach ($values as $value) {
+            $html .= formXIXAmount($value) . '<br>';
         }
-        $pages[] = $current;
+        return $html;
+    };
+    $wageLabels = array('Minimum', 'HRA', 'Conveyance', 'Education', 'Medical', 'Washing', 'OT Hours');
+    $earningLabels = array(
+        'Basic',
+        'HRA',
+        'Conveyance',
+        'Education',
+        'Medical',
+        'Washing',
+        'OT Earn',
+        'Food Allow.',
+        'Other Allow.',
+        'Mobile Allow.',
+        'Bonus',
+        'Leave',
+        'National Holiday'
+    );
+    $deductionLabels = array('Prof. Tax', 'PF', 'ESIC', 'GL.W.F.', 'Other Deduction', 'Advance');
+
+    return '<style>table{font-family:helvetica;font-size:9pt;color:#000}td{line-height:1.35}</style>' .
+        '<table width="100%" border="1" cellpadding="5" cellspacing="0">' .
+        '<tr><td colspan="7" align="center" style="font-size:16pt;font-weight:bold">' .
+        'FORM - XIX - [ SEE RULE - 78(I)(B) ] - WAGES SLIP</td></tr>' .
+        '<tr><td colspan="7" style="border-bottom:0"><table width="100%" cellpadding="2"><tr>' .
+        '<td width="25%">Sr. No.: <b>' . $esc($slip['serial']) . '</b></td>' .
+        '<td width="25%">PF No.: <b>' . $esc($slip['pf_number']) . '</b></td>' .
+        '<td width="25%">Worker No.: <b>' . $esc($slip['worker_number']) . '</b></td>' .
+        '<td width="25%" align="right">Period: <b>' . $esc($slip['period']) . '</b></td>' .
+        '</tr></table></td></tr>' .
+        '<tr><td colspan="7"><b>Name &amp; Address of Contractor</b>&nbsp;&nbsp;&nbsp; SHREE GANESH ENGINEERING COMPANY' .
+        '<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' .
+        'FF-8, DEVSHRUTI COMPLEX, NR. HCG HOSPITAL, MITHAKHALI, AHMEDABAD-380006.</td></tr>' .
+        '<tr><td colspan="7"><b>Code/Name and Father\'s/Husband\'s Name of Workman:</b>&nbsp;&nbsp;&nbsp; ' .
+        $esc($slip['workman']) . '</td></tr>' .
+        '<tr><td colspan="7"><b>Nature and Location of Work :</b>&nbsp;&nbsp;&nbsp; ' . $esc($slip['company']) .
+        '<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0</td></tr>' .
+        '<tr style="font-weight:bold;text-align:center">' .
+        '<td width="14%" align="left">Head</td><td width="8%" align="right">Wages</td>' .
+        '<td width="27%" colspan="2">Earning</td>' .
+        '<td width="24%" colspan="2">Deduction</td><td width="27%">Signature</td></tr>' .
+        '<tr><td width="14%" height="235">' . $lines($wageLabels, $slip['wages']) . '</td>' .
+        '<td width="8%" align="right">' . $amountLines($slip['wages']) . '</td>' .
+        '<td width="17%">' . $lines($earningLabels, $slip['earnings']) . '</td>' .
+        '<td width="10%" align="right">' . $amountLines($slip['earnings']) . '</td>' .
+        '<td width="14%">' . $lines($deductionLabels, $slip['deductions']) . '</td>' .
+        '<td width="10%" align="right">' . $amountLines($slip['deductions']) . '</td>' .
+        '<td width="27%">Bank Name:&nbsp;&nbsp; ' . $esc($slip['bank_name']) . '<br>' .
+        'IFSC Code:&nbsp;&nbsp; ' . $esc($slip['ifsc']) . '<br>UAN No.:&nbsp;&nbsp; ' . $esc($slip['uan']) . '</td></tr>' .
+        '<tr style="font-weight:bold"><td width="14%">Work Days</td><td width="8%" align="right">' .
+        formXIXAmount($slip['work_days']) . '</td><td width="17%">Gross Earn.</td><td width="10%" align="right">' .
+        formXIXAmount($slip['gross']) . '</td><td width="14%">Total Deduction</td><td width="10%" align="right">' .
+        formXIXAmount($slip['total_deduction']) . '</td><td width="27%">Net Pay. <span style="float:right">' .
+        formXIXAmount($slip['net_pay']) . '</span></td></tr>' .
+        '<tr><td colspan="7" height="48" align="right"><br>Initials of the Contractor or his Representative' .
+        '&nbsp;&nbsp;&nbsp;____________________________</td></tr></table>';
+}
+
+function renderFormXIXHtml(array $employees, $salaryMonth, $companyName, array $advances = array())
+{
+    $html = '<html><head><meta charset="UTF-8"><title>Wages Slip</title></head><body>';
+    foreach (getFormXIXSlipData($employees, $salaryMonth, $companyName, $advances) as $index => $slip) {
+        if ($index > 0) {
+            $html .= '<br pagebreak="true">';
+        }
+        $html .= renderFormXIXSlipTable($slip);
     }
-    return $documentHead . '<body>' . ($pages ? implode("\n", $pages) :
-        '<div class="print-page"><h2 style="text-align:center">No Data Found !</h2></div>') . '</body></html>';
+    return $html . '</body></html>';
 }
 
 function renderFormXIXList(array $employees, $companyId, $salaryMonth)
