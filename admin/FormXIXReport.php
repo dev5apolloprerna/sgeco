@@ -148,41 +148,59 @@ function renderFormXIXSlipTable(array $slip)
     );
     $deductionLabels = array('Prof. Tax', 'PF', 'ESIC', 'GL.W.F.', 'Other Deduction', 'Advance');
 
-    return '<style>table{font-family:helvetica;font-size:9pt;color:#000}td{line-height:1.35}</style>' .
-        '<table width="100%" border="1" cellpadding="5" cellspacing="0">' .
-        '<tr><td colspan="7" align="center" style="font-size:16pt;font-weight:bold">' .
+    $sideBorders = 'border-left:1px solid #000;border-right:1px solid #000;';
+
+    /*
+     * TCPDF supports a deliberately small subset of browser CSS.  Keep this
+     * layout table based, and set each edge explicitly, so the generated PDF
+     * matches the approved HTML form without depending on unsupported flex,
+     * float, or pseudo-element rules.
+     */
+    return '<style>table{font-family:helvetica;font-size:9pt;color:#000}td{line-height:1.25}</style>' .
+        '<table width="100%" border="0" cellpadding="0" cellspacing="0" nobr="true">' .
+        '<tr><td colspan="7" height="34" align="center" valign="middle" style="border:1px solid #000;border-bottom:0;font-size:16pt;font-weight:bold">' .
         'FORM - XIX - [ SEE RULE - 78(I)(B) ] - WAGES SLIP</td></tr>' .
-        '<tr><td colspan="7" style="border-bottom:0"><table width="100%" cellpadding="2"><tr>' .
+        '<tr><td colspan="7" height="30" valign="middle" style="' . $sideBorders . '"><table width="100%" cellpadding="4"><tr>' .
         '<td width="25%">Sr. No.: <b>' . $esc($slip['serial']) . '</b></td>' .
         '<td width="25%">PF No.: <b>' . $esc($slip['pf_number']) . '</b></td>' .
         '<td width="25%">Worker No.: <b>' . $esc($slip['worker_number']) . '</b></td>' .
         '<td width="25%" align="right">Period: <b>' . $esc($slip['period']) . '</b></td>' .
         '</tr></table></td></tr>' .
-        '<tr><td colspan="7"><b>Name &amp; Address of Contractor</b>&nbsp;&nbsp;&nbsp; SHREE GANESH ENGINEERING COMPANY' .
-        '<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' .
-        'FF-8, DEVSHRUTI COMPLEX, NR. HCG HOSPITAL, MITHAKHALI, AHMEDABAD-380006.</td></tr>' .
-        '<tr><td colspan="7"><b>Code/Name and Father\'s/Husband\'s Name of Workman:</b>&nbsp;&nbsp;&nbsp; ' .
-        $esc($slip['workman']) . '</td></tr>' .
-        '<tr><td colspan="7"><b>Nature and Location of Work :</b>&nbsp;&nbsp;&nbsp; ' . $esc($slip['company']) .
-        '<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0</td></tr>' .
+        '<tr><td colspan="7" style="' . $sideBorders . '"><table width="100%" cellpadding="4"><tr>' .
+        '<td width="22%"><b>Name &amp; Address of Contractor</b></td><td width="78%">' .
+        'SHREE GANESH ENGINEERING COMPANY<br>FF-8, DEVSHRUTI COMPLEX, NR. HCG HOSPITAL, ' .
+        'MITHAKHALI, AHMEDABAD-380006.</td></tr></table></td></tr>' .
+        '<tr><td colspan="7" height="28" style="' . $sideBorders . '"><table width="100%" cellpadding="4"><tr>' .
+        '<td width="40%"><b>Code/Name and Father\'s/Husband\'s Name of Workman:</b></td><td width="60%">' .
+        $esc($slip['workman']) . '</td></tr></table></td></tr>' .
+        '<tr><td colspan="7" height="34" style="' . $sideBorders . '"><table width="100%" cellpadding="4"><tr>' .
+        '<td width="22%"><b>Nature and Location of Work :</b></td><td width="78%">' . $esc($slip['company']) .
+        '</td></tr></table></td></tr>' .
         '<tr style="font-weight:bold;text-align:center">' .
-        '<td width="14%" align="left">Head</td><td width="8%" align="right">Wages</td>' .
-        '<td width="27%" colspan="2">Earning</td>' .
-        '<td width="24%" colspan="2">Deduction</td><td width="27%">Signature</td></tr>' .
-        '<tr><td width="14%" height="235">' . $lines($wageLabels, $slip['wages']) . '</td>' .
-        '<td width="8%" align="right">' . $amountLines($slip['wages']) . '</td>' .
-        '<td width="17%">' . $lines($earningLabels, $slip['earnings']) . '</td>' .
-        '<td width="10%" align="right">' . $amountLines($slip['earnings']) . '</td>' .
-        '<td width="14%">' . $lines($deductionLabels, $slip['deductions']) . '</td>' .
-        '<td width="10%" align="right">' . $amountLines($slip['deductions']) . '</td>' .
-        '<td width="27%">Bank Name:&nbsp;&nbsp; ' . $esc($slip['bank_name']) . '<br>' .
+        '<td width="14%" height="25" align="left" style="border:1px solid #000">Head</td>' .
+        '<td width="8%" align="right" style="border:1px solid #000">Wages</td>' .
+        '<td width="27%" colspan="2" style="border:1px solid #000">Earning</td>' .
+        '<td width="24%" colspan="2" style="border:1px solid #000">Deduction</td>' .
+        '<td width="27%" style="border:1px solid #000">Signature</td></tr>' .
+        '<tr><td width="14%" height="250" style="border:1px solid #000">' . $lines($wageLabels, $slip['wages']) . '</td>' .
+        '<td width="8%" align="right" style="border:1px solid #000">' . $amountLines($slip['wages']) . '</td>' .
+        '<td width="17%" style="border:1px solid #000">' . $lines($earningLabels, $slip['earnings']) . '</td>' .
+        '<td width="10%" align="right" style="border:1px solid #000">' . $amountLines($slip['earnings']) . '</td>' .
+        '<td width="14%" style="border:1px solid #000">' . $lines($deductionLabels, $slip['deductions']) . '</td>' .
+        '<td width="10%" align="right" style="border:1px solid #000">' . $amountLines($slip['deductions']) . '</td>' .
+        '<td width="27%" style="border:1px solid #000">Bank Name:&nbsp;&nbsp; ' . $esc($slip['bank_name']) . '<br>' .
         'IFSC Code:&nbsp;&nbsp; ' . $esc($slip['ifsc']) . '<br>UAN No.:&nbsp;&nbsp; ' . $esc($slip['uan']) . '</td></tr>' .
-        '<tr style="font-weight:bold"><td width="14%">Work Days</td><td width="8%" align="right">' .
-        formXIXAmount($slip['work_days']) . '</td><td width="17%">Gross Earn.</td><td width="10%" align="right">' .
-        formXIXAmount($slip['gross']) . '</td><td width="14%">Total Deduction</td><td width="10%" align="right">' .
-        formXIXAmount($slip['total_deduction']) . '</td><td width="27%">Net Pay. <span style="float:right">' .
-        formXIXAmount($slip['net_pay']) . '</span></td></tr>' .
-        '<tr><td colspan="7" height="48" align="right"><br>Initials of the Contractor or his Representative' .
+        '<tr style="font-weight:bold"><td width="14%" height="26" style="border:1px solid #000">Work Days</td>' .
+        '<td width="8%" align="right" style="border:1px solid #000">' .
+        formXIXAmount($slip['work_days']) . '</td><td width="17%" style="border:1px solid #000">Gross Earn.</td>' .
+        '<td width="10%" align="right" style="border:1px solid #000">' . formXIXAmount($slip['gross']) .
+        '</td><td width="14%" style="border:1px solid #000">Total Deduction</td>' .
+        '<td width="10%" align="right" style="border:1px solid #000">' .
+        formXIXAmount($slip['total_deduction']) . '</td><td width="27%" style="border:1px solid #000">' .
+        '<table width="100%"><tr>' .
+        '<td width="50%"><b>Net Pay.</b></td><td width="50%" align="right"><b>' .
+        formXIXAmount($slip['net_pay']) . '</b></td></tr></table></td></tr>' .
+        '<tr><td colspan="7" height="52" align="right" style="border:1px solid #000;border-top:0"><br>Initials of the Contractor or his Representative' .
         '&nbsp;&nbsp;&nbsp;____________________________</td></tr></table>';
 }
 
