@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,7 +18,8 @@
         }
 
         body {
-            background: #fff; /* background: #ececec; */
+            background: #fff;
+            /* background: #ececec; */
             color: #000;
             font-family: "Times New Roman", Times, serif;
         }
@@ -46,7 +48,7 @@
             table-layout: fixed;
         }
 
-        .page-layout > tbody > tr > td {
+        .page-layout>tbody>tr>td {
             padding: 0;
             vertical-align: top;
         }
@@ -98,7 +100,7 @@
 
         .main-title {
             margin-bottom: 10px;
-            font-size: 12px;
+            font-size: 14px;
             line-height: 1.05;
             font-weight: 700;
         }
@@ -234,6 +236,7 @@
         }
 
         @media print {
+
             html,
             body {
                 margin: 0;
@@ -273,14 +276,15 @@
 
 <body>
 
-    
+
     <section class="form-page">
 
         <table class="page-layout">
             <tr>
                 <td>
-                    <div class="main-title " style="text-align: center;">Register of Fines</div>
-                    <table class="header-table" border="0" cellspacing="0" cellpadding="0" style="border: none; font-weight: bold;">
+                    <div class="main-title " style="text-align: center;"><strong>Register of Fines</strong></div>
+                    <table class="header-table" border="0" cellspacing="0" cellpadding="0"
+                        style="border: none; font-weight: bold;">
                         <colgroup>
                             <col style="width: 39%;">
                             <col style="width: 22%;">
@@ -290,7 +294,8 @@
                         <tr>
                             <!-- Left contractor details -->
                             <td class="left-header" style="border: none;">
-                                <table class="info-table" border="0" cellspacing="0" cellpadding="0" style="border: none;">
+                                <table class="info-table" border="0" cellspacing="0" cellpadding="0"
+                                    style="border: none;">
                                     <colgroup>
                                         <col style="width: 55%;">
                                         <col style="width: 45%;">
@@ -346,7 +351,7 @@
                                 <div class="right-line">
                                     Name and Address of the principal Employer :
                                     <span class="normal-weight">
-                                         {{FORM_XXI_COMPANY}}
+                                        {{FORM_XXI_COMPANY}}
                                     </span>
                                 </div>
                             </td>
@@ -358,7 +363,8 @@
                     </div>
 
                     <div class="register-frame">
-                        <table class="register-table" border="1" cellspacing="0" cellpadding="0" style="border: 1px solid #000; border-collapse: collapse;">
+                        <table class="register-table" border="1" cellspacing="0" cellpadding="0"
+                            style="border: 1px solid #000; border-collapse: collapse;">
                             <colgroup>
                                 <col style="width: 3%;">
                                 <col style="width: 18%;">
@@ -378,22 +384,29 @@
                                 <tr>
                                     <th style="width: 3%;text-align: center;"><strong>Sr.<br>No.</strong></th>
                                     <th style="width: 18%;text-align: center;"><strong>Name of Workmen</strong></th>
-                                    <th style="width: 15%;text-align: center;"><strong>Father's / Husband's<br>Name</strong></th>
-                                    <th style="width: 12%;text-align: center;"><strong>Designation/<br>Nature of<br>Employment</strong></th>
-                                    <th style="width: 7%;text-align: center;"><strong>Act/Omission<br>for which fine<br>imposed</strong></th>
+                                    <th style="width: 15%;text-align: center;"><strong>Father's /
+                                            Husband's<br>Name</strong></th>
+                                    <th style="width: 12%;text-align: center;"><strong>Designation/<br>Nature
+                                            of<br>Employment</strong></th>
+                                    <th style="width: 7%;text-align: center;"><strong>Act/Omission<br>for which
+                                            fine<br>imposed</strong></th>
                                     <th style="width: 5%;text-align: center;"><strong>Date of<br>offence</strong></th>
-                                    <th style="width: 7%;text-align: center;"><strong>Whether workman<br>showed cause<br>against fine</strong></th>
+                                    <th style="width: 7%;text-align: center;"><strong>Whether workman<br>showed
+                                            cause<br>against fine</strong></th>
                                     <th style="width: 8%;text-align: center;">
                                         <strong>Name of person<br>
-                                        in whose presence<br>
-                                        workman<br>
-                                        explanation<br>
-                                        was heard
+                                            in whose presence<br>
+                                            workman<br>
+                                            explanation<br>
+                                            was heard
                                         </strong>
                                     </th>
-                                    <th style="width: 6%;text-align: center;"><strong>Wage periods<br>and<br>wages payable</strong></th>
-                                    <th style="width: 6%;text-align: center;"><strong>Amount of fine<br>imposed</strong></th>
-                                    <th style="width: 6%;text-align: center;"><strong>Date on which<br>fine<br>realised</strong></th>
+                                    <th style="width: 6%;text-align: center;"><strong>Wage periods<br>and<br>wages
+                                            payable</strong></th>
+                                    <th style="width: 6%;text-align: center;"><strong>Amount of fine<br>imposed</strong>
+                                    </th>
+                                    <th style="width: 6%;text-align: center;"><strong>Date on
+                                            which<br>fine<br>realised</strong></th>
                                     <th style="width: 7%;text-align: center;"><strong>Remarks</strong></th>
                                 </tr>
                             </thead>
@@ -439,4 +452,5 @@
     </section>
 
 </body>
+
 </html>

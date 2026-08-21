@@ -12,6 +12,7 @@ require_once('FormXXIIIReport.php');
 require_once('FormXIXReport.php');
 require_once('BonusFormCReport.php');
 require_once('FormVIIIReport.php');
+require_once('FormXIIReport.php');
 
 header('Content-Type: text/html; charset=UTF-8');
 
@@ -20,7 +21,7 @@ $companyId = isset($_POST['Company']) ? trim($_POST['Company']) : '';
 $salaryMonth = isset($_POST['salarymasterId']) ? trim($_POST['salarymasterId']) : '';
 
 if (
-    !in_array($report, array('form-c', 'form-xx', 'form-xxi', 'form-xxii', 'form-xxiii', 'form-xiii', 'form-xix', 'form-bonus-c', 'form-viii'), true) ||    $companyId === '' ||
+    !in_array($report, array('form-c', 'form-xx', 'form-xxi', 'form-xxii', 'form-xxiii', 'form-xiii', 'form-xix', 'form-bonus-c', 'form-viii', 'form-xii'), true) ||    $companyId === '' ||
     !preg_match('/^(0[1-9]|1[0-2])\/\d{4}$/', $salaryMonth)
 ) {
     http_response_code(400);
@@ -28,7 +29,9 @@ if (
 }
 
 try {
-    if ($report === 'form-viii') {
+    if ($report === 'form-xii') {
+        echo renderFormXIIList(getFormXIIEmployees($dbconn, $companyId, $salaryMonth), $companyId, $salaryMonth);
+    } elseif ($report === 'form-viii') {
         echo renderFormVIIIList(getFormVIIIEmployees($dbconn, $companyId, $salaryMonth), $companyId, $salaryMonth);
     } elseif ($report === 'form-bonus-c') {
         echo renderBonusFormCHtml(

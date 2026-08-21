@@ -24,7 +24,7 @@ $pdf->setPrintHeader(false);
 $pdf->setPrintFooter(false);
 $pdf->SetMargins(5, 5, 5);
 $pdf->SetAutoPageBreak(true, 5);
-$pdf->SetFont('helvetica', '', 12);
+$pdf->SetFont('helvetica', '', 9);
 $pdf->AddPage('L', 'LEGAL');
 $pdf->writeHTML($html, true, false, true, false, '');
 $pdf->Output('Form-XIII-Register-of-Workmen.pdf', 'I');

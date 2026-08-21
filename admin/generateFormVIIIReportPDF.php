@@ -54,6 +54,7 @@ $pdf->setPrintHeader(false);
 $pdf->setPrintFooter(false);
 $pdf->SetMargins(24, 24, 22);
 $pdf->SetAutoPageBreak(false);
+$pdf->SetFont('helvetica', '', 9);
 foreach ($employees as $employee) {
     $pdf->AddPage('P', 'A4');
     $pdf->writeHTML(formVIIIPdfHtml($employee), true, false, true, false, '');

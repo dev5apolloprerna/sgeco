@@ -24,7 +24,7 @@ $pdf->setPrintHeader(false);
 $pdf->setPrintFooter(false);
 $pdf->SetMargins(0, 8, 0);
 $pdf->SetAutoPageBreak(true, 8);
-$pdf->SetFont('helvetica', '', 12);
+$pdf->SetFont('helvetica', '', 9);
 $pdf->AddPage('L', 'LEGAL');
 $pdf->writeHTML($html, true, false, true, false, '');
 $pdf->Output('Form-XX-Register-of-Deduction-for-Damage-or-Loss.pdf', 'I');

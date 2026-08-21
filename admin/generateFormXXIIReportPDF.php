@@ -21,7 +21,7 @@ $pdf->setPrintHeader(false);
 $pdf->setPrintFooter(false);
 $pdf->SetMargins(5, 5, 5);
 $pdf->SetAutoPageBreak(true, 5);
-$pdf->SetFont('helvetica', '', 10);
+$pdf->SetFont('helvetica', '', 9);
 $pdf->AddPage('L', 'LEGAL');
 $pdf->writeHTML($html, true, false, true, false, '');
 $pdf->Output('Form-XXII-Register-of-Advance.pdf', 'I');
