@@ -160,6 +160,17 @@ function getBonusFormCPeriod($salaryMonth)
     );
 }
 
+/**
+ * Return the single column grid used by every Form C table row.
+ *
+ * TCPDF does not reliably apply HTML colgroups after rowspans/colspans, so the
+ * renderer also writes these percentages on every header and body cell.
+ */
+function getBonusFormCColumnWidths()
+{
+    return array(2, 16.5, 16, 6.5, 5.5, 4, 4.5, 6.5, 6.5, 5.5, 5.5, 5.5, 6, 4.5, 5);
+}
+
 function renderBonusFormCHtml(array $employees, $salaryMonth, $companyName)
 {
     $period = getBonusFormCPeriod($salaryMonth);
@@ -168,28 +179,92 @@ function renderBonusFormCHtml(array $employees, $salaryMonth, $companyName)
         return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
     };
     // TCPDF calculates widths independently for rows after a rowspan header.
-    // Repeat the width on every body cell so header and body keep one grid.
-    $columnWidths = array(2, 16.5, 16, 6.5, 5.5, 4, 4.5, 6.5, 6.5, 5.5, 5.5, 5.5, 6, 4.5, 5);
-    $cell = function ($column, $value, $attributes = '') use ($columnWidths) {
-        return '<td width="' . $columnWidths[$column] . '%"' . $attributes . '>' . $value . '</td>';
+    // Repeat the width on every cell so header and body keep one grid.
+    $columnWidths = getBonusFormCColumnWidths();
+    $cell = function ($tag, $column, $value, $attributes = '') use ($columnWidths) {
+        return '<' . $tag . ' width="' . $columnWidths[$column] . '%"' . $attributes . '>' .
+            $value . '</' . $tag . '>';
     };
-    $css = '@page{size:A4 landscape;margin:15mm 10mm}body{font-family:"Times New Roman",Times,serif;color:#000;margin:0;padding:0;font-size:11px}table{border-collapse:collapse}.head{width:100%;margin-bottom:10px}.head td{vertical-align:top;padding:0;font-size:13px}.contractor{white-space:nowrap;font-weight:bold}.title{text-align:center;font-size:20px;font-weight:bold;letter-spacing:1px;border-top:3px double #000;border-bottom:3px double #000;padding:4px 0}.main{width:100%;border:1px solid #000;margin-top:15px;table-layout:fixed}.main th,.main td{border:1px solid #000;padding:4px;text-align:center;vertical-align:middle;font-size:11px}.left{text-align:left!important;padding-left:6px!important}.info{font-size:13px!important;line-height:1.6}.note{width:100%;margin-top:6px;text-align:right;font-family:"Brush Script MT",cursive;font-style:italic;font-size:16px;padding-right:260px}';
+    $colgroup = '<colgroup>';
+    foreach ($columnWidths as $width) {
+        $colgroup .= '<col width="' . $width . '%">';
+    }
+    $colgroup .= '</colgroup>';
+    $css = '@page{size:A4 landscape;margin:15mm 10mm}body{font-family:"Times New Roman",Times,serif;color:#000;margin:0;padding:0;font-size:12px}table{border-collapse:collapse}.head{width:100%;margin-bottom:10px}.head td{vertical-align:top;padding:0;font-size:12px}.contractor{white-space:nowrap;font-weight:bold}.title{text-align:center;font-size:12px;font-weight:bold;letter-spacing:1px;border-top:3px double #000;border-bottom:3px double #000;padding:4px 0}.main{width:100%;border:1px solid #000;margin-top:15px;table-layout:fixed}.main th,.main td{border:1px solid #000;padding:4px;text-align:center;vertical-align:middle;font-size:12px;white-space:normal;word-wrap:break-word;overflow-wrap:break-word}.left{text-align:left!important;padding-left:6px!important}.info{font-size:12px!important;line-height:1.6}.note{width:100%;margin-top:6px;text-align:right;font-family:"Brush Script MT",cursive;font-style:italic;font-size:12px;padding-right:260px}';
     $html = '<html><head><meta charset="UTF-8"><style>' . $css . '</style></head><body><table class="head"><tr>' .
         '<td width="45%"><span class="contractor">NAME &amp; ADDRESS OF CONTRACTOR</span>&nbsp;&nbsp;SHREE GANESH ENGINEERING CO.<br><span style="margin-left:214px">FF-8, Devshruti Complex,</span><br><span style="margin-left:214px">Nr. HCG Hospital,</span><br><span style="margin-left:214px">Mithakhali, Ahmedabad - 380006</span></td>' .
-        '<td width="25%"><div class="title">REGISTER OF BONUS</div><div style="text-align:center;font-size:16px;font-weight:bold;padding-top:6px">FORM C</div><div style="text-align:center;text-decoration:underline;font-size:12px">See rule 4(b)</div></td>' .
+        '<td width="25%"><div class="title">REGISTER OF BONUS</div><div style="text-align:center;font-size:12px;font-weight:bold;padding-top:6px">FORM C</div><div style="text-align:center;text-decoration:underline;font-size:12px">See rule 4(b)</div></td>' .
         '<td width="30%" class="info"><strong>Bonus paid to the employees for the accounting year ' . $e($period['accounting_year']) . '<br><br>Bonus for Month of ' . $e($period['bonus_month']) . '<br><br>Name &amp; Address of the principal Employers : ' . $e($companyName) . '</strong></td></tr></table>' .
-        '<table class="main"><colgroup><col style="width:2%"><col style="width:16.5%"><col style="width:16%"><col style="width:6.5%"><col style="width:5.5%"><col style="width:4%"><col style="width:4.5%"><col style="width:6.5%"><col style="width:6.5%"><col style="width:5.5%"><col style="width:5.5%"><col style="width:5.5%"><col style="width:6%"><col style="width:4.5%"><col style="width:5%"></colgroup><tr><th width="1.5%" style="text-align: center;" rowspan="2">Sr.<br>No.</th><th width="16.5%" style="text-align: center;" rowspan="2">Name of Workmen</th><th width="16%" style="text-align: center;" rowspan="2">Father Name</th><th width="6.5%" style="text-align: center;" rowspan="2">Whether he has Completed 15 years of age at the beginning of the accounting year</th><th width="5.5%" style="text-align: center;" rowspan="2">Designation/ Nature of Work</th><th width="4%" style="text-align: center;" rowspan="2">No. of days Worked</th><th width="4.5%" style="text-align: center;" rowspan="2">Daily Rate</th><th width="6.5%" style="text-align: center;" rowspan="2">Total salary or wage in respect of the accounting year</th><th width="6.5%" style="text-align: center;" rowspan="2">Amount of Bonus Payable under section 10/11 as the case may be</th><th width="16.5%" style="text-align: center;" colspan="3">Deduction</th><th width="6%" style="text-align: center;" rowspan="2">Actually Amount Paid</th><th width="4.5%" style="text-align: center;" rowspan="2">Date of Payment</th><th width="5.5%" style="text-align: center;" rowspan="2">Signature / Thumb impression of workmen</th></tr><tr><th width="5.5%" style="text-align: center;">Puja or other customary bonus paid during the accounting year</th><th width="5.5%" style="text-align: center;">Interim bonus or bonus paid in advance</th><th width="5.5%" style="text-align: center;">Amount of income tax deducted 10-A</th></tr>' .
-        '<tr>' . implode('', array_map(function ($n) use ($cell) {
-            return $cell($n - 1, $n);
-            return '<td>' . $n . '</td>';
+        '<table class="main">' . $colgroup . '<tr>' .
+        $cell('th', 0, 'Sr.<br>No.', ' style="text-align:center" rowspan="2"') .
+        $cell('th', 1, 'Name of Workmen', ' style="text-align:center" rowspan="2"') .
+        $cell('th', 2, 'Father Name', ' style="text-align:center" rowspan="2"') .
+        $cell('th', 3, 'Whether he has Completed 15 years of age at the beginning of the accounting year', ' style="text-align:center" rowspan="2"') .
+        $cell('th', 4, 'Designation/ Nature of Work', ' style="text-align:center" rowspan="2"') .
+        $cell('th', 5, 'No. of days Worked', ' style="text-align:center" rowspan="2"') .
+        $cell('th', 6, 'Daily Rate', ' style="text-align:center" rowspan="2"') .
+        $cell('th', 7, 'Total salary or wage in respect of the accounting year', ' style="text-align:center" rowspan="2"') .
+        $cell('th', 8, 'Amount of Bonus Payable under section 10/11 as the case may be', ' style="text-align:center" rowspan="2"') .
+        '<th width="16.5%" style="text-align:center" colspan="3">Deduction</th>' .
+        $cell('th', 12, 'Actually Amount Paid', ' style="text-align:center" rowspan="2"') .
+        $cell('th', 13, 'Date of Payment', ' style="text-align:center" rowspan="2"') .
+        $cell('th', 14, 'Signature / Thumb impression of workmen', ' style="text-align:center" rowspan="2"') .
+        '</tr><tr>' .
+        $cell('th', 9, 'Puja or other customary bonus paid during the accounting year', ' style="text-align:center"') .
+        $cell('th', 10, 'Interim bonus or bonus paid in advance', ' style="text-align:center"') .
+        $cell('th', 11, 'Amount of income tax deducted 10-A', ' style="text-align:center"') .
+        '</tr><tr>' . implode('', array_map(function ($n) use ($cell) {
+            return $cell('td', $n - 1, $n, ' align="center" style="text-align:center"');
         }, range(1, 15))) . '</tr>';
     $totals = array('days' => 0, 'salary' => 0, 'bonus' => 0, 'paid' => 0);
     foreach ($rows as $index => $row) {
         foreach (array_keys($totals) as $key) {
             $totals[$key] += (float) $row[$key];
         }
-        $html .= '<tr><td>' . ($index + 1) . '</td><td class="left">' . $e($row['name']) . '</td><td class="left">' . $e($row['father']) . '</td><td>' . $e($row['adult']) . '</td><td>' . $e($row['designation']) . '</td><td>' . $row['days'] . '</td><td>' . $row['rate'] . '</td><td>' . $row['salary'] . '</td><td>' . $row['bonus'] . '</td><td>' . $row['customary'] . '</td><td>' . $row['advance'] . '</td><td>' . $row['tax'] . '</td><td>' . $row['paid'] . '</td><td>' . $row['payment_date'] . '</td><td></td></tr>';
+        $values = array(
+            $index + 1,
+            $e($row['name']),
+            $e($row['father']),
+            $e($row['adult']),
+            $e($row['designation']),
+            $row['days'],
+            $row['rate'],
+            $row['salary'],
+            $row['bonus'],
+            $row['customary'],
+            $row['advance'],
+            $row['tax'],
+            $row['paid'],
+            $row['payment_date'],
+            ''
+        );
+        $html .= '<tr>';
+        foreach ($values as $column => $value) {
+            $html .= $cell('td', $column, $value, in_array($column, array(1, 2), true) ? ' class="left"' : '');
+        }
+        $html .= '</tr>';
     }
-    $html .= '<tr><td></td><td colspan="2"><b>TOTAL</b></td><td></td><td></td><td>' . bonusFormCNumber($totals['days']) . '</td><td></td><td>' . bonusFormCNumber($totals['salary']) . '</td><td>' . bonusFormCNumber($totals['bonus']) . '</td><td></td><td></td><td></td><td>' . bonusFormCNumber($totals['paid']) . '</td><td></td><td></td></tr></table></body></html>';
+    $totalValues = array(
+        '',
+        '<b>TOTAL</b>',
+        '',
+        '',
+        '',
+        bonusFormCNumber($totals['days']),
+        '',
+        bonusFormCNumber($totals['salary']),
+        bonusFormCNumber($totals['bonus']),
+        '',
+        '',
+        '',
+        bonusFormCNumber($totals['paid']),
+        '',
+        ''
+    );
+    $html .= '<tr>';
+    foreach ($totalValues as $column => $value) {
+        $html .= $cell('td', $column, $value);
+    }
+    $html .= '</tr></table></body></html>';
     return preg_replace('/(<th(?:\s[^>]*)?>)(.*?)(<\/th>)/s', '$1<strong>$2</strong>$3', $html);
 }

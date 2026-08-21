@@ -29,18 +29,10 @@ try {
         $month,
         getBonusFormCCompanyName($dbconn, $companyId)
     );
-    
-    // Keep the PDF colgroup aligned with the explicit header-cell widths from
-    // the renderer. TCPDF uses the width attributes on those cells (rather than
-    // relying only on CSS colgroups), so the wider name columns are preserved.
-    $pdfColumns = '<colgroup>' .
-        '<col style="width:1.5%"><col style="width:16.5%"><col style="width:16%">' .
-        '<col style="width:6.5%"><col style="width:5.5%"><col style="width:4%">' .
-        '<col style="width:4.5%"><col style="width:6.5%"><col style="width:6.5%">' .
-        '<col style="width:5.5%"><col style="width:5.5%"><col style="width:5.5%">' .
-        '<col style="width:6%"><col style="width:4.5%"><col style="width:5.5%">' .
-        '</colgroup>';
-    $html = preg_replace('/<colgroup>.*?<\/colgroup>/s', $pdfColumns, $html, 1);
+
+    // Column widths are defined once by renderBonusFormCHtml() and applied to
+    // its colgroup, headers, numbering row, and every body cell. Do not replace
+    // that grid here, otherwise TCPDF can calculate a different body layout.
     // Keep an explicit HTML border as well as the CSS borders. TCPDF supports
     // the table border attribute consistently, including around the outer edge.
     $html = str_replace(
@@ -48,18 +40,14 @@ try {
         '<table class="main" border="1" cellspacing="0" cellpadding="3">',
         $html
     );
-    $html = preg_replace(
-        '/(<table class="main"[^>]*><colgroup>.*?<\/colgroup>)(<tr>.*?<\/tr><tr>.*?<\/tr><tr>.*?<\/tr>)/s',
-        '$1<thead>$2</thead><tbody>',
-        $html,
-        1
-    );
-    $html = str_replace('</table></body></html>', '</tbody></table></body></html>', $html);
+    // Keep the rows in the normal table flow, as generateFormCReportPDF.php
+    // does. Wrapping them in THEAD makes TCPDF repeat the complete three-row
+    // heading at every automatic page break.
     $html = str_replace(
         '</style>',
         '.main{width:100%;table-layout:fixed}.main th{font-weight:bold!important}' .
-        '.main th strong,.main thead td{font-weight:bold}.main th,.main td{padding:3px;font-size:9px}' .
-        '</style>',
+            '.main th strong,.main thead td{font-weight:bold}.main th,.main td{padding:3px;font-size:9px}' .
+            '</style>',
         $html
     );
 } catch (Throwable $exception) {
@@ -68,7 +56,7 @@ try {
     exit(htmlspecialchars($exception->getMessage(), ENT_QUOTES, 'UTF-8'));
 }
 ob_clean();
-$pdf = new TCPDF('L', PDF_UNIT, 'A4', true, 'UTF-8', false);
+$pdf = new TCPDF('L', PDF_UNIT, 'LEGAL', true, 'UTF-8', false);
 $pdf->SetCreator('SGECO');
 $pdf->SetTitle('Form C - Register of Bonus');
 $pdf->setPrintHeader(false);
