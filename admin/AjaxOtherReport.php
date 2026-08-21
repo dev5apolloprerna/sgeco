@@ -28,10 +28,10 @@ if (
 
 try {
     if ($report === 'form-bonus-c') {
-        echo renderBonusFormCList(
+        echo renderBonusFormCHtml(
             getBonusFormCListEmployees($dbconn, $companyId, $salaryMonth),
-            $companyId,
-            $salaryMonth
+            $salaryMonth,
+            getBonusFormCCompanyName($dbconn, $companyId)
         );
     } elseif ($report === 'form-xix') {
         echo renderFormXIXList(
