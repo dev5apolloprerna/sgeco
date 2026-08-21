@@ -34,11 +34,11 @@ try {
     // numeric/deduction columns narrow. The widths total exactly 100% so TCPDF
     // keeps the final column inside the printable landscape page area.
     $pdfColumns = '<colgroup>' .
-        '<col style="width:2%"><col style="width:13%"><col style="width:12%">' .
-        '<col style="width:7%"><col style="width:6%"><col style="width:4.5%">' .
-        '<col style="width:5%"><col style="width:7%"><col style="width:7%">' .
-        '<col style="width:6%"><col style="width:6%"><col style="width:6%">' .
-        '<col style="width:6.5%"><col style="width:5%"><col style="width:7%">' .
+        '<col style="width:1.5%"><col style="width:16.5%"><col style="width:16%">' .
+        '<col style="width:6.5%"><col style="width:5.5%"><col style="width:4%">' .
+        '<col style="width:4.5%"><col style="width:6.5%"><col style="width:6.5%">' .
+        '<col style="width:5.5%"><col style="width:5.5%"><col style="width:5.5%">' .
+        '<col style="width:6%"><col style="width:4.5%"><col style="width:5.5%">' .
         '</colgroup>';
     $html = preg_replace('/<colgroup>.*?<\/colgroup>/s', $pdfColumns, $html, 1);
     // Keep an explicit HTML border as well as the CSS borders. TCPDF supports
