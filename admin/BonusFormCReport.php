@@ -126,20 +126,21 @@ function getBonusFormCRows(array $employees, $salaryMonth)
     $rows = array();
     foreach ($employees as $employee) {
         $bonus = $employee['iBonusAmt'];
+        $paymentDate = bonusFormCDate($employee['salarypaiddate']);
         $rows[] = array(
             'name' => bonusFormCText($employee['emp_name']),
             'father' => bonusFormCText($employee['strFatherName']),
             'adult' => bonusFormCAdult($employee['dateofbirth'], $yearStart),
-            'designation' => bonusFormCText($employee['designation']),
+            'designation' => trim((string) $employee['designation']),
             'days' => bonusFormCNumber($employee['workingdays']),
             'rate' => bonusFormCNumber($employee['skillrate']),
             'salary' => bonusFormCNumber($employee['basicwages']),
             'bonus' => bonusFormCNumber($bonus),
-            'customary' => bonusFormCNumber(0),
-            'advance' => bonusFormCNumber(0),
-            'tax' => bonusFormCNumber(0),
+            'customary' => '',
+            'advance' => '',
+            'tax' => '',
             'paid' => bonusFormCNumber($bonus),
-            'payment_date' => bonusFormCDate($employee['salarypaiddate'])
+            'payment_date' => $paymentDate === '0' ? '' : $paymentDate
         );
     }
     return $rows;
@@ -171,7 +172,7 @@ function renderBonusFormCHtml(array $employees, $salaryMonth, $companyName)
         '<td width="45%"><span class="contractor">NAME &amp; ADDRESS OF CONTRACTOR</span>&nbsp;&nbsp;SHREE GANESH ENGINEERING CO.<br><span style="margin-left:214px">FF-8, Devshruti Complex,</span><br><span style="margin-left:214px">Nr. HCG Hospital,</span><br><span style="margin-left:214px">Mithakhali, Ahmedabad - 380006</span></td>' .
         '<td width="25%"><div class="title">REGISTER OF BONUS</div><div style="text-align:center;font-size:16px;font-weight:bold;padding-top:6px">FORM C</div><div style="text-align:center;text-decoration:underline;font-size:12px">See rule 4(b)</div></td>' .
         '<td width="30%" class="info"><strong>Bonus paid to the employees for the accounting year ' . $e($period['accounting_year']) . '<br><br>Bonus for Month of ' . $e($period['bonus_month']) . '<br><br>Name &amp; Address of the principal Employers : ' . $e($companyName) . '</strong></td></tr></table>' .
-        '<table class="main"><colgroup><col style="width:3%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:7%"><col style="width:5%"><col style="width:5%"><col style="width:8%"><col style="width:8%"><col style="width:10%"><col style="width:7%"><col style="width:6%"><col style="width:6%"><col style="width:6%"><col style="width:6%"></colgroup><tr><th rowspan="2">Sr.<br>No.</th><th rowspan="2">Name of Workmen</th><th rowspan="2">Father Name</th><th rowspan="2">Whether he has Completed 15 years of age at the beginning of the accounting year</th><th rowspan="2">Designation/ Nature of Work</th><th rowspan="2">No. of days Worked</th><th rowspan="2">Daily Rate</th><th rowspan="2">Total salary or wage in respect of the accounting year</th><th rowspan="2">Amount of Bonus Payable under section 10/11 as the case may be</th><th colspan="3">Deduction</th><th rowspan="2">Actually Amount Paid</th><th rowspan="2">Date of Payment</th><th rowspan="2">Signature / Thumb impression of workmen</th></tr><tr><th>Puja or other customary bonus paid during the accounting year</th><th>Interim bonus or bonus paid in advance</th><th>Amount of income tax deducted 10-A</th></tr>' .
+        '<table class="main"><colgroup><col style="width:2%"><col style="width:12%"><col style="width:11%"><col style="width:7%"><col style="width:7%"><col style="width:5%"><col style="width:5%"><col style="width:7%"><col style="width:7%"><col style="width:7%"><col style="width:7%"><col style="width:7%"><col style="width:6%"><col style="width:5%"><col style="width:5%"></colgroup><tr><th rowspan="2">Sr.<br>No.</th><th rowspan="2">Name of Workmen</th><th rowspan="2">Father Name</th><th rowspan="2">Whether he has Completed 15 years of age at the beginning of the accounting year</th><th rowspan="2">Designation/ Nature of Work</th><th rowspan="2">No. of days Worked</th><th rowspan="2">Daily Rate</th><th rowspan="2">Total salary or wage in respect of the accounting year</th><th rowspan="2">Amount of Bonus Payable under section 10/11 as the case may be</th><th colspan="3">Deduction</th><th rowspan="2">Actually Amount Paid</th><th rowspan="2">Date of Payment</th><th rowspan="2">Signature / Thumb impression of workmen</th></tr><tr><th>Puja or other customary bonus paid during the accounting year</th><th>Interim bonus or bonus paid in advance</th><th>Amount of income tax deducted 10-A</th></tr>' .
         '<tr>' . implode('', array_map(function ($n) {
             return '<td>' . $n . '</td>';
         }, range(1, 15))) . '</tr>';
@@ -182,6 +183,6 @@ function renderBonusFormCHtml(array $employees, $salaryMonth, $companyName)
         }
         $html .= '<tr><td>' . ($index + 1) . '</td><td class="left">' . $e($row['name']) . '</td><td class="left">' . $e($row['father']) . '</td><td>' . $e($row['adult']) . '</td><td>' . $e($row['designation']) . '</td><td>' . $row['days'] . '</td><td>' . $row['rate'] . '</td><td>' . $row['salary'] . '</td><td>' . $row['bonus'] . '</td><td>' . $row['customary'] . '</td><td>' . $row['advance'] . '</td><td>' . $row['tax'] . '</td><td>' . $row['paid'] . '</td><td>' . $row['payment_date'] . '</td><td></td></tr>';
     }
-    $html .= '<tr><td></td><td colspan="2"><b>TOTAL</b></td><td></td><td></td><td>' . bonusFormCNumber($totals['days']) . '</td><td>0.00</td><td>' . bonusFormCNumber($totals['salary']) . '</td><td>' . bonusFormCNumber($totals['bonus']) . '</td><td>0.00</td><td>0.00</td><td>0.00</td><td>' . bonusFormCNumber($totals['paid']) . '</td><td>0</td><td></td></tr></table><div class="note">i.e. Basic x 8.33 %</div></body></html>';
-    return $html;
+    $html .= '<tr><td></td><td colspan="2"><b>TOTAL</b></td><td></td><td></td><td>' . bonusFormCNumber($totals['days']) . '</td><td></td><td>' . bonusFormCNumber($totals['salary']) . '</td><td>' . bonusFormCNumber($totals['bonus']) . '</td><td></td><td></td><td></td><td>' . bonusFormCNumber($totals['paid']) . '</td><td></td><td></td></tr></table></body></html>';
+    return preg_replace('/(<th(?:\s[^>]*)?>)(.*?)(<\/th>)/s', '$1<strong>$2</strong>$3', $html);
 }
