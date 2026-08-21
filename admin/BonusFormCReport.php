@@ -154,6 +154,7 @@ function getBonusFormCPeriod($salaryMonth)
     $startYear = (int) $period->format('Y') - ((int) $period->format('n') < 4 ? 1 : 0);
     return array(
         'month_number' => $period->format('m'),
+        'bonus_month' => $period->format('F-Y'),
         'accounting_year' => $startYear . '-' . substr((string) ($startYear + 1), -2)
     );
 }
@@ -169,7 +170,7 @@ function renderBonusFormCHtml(array $employees, $salaryMonth, $companyName)
     $html = '<html><head><meta charset="UTF-8"><style>' . $css . '</style></head><body><table class="head"><tr>' .
         '<td width="45%"><span class="contractor">NAME &amp; ADDRESS OF CONTRACTOR</span>&nbsp;&nbsp;SHREE GANESH ENGINEERING CO.<br><span style="margin-left:214px">FF-8, Devshruti Complex,</span><br><span style="margin-left:214px">Nr. HCG Hospital,</span><br><span style="margin-left:214px">Mithakhali, Ahmedabad - 380006</span></td>' .
         '<td width="25%"><div class="title">REGISTER OF BONUS</div><div style="text-align:center;font-size:16px;font-weight:bold;padding-top:6px">FORM C</div><div style="text-align:center;text-decoration:underline;font-size:12px">See rule 4(b)</div></td>' .
-        '<td width="30%" class="info">Bonus paid to the employees for the accounting year ' . $e($period['accounting_year']) . '<br><br>Month No. ' . $e($period['month_number']) . '<br><br>Name &amp; Address of the principal Employers : ' . $e($companyName) . '</td></tr></table>' .
+        '<td width="30%" class="info"><strong>Bonus paid to the employees for the accounting year ' . $e($period['accounting_year']) . '<br><br>Bonus for Month of ' . $e($period['bonus_month']) . '<br><br>Name &amp; Address of the principal Employers : ' . $e($companyName) . '</strong></td></tr></table>' .
         '<table class="main"><colgroup><col style="width:3%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:7%"><col style="width:5%"><col style="width:5%"><col style="width:8%"><col style="width:8%"><col style="width:10%"><col style="width:7%"><col style="width:6%"><col style="width:6%"><col style="width:6%"><col style="width:6%"></colgroup><tr><th rowspan="2">Sr.<br>No.</th><th rowspan="2">Name of Workmen</th><th rowspan="2">Father Name</th><th rowspan="2">Whether he has Completed 15 years of age at the beginning of the accounting year</th><th rowspan="2">Designation/ Nature of Work</th><th rowspan="2">No. of days Worked</th><th rowspan="2">Daily Rate</th><th rowspan="2">Total salary or wage in respect of the accounting year</th><th rowspan="2">Amount of Bonus Payable under section 10/11 as the case may be</th><th colspan="3">Deduction</th><th rowspan="2">Actually Amount Paid</th><th rowspan="2">Date of Payment</th><th rowspan="2">Signature / Thumb impression of workmen</th></tr><tr><th>Puja or other customary bonus paid during the accounting year</th><th>Interim bonus or bonus paid in advance</th><th>Amount of income tax deducted 10-A</th></tr>' .
         '<tr>' . implode('', array_map(function ($n) {
             return '<td>' . $n . '</td>';

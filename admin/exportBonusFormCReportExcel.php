@@ -26,7 +26,7 @@ try {
     $sheet->mergeCells('F1:J2')->setCellValue('F1', 'REGISTER OF BONUS');
     $sheet->mergeCells('F3:J3')->setCellValue('F3', 'FORM C');
     $sheet->mergeCells('F4:J4')->setCellValue('F4', 'See rule 4(b)');
-    $sheet->mergeCells('K1:O4')->setCellValue('K1', 'Bonus paid to the employees for the accounting year ' . $period['accounting_year'] . "\nMonth No. " . $period['month_number'] . "\nName & Address of the principal Employers : " . $company);
+    $sheet->mergeCells('K1:O4')->setCellValue('K1', 'Bonus paid to the employees for the accounting year ' . $period['accounting_year'] . "\n\nBonus for Month of " . $period['bonus_month'] . "\n\nName & Address of the principal Employers : " . $company);
     $headers = array('Sr. No.', 'Name of Workmen', 'Father Name', 'Whether he has Completed 15 years of age at the beginning of the accounting year', 'Designation/ Nature of Work', 'No. of days Worked', 'Daily Rate', 'Total salary or wage in respect of the accounting year', 'Amount of Bonus Payable under section 10/11 as the case may be');
     foreach ($headers as $column => $header) {
         $sheet->mergeCellsByColumnAndRow($column + 1, 5, $column + 1, 6);
@@ -58,6 +58,7 @@ try {
     $sheet->getStyle('A1:O' . $totalRow)->getFont()->setName('Times New Roman')->setSize(10);
     $sheet->getStyle('F1')->getFont()->setBold(true)->setSize(18);
     $sheet->getStyle('F3')->getFont()->setBold(true)->setSize(14);
+    $sheet->getStyle('K1')->getFont()->setBold(true);
     $sheet->getStyle('A1:O' . $totalRow)->getAlignment()->setWrapText(true)->setVertical(Alignment::VERTICAL_CENTER);
     $sheet->getStyle('F1:J4')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
     $sheet->getStyle('A5:O' . $totalRow)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
