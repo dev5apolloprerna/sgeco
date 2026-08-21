@@ -28,7 +28,11 @@ if (
 
 try {
     if ($report === 'form-bonus-c') {
-        echo renderBonusFormCList(getBonusFormCEmployees($dbconn, $companyId, $salaryMonth), $companyId, $salaryMonth);
+        echo renderBonusFormCList(
+            getBonusFormCListEmployees($dbconn, $companyId, $salaryMonth),
+            $companyId,
+            $salaryMonth
+        );
     } elseif ($report === 'form-xix') {
         echo renderFormXIXList(
             getFormXIXEmployees($dbconn, $companyId, $salaryMonth),

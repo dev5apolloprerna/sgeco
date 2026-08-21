@@ -1,6 +1,44 @@
 <?php
 
 /** Register of Bonus (Form C) data and template renderer. */
+function getBonusFormCListEmployees($dbconn, $companyId, $salaryMonth)
+{
+    if (!($dbconn instanceof mysqli)) {
+        throw new RuntimeException('A database connection could not be established.');
+    }
+
+    // Match the Form C listing filter exactly. Keep this query separate from
+    // getBonusFormCEmployees(), which is shared by the existing PDF and Excel
+    // exports and must retain its current behaviour.
+    $companyId = mysqli_real_escape_string($dbconn, $companyId);
+    $salaryMonth = mysqli_real_escape_string($dbconn, $salaryMonth);
+    $sql = "SELECT e.employeeId, e.employeecode, e.emp_name
+            FROM salarydetails sd
+            INNER JOIN employee e ON e.employeeId = sd.emp_id
+                AND e.isDelete = '0'
+            WHERE sd.companyId = '" . $companyId . "'
+              AND sd.salaryId IN (
+                  SELECT salarymasterId FROM salarymaster
+                  WHERE month = '" . $salaryMonth . "'
+                    AND isDelete = '0' AND istatus = '1'
+              )
+              AND sd.isDelete = '0'
+              AND sd.istatus = '1'
+              AND sd.workingdays > 0
+            ORDER BY sd.salarydetailsId ASC";
+
+    $result = mysqli_query($dbconn, $sql);
+    if ($result === false) {
+        throw new RuntimeException('Unable to retrieve Register of Bonus employees.');
+    }
+
+    $employees = array();
+    while ($row = mysqli_fetch_assoc($result)) {
+        $employees[] = $row;
+    }
+    return $employees;
+}
+
 function getBonusFormCEmployees($dbconn, $companyId, $salaryMonth, $employeeId = 0)
 {
     $companyId = (int) $companyId;
