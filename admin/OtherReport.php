@@ -56,6 +56,7 @@ include('IsLogin.php');
                                                     <option value="form-xxiii">FORM NO. XXIII (Register of Overtime)</option>
                                                     <option value="form-xix">FORM NO. XIX (WAGES SLIP)</option>
                                                     <option value="form-bonus-c">FORM NO. C (REGISTER OF BONUS)</option>
+                                                    <option value="form-viii">FORM NO. VIII (Service Certificate)</option>
                                                 </select>
                                             </div>
                                             <div class="form-group col-md-2">
@@ -259,7 +260,8 @@ include('IsLogin.php');
                 'form-xxii': 'generateFormXXIIReportPDF.php',
                 'form-xxiii': 'generateFormXXIIIReportPDF.php',
                 'form-xix': 'generateFormXIXReportPDF.php',
-                'form-bonus-c': 'generateBonusFormCReportPDF.php'
+                'form-bonus-c': 'generateBonusFormCReportPDF.php',
+                'form-viii': 'generateFormVIIIReportPDF.php'
             };
             var reportUrl = reportUrls[$('#Report').val()];
             window.open(reportUrl + "?Company=" + encodeURIComponent(Company) + "&salarymasterId=" + encodeURIComponent(salarymasterId), '_blank');
@@ -285,6 +287,7 @@ include('IsLogin.php');
                 'form-xxiii': 'exportFormXXIIIReportExcel.php',
                 'form-xix': 'exportFormXIXReportExcel.php',
                 'form-bonus-c': 'exportBonusFormCReportExcel.php',
+                'form-viii': 'exportFormVIIIReportExcel.php',
             };
             var reportUrl = reportUrls[$('#Report').val()];
             window.open(reportUrl + "?Company=" + encodeURIComponent(Company) + "&salarymasterId=" + encodeURIComponent(salarymasterId), '_blank');
