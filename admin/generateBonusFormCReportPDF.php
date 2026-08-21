@@ -10,10 +10,50 @@ try {
     $companyId = isset($_GET['Company']) ? (int) $_GET['Company'] : 0;
     $month = isset($_GET['salarymasterId']) ? trim($_GET['salarymasterId']) : '';
     $employeeId = isset($_GET['employeeId']) ? (int) $_GET['employeeId'] : 0;
+    $employees = getBonusFormCEmployees($dbconn, $companyId, $month, $employeeId);
+
+    // Older records use zero as the default for fields that were not entered.
+    // Keep that implementation detail out of this PDF without changing the data.
+    foreach ($employees as &$employee) {
+        if (trim((string) $employee['designation']) === '0') {
+            $employee['designation'] = '';
+        }
+        if (trim((string) $employee['salarypaiddate']) === '0') {
+            $employee['salarypaiddate'] = '';
+        }
+    }
+    unset($employee);
+
     $html = renderBonusFormCHtml(
-        getBonusFormCEmployees($dbconn, $companyId, $month, $employeeId),
+        $employees,
         $month,
         getBonusFormCCompanyName($dbconn, $companyId)
+    );
+    
+    // PDF-only proportions: allow more room for names and keep the compact
+    // numeric/deduction columns narrow. The widths total exactly 100% so TCPDF
+    // keeps the final column inside the printable landscape page area.
+    $pdfColumns = '<colgroup>' .
+        '<col style="width:2%"><col style="width:13%"><col style="width:12%">' .
+        '<col style="width:7%"><col style="width:6%"><col style="width:4.5%">' .
+        '<col style="width:5%"><col style="width:7%"><col style="width:7%">' .
+        '<col style="width:6%"><col style="width:6%"><col style="width:6%">' .
+        '<col style="width:6.5%"><col style="width:5%"><col style="width:7%">' .
+        '</colgroup>';
+    $html = preg_replace('/<colgroup>.*?<\/colgroup>/s', $pdfColumns, $html, 1);
+    $html = preg_replace(
+        '/(<table class="main"><colgroup>.*?<\/colgroup>)(<tr>.*?<\/tr><tr>.*?<\/tr><tr>.*?<\/tr>)/s',
+        '$1<thead>$2</thead><tbody>',
+        $html,
+        1
+    );
+    $html = str_replace('</table></body></html>', '</tbody></table></body></html>', $html);
+    $html = str_replace(
+        '</style>',
+        '.main{width:100%;table-layout:fixed}.main th{font-weight:bold!important}' .
+        '.main th strong,.main thead td{font-weight:bold}.main th,.main td{padding:3px;font-size:9px}' .
+        '</style>',
+        $html
     );
 } catch (Throwable $exception) {
     ob_clean();
@@ -28,7 +68,7 @@ $pdf->setPrintHeader(false);
 $pdf->setPrintFooter(false);
 $pdf->SetMargins(5, 5, 5);
 $pdf->SetAutoPageBreak(true, 5);
-$pdf->SetFont('helvetica', '', 9);
+$pdf->SetFont('helvetica', '', 8);
 $pdf->AddPage('L', 'LEGAL');
 $pdf->writeHTML($html, true, false, true, false, '');
 $pdf->Output('Form-C-Register-of-Bonus.pdf', 'I');
