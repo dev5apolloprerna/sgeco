@@ -30,9 +30,9 @@ try {
         getBonusFormCCompanyName($dbconn, $companyId)
     );
     
-    // PDF-only proportions: allow more room for names and keep the compact
-    // numeric/deduction columns narrow. The widths total exactly 100% so TCPDF
-    // keeps the final column inside the printable landscape page area.
+    // Keep the PDF colgroup aligned with the explicit header-cell widths from
+    // the renderer. TCPDF uses the width attributes on those cells (rather than
+    // relying only on CSS colgroups), so the wider name columns are preserved.
     $pdfColumns = '<colgroup>' .
         '<col style="width:1.5%"><col style="width:16.5%"><col style="width:16%">' .
         '<col style="width:6.5%"><col style="width:5.5%"><col style="width:4%">' .
