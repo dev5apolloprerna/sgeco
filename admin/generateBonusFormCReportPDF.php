@@ -41,8 +41,15 @@ try {
         '<col style="width:6.5%"><col style="width:5%"><col style="width:7%">' .
         '</colgroup>';
     $html = preg_replace('/<colgroup>.*?<\/colgroup>/s', $pdfColumns, $html, 1);
+    // Keep an explicit HTML border as well as the CSS borders. TCPDF supports
+    // the table border attribute consistently, including around the outer edge.
+    $html = str_replace(
+        '<table class="main">',
+        '<table class="main" border="1" cellspacing="0" cellpadding="3">',
+        $html
+    );
     $html = preg_replace(
-        '/(<table class="main"><colgroup>.*?<\/colgroup>)(<tr>.*?<\/tr><tr>.*?<\/tr><tr>.*?<\/tr>)/s',
+        '/(<table class="main"[^>]*><colgroup>.*?<\/colgroup>)(<tr>.*?<\/tr><tr>.*?<\/tr><tr>.*?<\/tr>)/s',
         '$1<thead>$2</thead><tbody>',
         $html,
         1
