@@ -55,7 +55,9 @@ function addOtherReportPdfSpacing($html, $repeatTableHeaders = true, $cellPaddin
  */
 function addFormXXPdfFormatting($html)
 {
-    $columnWidths = array(4, 17, 14, 12, 8, 7, 8, 7, 6, 5, 4, 4, 4);
+    // Keep every row on the same grid as the template header. Different body
+    // widths make TCPDF draw vertical borders at different positions.
+    $columnWidths = array(3, 18, 17, 8, 6, 6, 6, 6, 6, 6, 6, 6, 6);
 
     // TCPDF ignores <colgroup> widths in some releases. Once that happens it
     // gives the body cells an automatic width and the final cells can fall
@@ -83,7 +85,7 @@ function addFormXXPdfFormatting($html)
 
     // The first heading row establishes the TCPDF table grid. Its recovery
     // heading spans columns 11 and 12, so it receives their combined width.
-    $headingWidths = array(3, 18, 16, 10, 8, 7, 8, 7, 6, 5, 8, 4);
+    $headingWidths = array(3, 18, 17, 8, 6, 6, 6, 6, 6, 6, 6, 6, 6); // array(3, 18, 16, 10, 8, 7, 8, 7, 6, 5, 8, 4);
     $html = preg_replace_callback(
         '/(<thead\b[^>]*>\s*)<tr\b([^>]*)>(.*?)<\/tr>/is',
         function ($rowMatch) use ($headingWidths) {
@@ -97,6 +99,22 @@ function addFormXXPdfFormatting($html)
                     $width = $headingWidths[$columnIndex++];
                     return '<th width="' . $width . '%"' . $cellMatch[1] . '>';
                 },
+                $rowMatch[3]
+            );
+            return $rowMatch[1] . '<tr' . $rowMatch[2] . '>' . $cells . '</tr>';
+        },
+        $html,
+        1
+    );
+
+    // The two recovery subheadings are emitted in a separate row, so TCPDF
+    // cannot reliably infer their widths from the colspan in the row above.
+    $html = preg_replace_callback(
+        '/(<thead\b[^>]*>.*?<\/tr>\s*)<tr\b([^>]*)>(.*?)<\/tr>/is',
+        function ($rowMatch) {
+            $cells = preg_replace(
+                '/<th\b([^>]*)>/i',
+                '<th width="4%"$1>',
                 $rowMatch[3]
             );
             return $rowMatch[1] . '<tr' . $rowMatch[2] . '>' . $cells . '</tr>';
