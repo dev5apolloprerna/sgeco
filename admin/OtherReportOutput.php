@@ -55,6 +55,56 @@ function addOtherReportPdfSpacing($html, $repeatTableHeaders = true, $cellPaddin
  */
 function addFormXXPdfFormatting($html)
 {
+    $columnWidths = array(4, 17, 14, 12, 8, 7, 8, 7, 6, 5, 4, 4, 4);
+
+    // TCPDF ignores <colgroup> widths in some releases. Once that happens it
+    // gives the body cells an automatic width and the final cells can fall
+    // outside the row (columns 12 and 13 were consequently blank). Put the
+    // same percentages on every numbered/data cell so all thirteen columns
+    // retain the supplied layout and remain inside the printable table.
+    $html = preg_replace_callback(
+        '/<tr\b[^>]*class=("|\')(?:column-number-row|data-row)\1[^>]*>.*?<\/tr>/is',
+        function ($rowMatch) use ($columnWidths) {
+            $columnIndex = 0;
+            return preg_replace_callback(
+                '/<(td|th)\b([^>]*)>/i',
+                function ($cellMatch) use (&$columnIndex, $columnWidths) {
+                    if (!isset($columnWidths[$columnIndex])) {
+                        return $cellMatch[0];
+                    }
+                    $width = $columnWidths[$columnIndex++];
+                    return '<' . $cellMatch[1] . ' width="' . $width . '%"' . $cellMatch[2] . '>';
+                },
+                $rowMatch[0]
+            );
+        },
+        $html
+    );
+
+    // The first heading row establishes the TCPDF table grid. Its recovery
+    // heading spans columns 11 and 12, so it receives their combined width.
+    $headingWidths = array(3, 18, 16, 10, 8, 7, 8, 7, 6, 5, 8, 4);
+    $html = preg_replace_callback(
+        '/(<thead\b[^>]*>\s*)<tr\b([^>]*)>(.*?)<\/tr>/is',
+        function ($rowMatch) use ($headingWidths) {
+            $columnIndex = 0;
+            $cells = preg_replace_callback(
+                '/<th\b([^>]*)>/i',
+                function ($cellMatch) use (&$columnIndex, $headingWidths) {
+                    if (!isset($headingWidths[$columnIndex])) {
+                        return $cellMatch[0];
+                    }
+                    $width = $headingWidths[$columnIndex++];
+                    return '<th width="' . $width . '%"' . $cellMatch[1] . '>';
+                },
+                $rowMatch[3]
+            );
+            return $rowMatch[1] . '<tr' . $rowMatch[2] . '>' . $cells . '</tr>';
+        },
+        $html,
+        1
+    );
+
     // TCPDF's CSS cascade is limited.  Put the important header rules on the
     // elements themselves so a <strong> in one cell cannot make the remaining
     // header cells bold, and use its nowrap attribute for the long labels.
