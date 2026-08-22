@@ -88,7 +88,9 @@ function renderFormXXHtml(array $employees, $salaryMonth, $companyName)
             $rows .= '<td class="' . ($index === 0 ? 'text-center' : 'text-left') . '">'
                 . htmlspecialchars($value, ENT_QUOTES, 'UTF-8') . '</td>';
         }
-        $rows .= str_repeat('<td class="text-center">NIL</td>', 7) . '</tr>';
+        // Form XX has thirteen statutory columns. The first four contain the
+        // employee details and columns 5 through 13 contain deduction data.
+        $rows .= str_repeat('<td class="text-center">NIL</td>', 9) . '</tr>';
     }
 
     $sectionPosition = strpos($template, $matches[0]);
