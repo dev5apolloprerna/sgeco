@@ -113,17 +113,13 @@ function renderFormXIIIHtml(array $employees, $salaryMonth, $companyName)
     if (!$period || $period->format('m/Y') !== $salaryMonth) {
         throw new InvalidArgumentException('A valid salary month is required.');
     }
-    $header = preg_replace(
-        '/(<div class="rule-text">\[See Rule 75\]<\/div>)/',
-        '$1<div class="rule-text"><strong>Month: ' . htmlspecialchars($period->format('F-Y'), ENT_QUOTES, 'UTF-8') . '</strong></div>',
-        $matches[1],
-        1
-    );
-    $header = preg_replace(
-        '/(Name and Address of the principal Employer\s*:\s*<span class="normal-weight">).*?(<\/span>)/s',
-        '$1' . htmlspecialchars($companyName, ENT_QUOTES, 'UTF-8') . '$2',
-        $header,
-        1
+    $header = str_replace(
+        array('{{FORM_XIII_MONTH}}', '{{FORM_XIII_COMPANY}}'),
+        array(
+            htmlspecialchars($period->format('F-Y'), ENT_QUOTES, 'UTF-8'),
+            htmlspecialchars($companyName, ENT_QUOTES, 'UTF-8')
+        ),
+        $matches[1]
     );
 
     $rows = $numberRow[0];

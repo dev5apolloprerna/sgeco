@@ -94,6 +94,13 @@ function formXXIIIFormatMonth($salaryMonth)
 function formXXIIIApplyMonth($html, $salaryMonth)
 {
     $formattedMonth = formXXIIIFormatMonth($salaryMonth);
+    if (strpos($html, '{{FORM_XXIII_MONTH}}') !== false) {
+        return str_replace(
+            '{{FORM_XXIII_MONTH}}',
+            htmlspecialchars($formattedMonth, ENT_QUOTES, 'UTF-8'),
+            $html
+        );
+    }
     $replacementCount = 0;
     $html = preg_replace_callback(
         '/(<span\s+class=(?:"|\')month-label(?:"|\')>\s*Month\s*:\s*<\/span>\s*<span[^>]*>).*?(<\/span>)/is',
