@@ -117,12 +117,14 @@ function formXXIIIApplyMonth($html, $salaryMonth)
     return $html;
 }
 
-function renderFormXXIIIHtml(array $entries, $salaryMonth, $companyName)
+function renderFormXXIIIHtml(array $entries, $salaryMonth, $companyName, $repeatPageHeaders = true)
 {
-    // The fixed-height legal landscape template can display at most 17 detail
-    // rows.  Render additional entries on repeated form pages instead of
-    // allowing them to be clipped by the template's overflow rule.
-    $rowsPerPage = 17;
+     // The form heading on the first legal-landscape page leaves room for 17
+    // detail rows. PDF continuation pages omit those headings, so use the
+    // remaining page height for more rows instead of leaving most of each page
+    // blank. Browser/Excel pages retain the original 17-row form layout.
+    $firstPageRows = 17;
+    $continuationPageRows = 45;
     $columnWidths = array('3%', '20%', '17%', '4%', '7%', '9%', '9%', '6%', '7%', '5%', '8%', '5%');
     $template = file_get_contents(__DIR__ . '/SGECO-forms/Register_of_Overtime_Form_XXIII_Legal_Landscape.html');
     if ($template === false || !preg_match('/(<section class="form-page">.*?<tbody>)(.*?)(<\/tbody>.*?<\/section>)/s', $template, $matches)) {
@@ -169,17 +171,41 @@ function renderFormXXIIIHtml(array $entries, $salaryMonth, $companyName)
         $prefix,
         1
     );
-    $rowPages = $detailRows ? array_chunk($detailRows, $rowsPerPage) : array(array());
+    if (!$detailRows) {
+        $rowPages = array(array());
+    } elseif ($repeatPageHeaders) {
+        $rowPages = array_chunk($detailRows, $firstPageRows);
+    } else {
+        $rowPages = array(array_slice($detailRows, 0, $firstPageRows));
+        foreach (array_chunk(array_slice($detailRows, $firstPageRows), $continuationPageRows) as $pageRows) {
+            $rowPages[] = $pageRows;
+        }
+    }
     $sections = array();
-    foreach ($rowPages as $pageRows) {
-        $sections[] = $prefix . $numberRow[0] . implode('', $pageRows) . $matches[3];
+    foreach ($rowPages as $pageIndex => $pageRows) {
+        $pagePrefix = $prefix;
+        $pageNumberRow = $numberRow[0];
+        if (!$repeatPageHeaders && $pageIndex > 0) {
+            // PDF continuation pages are part of the same register. Keep the
+            // table grid, but do not reprint either the legal form heading or
+            // the table/column-number headings on every explicitly split page.
+            $pagePrefix = preg_replace(
+                '/(<section\b[^>]*class=("|\')[^"\']*\bform-page\b[^"\']*\2[^>]*>\s*<table\b[^>]*class=("|\')[^"\']*\bpage-layout\b[^"\']*\3[^>]*>\s*<tr>\s*<td>).*?(<div\b[^>]*class=("|\')[^"\']*\bregister-frame\b[^"\']*\5[^>]*>)/is',
+                '$1$4',
+                $pagePrefix,
+                1
+            );
+            $pagePrefix = preg_replace('/<thead\b[^>]*>.*?<\/thead>/is', '', $pagePrefix, 1);
+            $pageNumberRow = '';
+        }
+        $sections[] = $pagePrefix . $pageNumberRow . implode('', $pageRows) . $matches[3];
     }
     $firstSection = strpos($template, $matches[0]);
-     return substr($template, 0, $firstSection) . implode('', $sections)
+    return substr($template, 0, $firstSection) . implode('', $sections)
         . substr($template, $firstSection + strlen($matches[0]));
 }
 
-function getFormXXIIIRequestData($dbconn)
+function getFormXXIIIRequestData($dbconn, $repeatPageHeaders = true)
 {
     $companyId = isset($_GET['Company']) ? trim($_GET['Company']) : '';
     $salaryMonth = isset($_GET['salarymasterId']) ? trim($_GET['salarymasterId']) : '';
@@ -189,6 +215,7 @@ function getFormXXIIIRequestData($dbconn)
     return renderFormXXIIIHtml(
         getFormXXIIIEntries($dbconn, $companyId, $salaryMonth),
         $salaryMonth,
-        getFormXXIIICompanyName($dbconn, $companyId)
+        getFormXXIIICompanyName($dbconn, $companyId),
+        $repeatPageHeaders
     );
 }
