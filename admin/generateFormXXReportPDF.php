@@ -7,7 +7,10 @@ require_once('FormXXReport.php');
 require_once('OtherReportOutput.php');
 
 try {
-    $html = addOtherReportPdfSpacing(getFormXXRequestData($dbconn));
+    // $html = addOtherReportPdfSpacing(getFormXXRequestData($dbconn));
+    $html = addFormXXPdfFormatting(
+        addOtherReportPdfSpacing(getFormXXRequestData($dbconn), true, '6px 4px')
+    );
 } catch (Throwable $exception) {
     ob_clean();
     exit(htmlspecialchars($exception->getMessage(), ENT_QUOTES, 'UTF-8'));

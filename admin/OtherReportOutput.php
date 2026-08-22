@@ -44,3 +44,42 @@ function addOtherReportPdfSpacing($html, $repeatTableHeaders = true, $cellPaddin
 
     return $style . $html;
 }
+
+/**
+ * Keep the Form XX PDF header faithful to the printed register.
+ *
+ * TCPDF does not apply the browser's table layout in exactly the same way and
+ * can inherit bold text or wrap labels which fit on one line in the template.
+ * These export-only rules deliberately leave only the marked labels bold and
+ * reserve a little more horizontal room for the two detail columns.
+ */
+function addFormXXPdfFormatting($html)
+{
+    $style = '<style type="text/css">'
+        . '.header-table, .header-table td, .header-table div, .header-table span {'
+        . 'font-weight: normal;'
+        . '}'
+        . '.header-table strong, .main-title strong, .work-title {'
+        . 'font-weight: bold;'
+        . '}'
+        . '.header-table .left-header { width: 40%; font-size: 8px; }'
+        . '.header-table .center-header { width: 20%; }'
+        . '.header-table .right-header { width: 40%; font-size: 8px; }'
+        . '.header-table .info-label, .header-table .normal-weight,'
+        . '.header-table .address-line, .header-table .right-line {'
+        . 'white-space: nowrap;'
+        . '}'
+        . '.register-table tbody .data-row td {'
+        . 'padding: 6px 4px; line-height: 1.3; vertical-align: middle;'
+        . '}'
+        . '.register-table tbody .data-row td.text-left {'
+        . 'padding-left: 7px;'
+        . '}'
+        . '</style>';
+
+    if (stripos($html, '</head>') !== false) {
+        return preg_replace('/<\/head>/i', $style . '</head>', $html, 1);
+    }
+
+    return $style . $html;
+}
