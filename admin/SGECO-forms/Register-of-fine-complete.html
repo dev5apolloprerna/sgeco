@@ -85,7 +85,7 @@
 
         .left-header,
         .right-header {
-            font-size: 12px;
+            font-size: 9px;
             line-height: 1.45;
         }
 
@@ -111,18 +111,17 @@
 
         .form-number {
             /* margin-top: 0.08in; */
-            font-size: 12px;
+            font-size: 10px;
             font-weight: 700;
         }
 
         .rule-text {
             margin-top: 0.08in;
-            font-size: 12px;
+            font-size: 9px;
         }
 
         .month-row {
-            /* margin-top: 0.35in; */
-            font-size: 12px;
+            font-size: 9px;
         }
 
         .month-label {
@@ -142,9 +141,15 @@
         }
 
         .info-label {
-            /* font-weight: 700; */
-            white-space: nowrap;
-            padding-right: 0.12in !important;
+            font-size: 9px;
+            /* line-height: 1; */
+            /* white-space: nowrap; */
+            /* padding-right: 0.12in !important; */
+        }
+
+        .contractor-value,
+        .normal-weight {
+            font-weight: normal !important;
         }
 
         .address-line {
@@ -157,7 +162,7 @@
 
         .header-summary-row>td {
             vertical-align: bottom;
-            font-size: 12px;
+            font-size: 10px;
             line-height: 1.25;
         }
 
@@ -165,13 +170,9 @@
             text-align: center;
         }
 
-        .normal-weight {
-            /* font-weight: bold; */
-        }
-
         .work-title {
             margin: 0;
-            font-size: 12px;
+            font-size: 9px;
             font-weight: bold;
         }
 
@@ -209,25 +210,25 @@
         }
 
         .register-table thead th {
-            height: 0.78in;
+            height: auto;
             text-align: center;
-            font-size: 12px;
+            font-size: 9px;
             line-height: 1.08;
             font-weight: bold;
         }
 
         .register-table .column-number-row td {
-            height: 0.20in;
+            height: auto;
             padding: 0.01in 0.02in;
             text-align: center;
-            font-size: 12px;
-            line-height: 1;
+            font-size: 9px;
+            line-height: 1.08;
             font-weight: 700;
         }
 
         .register-table .data-row td {
             height: 0.24in;
-            font-size: 12px;
+            font-size: 9px;
             line-height: 1.05;
         }
 
@@ -282,12 +283,8 @@
         }
     </style>
 </head>
-
 <body>
-
-
     <section class="form-page">
-
         <table class="page-layout">
             <tr>
                 <td>
@@ -299,7 +296,6 @@
                             <col style="width: 22%;">
                             <col style="width: 39%;">
                         </colgroup>
-
                         <tr class="header-details-row">
                             <!-- Left contractor details -->
                             <td class="left-header" style="border: none;">
@@ -310,24 +306,27 @@
                                         <col style="width: 45%;">
                                     </colgroup>
                                     <tr>
-                                        <td class="info-label">
+                                        <td class="info-label"
+                                            style="font-size: 9px; line-height: 1.2; white-space: nowrap;">
                                             <strong>NAME AND ADDRESS OF CONTRACTOR :</strong>
                                         </td>
-                                        <td>
+                                        <td class="contractor-value" style="font-weight: normal;">
                                             SHREE GANESH ENGINEERING CO.
                                         </td>
                                     </tr>
                                     <tr>
                                         <td></td>
-                                        <td class="address-line">FF-8, Devshruti Complex,</td>
+                                        <td class="address-line contractor-value" style="font-weight: normal;">FF-8,
+                                            Devshruti Complex,</td>
                                     </tr>
                                     <tr>
                                         <td></td>
-                                        <td class="address-line">Nr. HCG Hospital,</td>
+                                        <td class="address-line contractor-value" style="font-weight: normal;">Nr. HCG
+                                            Hospital,</td>
                                     </tr>
                                     <tr>
                                         <td></td>
-                                        <td class="address-line">
+                                        <td class="address-line contractor-value" style="font-weight: normal;">
                                             Mithakhali, Ahmedabad - 380006
                                         </td>
                                     </tr>
@@ -358,13 +357,13 @@
                             <td class="center-header" style="border: none;">
                                 <div class="month-row">
                                     <span class="month-label">Month:</span>
-                                    <span>September-2024</span>
+                                    <span class="normal-weight" style="font-weight: normal;">September-2024</span>
                                 </div>
                             </td>
                             <td class="right-header" style="border: none;">
                                 <div class="right-line">
                                     Name and Address of the principal Employer :
-                                    <span class="normal-weight">{{FORM_XXI_COMPANY}}</span>
+                                    <span class="normal-weight" style="font-weight: normal;">{{FORM_XXI_COMPANY}}</span>
                                 </div>
                             </td>
                         </tr>
