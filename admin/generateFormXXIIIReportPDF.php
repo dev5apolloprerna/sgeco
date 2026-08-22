@@ -26,6 +26,8 @@ $pdf->setPrintFooter(false);
 $pdf->SetMargins(5, 5, 5);
 $pdf->SetAutoPageBreak(true, 5);
 $pdf->SetFont('helvetica', '', 9);
-$pdf->AddPage('L', 'LEGAL');
-$pdf->writeHTML($html, true, false, true, false, '');
+foreach (splitOtherReportPdfPages($html) as $pageHtml) {
+    $pdf->AddPage('L', 'LEGAL');
+    $pdf->writeHTML($pageHtml, true, false, true, false, '');
+}
 $pdf->Output('Form-XXIII-Register-of-Overtime.pdf', 'I');

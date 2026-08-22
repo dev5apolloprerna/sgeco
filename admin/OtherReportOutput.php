@@ -46,6 +46,36 @@ function addOtherReportPdfSpacing($html, $repeatTableHeaders = true, $cellPaddin
 }
 
 /**
+ * Split a report containing repeated form sections into standalone documents.
+ *
+ * Browser print engines honour the CSS break-before rule on .form-page, but
+ * TCPDF does not. Passing all sections to one writeHTML() call therefore lets
+ * the next form header begin in the unused space at the bottom of the current
+ * PDF page. Keeping the document head on every fragment preserves its styles
+ * while allowing the PDF generator to add an explicit page for each section.
+ */
+function splitOtherReportPdfPages($html)
+{
+    if (!preg_match('/\A(.*?<body\b[^>]*>)(.*)(<\/body>\s*<\/html>\s*)\z/is', $html, $document)) {
+        return array($html);
+    }
+
+    if (!preg_match_all(
+        '/<section\b[^>]*class\s*=\s*(["\'])[^"\']*\bform-page\b[^"\']*\1[^>]*>.*?<\/section>/is',
+        $document[2],
+        $sections
+    ) || count($sections[0]) < 2) {
+        return array($html);
+    }
+
+    $pages = array();
+    foreach ($sections[0] as $section) {
+        $pages[] = $document[1] . $section . $document[3];
+    }
+    return $pages;
+}
+
+/**
  * Keep the Form XX PDF header faithful to the printed register.
  *
  * TCPDF does not apply the browser's table layout in exactly the same way and
