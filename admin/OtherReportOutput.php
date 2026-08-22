@@ -7,12 +7,13 @@
  * Letting the cells grow with their content also prevents wrapped names from
  * overlapping the following row.
  */
-function addOtherReportPdfSpacing($html, $repeatTableHeaders = true)
+function addOtherReportPdfSpacing($html, $repeatTableHeaders = true, $cellPadding = '5px 3px')
 {
+    $cellPadding = htmlspecialchars($cellPadding, ENT_QUOTES, 'UTF-8');
     $style = '<style type="text/css">'
         . '.register-table tbody.register-body td,'
         . '.register-table tbody .data-row td {'
-        . 'padding: 5px 3px; line-height: 1.25; vertical-align: middle;'
+        . 'padding: ' . $cellPadding . '; line-height: 1.25; vertical-align: middle;'
         . '}'
         . '.register-table tbody .data-row td.employee-text {'
         . 'padding-left: 7px;'

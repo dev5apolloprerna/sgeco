@@ -70,22 +70,19 @@
         }
 
         .header-details-row>td {
-            height: 1.05in;
+            padding-bottom: 0.14in !important;
         }
 
         /* TCPDF can otherwise inherit cell borders from the register table. */
         .header-table,
         .header-table tr,
-        .header-table td,
-        .info-table,
-        .info-table tr,
-        .info-table td {
+        .header-table td {
             border: none;
         }
 
         .left-header,
         .right-header {
-            font-size: 9px;
+            font-size: 10px;
             line-height: 1.45;
         }
 
@@ -128,20 +125,21 @@
             font-weight: 700;
         }
 
-        .info-table {
+        /* .info-table {
             width: 100%;
             table-layout: fixed;
-        }
+        } */
 
-        .info-table td {
+        /* .info-table td {
             border: 0;
             padding: 0 0 0.06in 0;
             vertical-align: top;
             font-weight: bold;
-        }
+        } */
 
         .info-label {
             font-size: 9px;
+            line-height: 1.2;
             /* line-height: 1; */
             /* white-space: nowrap; */
             /* padding-right: 0.12in !important; */
@@ -152,8 +150,9 @@
             font-weight: normal !important;
         }
 
-        .address-line {
-            padding-left: 0.02in;
+        .contractor-value,
+        .normal-weight {
+            font-weight: normal !important;
         }
 
         .right-line {
@@ -162,8 +161,9 @@
 
         .header-summary-row>td {
             vertical-align: bottom;
-            font-size: 10px;
+            font-size: 12px;
             line-height: 1.25;
+            padding-bottom: 0.06in !important;
         }
 
         .header-summary-row .center-header {
@@ -292,66 +292,31 @@
                     <table class="header-table" border="0" cellspacing="0" cellpadding="0"
                         style="border: none; font-weight: bold;">
                         <colgroup>
-                            <col style="width: 39%;">
+                            <col style="width: 16%;">
+                            <col style="width: 23%;">
                             <col style="width: 22%;">
                             <col style="width: 39%;">
                         </colgroup>
                         <tr class="header-details-row">
-                            <!-- Left contractor details -->
-                            <td class="left-header" style="border: none;">
-                                <table class="info-table" border="0" cellspacing="0" cellpadding="0"
-                                    style="border: none;">
-                                    <colgroup>
-                                        <col style="width: 55%;">
-                                        <col style="width: 45%;">
-                                    </colgroup>
-                                    <tr>
-                                        <td class="info-label"
-                                            style="font-size: 9px; line-height: 1.2; white-space: nowrap;">
-                                            <strong>NAME AND ADDRESS OF CONTRACTOR :</strong>
-                                        </td>
-                                        <td class="contractor-value" style="font-weight: normal;">
-                                            SHREE GANESH ENGINEERING CO.
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td></td>
-                                        <td class="address-line contractor-value" style="font-weight: normal;">FF-8,
-                                            Devshruti Complex,</td>
-                                    </tr>
-                                    <tr>
-                                        <td></td>
-                                        <td class="address-line contractor-value" style="font-weight: normal;">Nr. HCG
-                                            Hospital,</td>
-                                    </tr>
-                                    <tr>
-                                        <td></td>
-                                        <td class="address-line contractor-value" style="font-weight: normal;">
-                                            Mithakhali, Ahmedabad - 380006
-                                        </td>
-                                    </tr>
-                                </table>
+                            <td class="left-header info-label"
+                                style="border: none; font-size: 8px; line-height: 1.2; white-space: nowrap;">
+                                <strong>NAME AND ADDRESS OF CONTRACTOR :</strong>
+                            </td>
+                            <td class="left-header contractor-value" style="border: none; font-weight: normal;">
+                                SHREE GANESH ENGINEERING CO.<br>
+                                FF-8, Devshruti Complex,<br>
+                                Nr. HCG Hospital,<br>
+                                Mithakhali, Ahmedabad - 380006
                             </td>
                             <!-- Centre title -->
                             <td class="center-header" style="border: none;">
                                 <!-- <div class="main-title">Register of Fines</div> -->
                                 <div class="form-number">FORM NO. XXI</div>
                                 <div class="rule-text">[See rule 78 (2)(d)]</div>
-                                <!-- <div class="month-row">
-                                    <span class="month-label">Month:</span>
-                                    <span>September-2024</span>
-                                </div> -->
-                            </td>
-                            <!-- Right establishment details -->
-                            <td class="right-header" style="border: none;">
-                                <div class="right-line">
-                                    Name and Address of establishment in/under which
-                                    contract is carried on
-                                </div>
-                            </td>
+                             </td>
                         </tr>
                         <tr class="header-summary-row">
-                            <td class="left-header" style="border: none;">
+                            <td class="left-header" colspan="2" style="border: none;">
                                 <div class="work-title">NATURE AND LOCATION OF WORK</div>
                             </td>
                             <td class="center-header" style="border: none;">
@@ -363,7 +328,8 @@
                             <td class="right-header" style="border: none;">
                                 <div class="right-line">
                                     Name and Address of the principal Employer :
-                                    <span class="normal-weight" style="font-weight: normal;">{{FORM_XXI_COMPANY}}</span>
+                                    <span class="normal-weight"
+                                        style="font-weight: normal;">{{FORM_XXI_COMPANY}}</span>
                                 </div>
                             </td>
                         </tr>
