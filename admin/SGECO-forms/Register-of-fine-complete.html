@@ -69,6 +69,10 @@
             font-weight: bold;
         }
 
+        .header-details-row>td {
+            height: 1.05in;
+        }
+
         /* TCPDF can otherwise inherit cell borders from the register table. */
         .header-table,
         .header-table tr,
@@ -117,7 +121,7 @@
         }
 
         .month-row {
-            margin-top: 0.35in;
+            /* margin-top: 0.35in; */
             font-size: 12px;
         }
 
@@ -148,12 +152,17 @@
         }
 
         .right-line {
-            margin-bottom: 0.25in;
-            /* font-weight: 700; */
+            margin-bottom: 0;
         }
 
-        .right-line:last-child {
-            margin-bottom: 0;
+        .header-summary-row>td {
+            vertical-align: bottom;
+            font-size: 12px;
+            line-height: 1.25;
+        }
+
+        .header-summary-row .center-header {
+            text-align: center;
         }
 
         .normal-weight {
@@ -161,7 +170,7 @@
         }
 
         .work-title {
-            margin: 0.04in 0 0.07in;
+            margin: 0;
             font-size: 12px;
             font-weight: bold;
         }
@@ -291,7 +300,7 @@
                             <col style="width: 39%;">
                         </colgroup>
 
-                        <tr>
+                        <tr class="header-details-row">
                             <!-- Left contractor details -->
                             <td class="left-header" style="border: none;">
                                 <table class="info-table" border="0" cellspacing="0" cellpadding="0"
@@ -329,10 +338,10 @@
                                 <!-- <div class="main-title">Register of Fines</div> -->
                                 <div class="form-number">FORM NO. XXI</div>
                                 <div class="rule-text">[See rule 78 (2)(d)]</div>
-                                <div class="month-row">
+                                <!-- <div class="month-row">
                                     <span class="month-label">Month:</span>
                                     <span>September-2024</span>
-                                </div>
+                                </div> -->
                             </td>
                             <!-- Right establishment details -->
                             <td class="right-header" style="border: none;">
@@ -340,19 +349,30 @@
                                     Name and Address of establishment in/under which
                                     contract is carried on
                                 </div>
+                            </td>
+                        </tr>
+                        <tr class="header-summary-row">
+                            <td class="left-header" style="border: none;">
+                                <div class="work-title">NATURE AND LOCATION OF WORK</div>
+                            </td>
+                            <td class="center-header" style="border: none;">
+                                <div class="month-row">
+                                    <span class="month-label">Month:</span>
+                                    <span>September-2024</span>
+                                </div>
+                            </td>
+                            <td class="right-header" style="border: none;">
                                 <div class="right-line">
                                     Name and Address of the principal Employer :
-                                    <span class="normal-weight">
-                                        {{FORM_XXI_COMPANY}}
-                                    </span>
+                                    <span class="normal-weight">{{FORM_XXI_COMPANY}}</span>
                                 </div>
                             </td>
                         </tr>
                     </table>
 
-                    <div class="work-title" style="font-weight: bold;">
+                    <!-- <div class="work-title" style="font-weight: bold;">
                         NATURE AND LOCATION OF WORK
-                    </div>
+                    </div> -->
 
                     <div class="register-frame">
                         <table class="register-table" border="1" cellspacing="0" cellpadding="0"
