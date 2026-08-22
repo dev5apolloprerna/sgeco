@@ -59,14 +59,14 @@
             width: 100%;
             table-layout: fixed;
             margin-bottom: 0.10in;
-            font-weight: bold;
+            font-weight: normal;
         }
 
         .header-table td {
             border: none;
             padding: 0;
             vertical-align: top;
-            font-weight: bold;
+            font-weight: normal;
         }
 
         /* TCPDF can otherwise inherit cell borders from the register table. */
@@ -81,7 +81,7 @@
 
         .left-header,
         .right-header {
-            font-size: 12px;
+            font-size: 9px;
             line-height: 1.45;
         }
 
@@ -134,7 +134,8 @@
             border: 0;
             padding: 0 0 0.06in 0;
             vertical-align: top;
-            font-weight: bold;
+            font-weight: normal;
+            white-space: nowrap;
         }
 
         .info-label {
@@ -150,6 +151,7 @@
         .right-line {
             margin-bottom: 0.25in;
             font-weight: 700;
+            white-space: nowrap;
         }
 
         .right-line:last-child {
@@ -157,12 +159,12 @@
         }
 
         .normal-weight {
-            font-weight: bold;
+            font-weight: normal;
         }
 
         .work-title {
             margin: 0.04in 0 0.07in;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
         }
 
@@ -218,7 +220,7 @@
 
         .register-table .data-row td {
             height: 0.24in;
-            font-size: 12px;
+            font-size: 10px;
             line-height: 1.05;
         }
 
@@ -284,7 +286,7 @@
                 <td>
                     <div class="main-title" style="text-align: center;"><strong>Register of deductions for damage or loss</strong></div>
                     <table class="header-table" border="0" cellspacing="0" cellpadding="0"
-                        style="border: none; font-weight: bold;">
+                        style="border: none; font-weight: normal;">
                         <colgroup>
                             <col style="width: 39%;">
                             <col style="width: 22%;">
@@ -302,12 +304,8 @@
                                     </colgroup>
 
                                     <tr>
-                                        <td class="info-label">
-                                            NAME AND ADDRESS OF CONTRACTOR :
-                                        </td>
-                                        <td>
-                                            SHREE GANESH ENGINEERING CO.
-                                        </td>
+                                        <td class="info-label"><strong>NAME AND ADDRESS OF CONTRACTOR :</strong></td>
+                                        <td class="normal-weight">SHREE GANESH ENGINEERING CO.</td>
                                     </tr>
 
                                     <tr>
@@ -322,9 +320,7 @@
 
                                     <tr>
                                         <td></td>
-                                        <td class="address-line">
-                                            Mithakhali, Ahmedabad - 380006
-                                        </td>
+                                        <td class="address-line">Mithakhali, Ahmedabad - 380006</td>
                                     </tr>
                                 </table>
                             </td>
@@ -332,24 +328,21 @@
                             <!-- Centre title -->
                             <td class="center-header" style="border: none;">
                                 <!-- <div class="main-title">Register of deductions for damage or loss</div> -->
-                                <div class="form-number">FORM NO. XX</div>
+                                <div class="form-number"><strong>FORM NO. XX</strong></div>
                                 <div class="rule-text">[See rule 78 (2)(c)]</div>
 
                                 <div class="month-row">
-                                    <span class="month-label">Month:</span>
+                                    <span class="month-label"><strong>Month:</strong></span>
                                     <span>September-2024</span>
                                 </div>
                             </td>
 
                             <!-- Right establishment details -->
                             <td class="right-header" style="border: none;">
-                                <div class="right-line">
-                                    Name and Address of establishment in/under which
-                                    contract is carried on
+                                <div class="right-line"><strong>Name and Address of establishment in/under which contract is carried on</strong>
                                 </div>
 
-                                <div class="right-line">
-                                    Name and Address of the principal Employer :
+                                <div class="right-line"><strong>Name and Address of the principal Employer :</strong>
                                     <span class="normal-weight">
                                         {{FORM_XX_COMPANY}}
                                     </span>
@@ -381,11 +374,11 @@
 
                             <thead style="font-weight: bold;">
                                 <tr>
-                                    <th style="width: 4%;text-align: center;"><strong>Sr.<br>No.</strong></th>
-                                    <th style="width: 18%;text-align: center;"><strong>Name of Workmen</strong></th>
-                                    <th style="width: 15%;text-align: center;"><strong>Father's /
+                                    <th style="width: 3%;text-align: center;"><strong>Sr.<br>No.</strong></th>
+                                    <th style="width: 20%;text-align: center;"><strong>Name of Workmen</strong></th>
+                                    <th style="width: 19%;text-align: center;"><strong>Father's /
                                             Husband's<br>Name</strong></th>
-                                    <th style="width: 12%;text-align: center;"><strong>Designation / Nature<br>of
+                                    <th style="width: 7%;text-align: center;"><strong>Designation / Nature<br>of
                                             Employment</strong></th>
                                     <th style="width: 10%;text-align: center;"><strong>Damage or loss caused<br>with
                                             date</strong></th>
