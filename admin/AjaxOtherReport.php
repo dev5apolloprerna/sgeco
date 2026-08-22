@@ -1,6 +1,6 @@
 <?php
 
-error_reporting(E_ALL);
+error_reporting(0);
 include('../config.php');
 include('IsLogin.php');
 require_once('FormCReport.php');
@@ -28,7 +28,7 @@ if (
     exit('A valid report, company, month, and year are required.');
 }
 
-// try {
+try {
     if ($report === 'form-xii') {
         echo renderFormXIIList(getFormXIIEmployees($dbconn, $companyId, $salaryMonth), $companyId, $salaryMonth);
     } elseif ($report === 'form-viii') {
@@ -82,7 +82,7 @@ if (
             getFormCCompanyName($dbconn, $companyId)
         );
     }
-// } catch (Throwable $exception) {
-//     http_response_code(500);
-//     exit('Unable to load the selected report.');
-// }
+} catch (Throwable $exception) {
+    http_response_code(500);
+    exit('Unable to load the selected report.');
+}

@@ -103,9 +103,9 @@ function formXXIIIApplyMonth($html, $salaryMonth)
     }
     $replacementCount = 0;
     $html = preg_replace_callback(
-        '/(<span\s+class=(?:"|\')month-label(?:"|\')>\s*Month\s*:\s*<\/span>\s*<span[^>]*>).*?(<\/span>)/is',
+        '/(<span\b[^>]*class\s*=\s*(["\'])[^"\']*\bmonth-label\b[^"\']*\2[^>]*>.*?Month\s*:.*?<\/span>\s*<span\b[^>]*>).*?(<\/span>)/is',
         function ($matches) use ($formattedMonth) {
-            return $matches[1] . htmlspecialchars($formattedMonth, ENT_QUOTES, 'UTF-8') . $matches[2];
+            return $matches[1] . htmlspecialchars($formattedMonth, ENT_QUOTES, 'UTF-8') . $matches[3];
         },
         $html,
         -1,
