@@ -85,7 +85,7 @@ function addFormXXPdfFormatting($html)
 
     // The first heading row establishes the TCPDF table grid. Its recovery
     // heading spans columns 11 and 12, so it receives their combined width.
-    $headingWidths = array(3, 18, 17, 8, 6, 6, 6, 6, 6, 6, 6, 6, 6); // array(3, 18, 16, 10, 8, 7, 8, 7, 6, 5, 8, 4);
+    $headingWidths = array(3, 18, 17, 8, 6, 6, 6, 6, 6, 6, 12, 6);
     $html = preg_replace_callback(
         '/(<thead\b[^>]*>\s*)<tr\b([^>]*)>(.*?)<\/tr>/is',
         function ($rowMatch) use ($headingWidths) {
@@ -114,7 +114,7 @@ function addFormXXPdfFormatting($html)
         function ($rowMatch) {
             $cells = preg_replace(
                 '/<th\b([^>]*)>/i',
-                '<th width="4%"$1>',
+                '<th width="6%"$1>',
                 $rowMatch[3]
             );
             return $rowMatch[1] . '<tr' . $rowMatch[2] . '>' . $cells . '</tr>';

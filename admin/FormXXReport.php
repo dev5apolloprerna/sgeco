@@ -66,12 +66,13 @@ function renderFormXXHtml(array $employees, $salaryMonth, $companyName)
     }
 
     $period = DateTime::createFromFormat('!m/Y', $salaryMonth);
-    $periodLabel = $period ? $period->format('F-Y') : $salaryMonth;
-    $prefix = preg_replace(
-        '/(<span class="month-label">.*?Month:.*?<\/span>\s*<span>).*?(<\/span>)/s',
-        '$1' . htmlspecialchars($periodLabel, ENT_QUOTES, 'UTF-8') . '$2',
-        $matches[1],
-        1
+    if (!$period || $period->format('m/Y') !== $salaryMonth) {
+        throw new InvalidArgumentException('A valid salary month is required.');
+    }
+    $prefix = str_replace(
+        '{{FORM_XX_MONTH}}',
+        htmlspecialchars($period->format('F-Y'), ENT_QUOTES, 'UTF-8'),
+        $matches[1]
     );
 
     $rows = $numberRowMatch[0];
