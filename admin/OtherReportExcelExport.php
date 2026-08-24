@@ -471,6 +471,13 @@ function formatFormXXWorksheet($sheet, array $details)
 {
     // Rebuild the sheet from the extracted records. This avoids the HTML
     // reader's extra highlighted row and preserves all 13 statutory columns.
+    // Clear the HTML reader's merged ranges before removing its rows. Row
+    // removal shifts those ranges instead of deleting them, which otherwise
+    // leaves them overlapping the rebuilt header and makes Excel repair the
+    // workbook when it is opened.
+    foreach ($sheet->getMergeCells() as $range) {
+        $sheet->unmergeCells($range);
+    }
     $sheet->removeRow(1, max(1, $sheet->getHighestRow()));
     $sheet->mergeCells('A1:M1');
     $sheet->mergeCells('A2:B2');
