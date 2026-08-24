@@ -4,6 +4,7 @@ include('../config.php');
 include('IsLogin.php');
 require_once('BonusFormCReport.php');
 require_once('../vendor/autoload.php');
+require_once('OtherReportExcelExport.php');
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
@@ -64,6 +65,11 @@ try {
     $sheet->getStyle('A5:O' . $totalRow)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
     $sheet->getStyle('A5:O6')->getFont()->setBold(true);
     $sheet->getStyle('A5:O7')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+    // Only columns whose headings explicitly identify an Amount are right-aligned.
+    foreach (array('I', 'L', 'M') as $amountColumn) {
+        $sheet->getStyle($amountColumn . '8:' . $amountColumn . $totalRow)
+            ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+    }
     $widths = array(6, 20, 20, 23, 18, 12, 12, 18, 18, 18, 18, 18, 15, 15, 18);
     foreach ($widths as $index => $width) {
         $sheet->getColumnDimensionByColumn($index + 1)->setWidth($width);
@@ -72,6 +78,7 @@ try {
     $sheet->getRowDimension(6)->setRowHeight(65);
     $sheet->getPageSetup()->setOrientation(PageSetup::ORIENTATION_LANDSCAPE)->setPaperSize(PageSetup::PAPERSIZE_A4)->setFitToWidth(1)->setFitToHeight(0);
     $sheet->getPageSetup()->setPrintArea('A1:O' . $totalRow);
+    rightAlignOtherReportAmountColumnsInWorksheet($sheet);
 } catch (Throwable $exception) {
     while (ob_get_level() > 0) {
         ob_end_clean();

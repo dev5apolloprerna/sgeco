@@ -49,7 +49,49 @@ function createOtherReportSpreadsheet($html, $worksheetTitle)
         formatFormXXIIIWorksheet($sheet, $formXXIIIDetails);
     }
 
+    rightAlignOtherReportAmountColumnsInWorksheet($sheet);
+
     return $spreadsheet;
+}
+
+/**
+ * Align only the data below headings containing "Amount" or "Amt.".
+ */
+function rightAlignOtherReportAmountColumnsInWorksheet($sheet)
+{
+    $highestRow = $sheet->getHighestRow();
+    $highestColumn = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString(
+        $sheet->getHighestColumn()
+    );
+    $dataStartRow = null;
+
+    // Statutory registers place a numbered column row immediately above the
+    // records. Using it as the boundary keeps both heading rows unchanged.
+    for ($row = 1; $row <= $highestRow; $row++) {
+        $numberedCells = 0;
+        for ($column = 1; $column <= $highestColumn; $column++) {
+            if ((string) $sheet->getCellByColumnAndRow($column, $row)->getValue() === (string) $column) {
+                $numberedCells++;
+            }
+        }
+        if ($numberedCells >= min(3, $highestColumn)) {
+            $dataStartRow = $row + 1;
+        }
+    }
+
+    for ($row = 1; $row <= $highestRow; $row++) {
+        for ($column = 1; $column <= $highestColumn; $column++) {
+            $heading = (string) $sheet->getCellByColumnAndRow($column, $row)->getValue();
+            if (!preg_match('/\b(?:amt|amount)\.?\b/i', $heading)) {
+                continue;
+            }
+            $firstDataRow = $dataStartRow === null ? $row + 1 : max($row + 1, $dataStartRow);
+            if ($firstDataRow <= $highestRow) {
+                $sheet->getStyleByColumnAndRow($column, $firstDataRow, $column, $highestRow)
+                    ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+            }
+        }
+    }
 }
 
 function extractFormXXIIIDetails($html)
@@ -378,18 +420,46 @@ function formatFormXIIIWorksheet($sheet, array $details)
 
 function extractFormXXDetails($html)
 {
-    preg_match('/<span class="month-label">Month:<\/span>\s*<span>(.*?)<\/span>/is', $html, $month);
-    preg_match(
-        '/Name and Address of the principal Employer\s*:\s*<span[^>]*>(.*?)<\/span>/is',
-        $html,
-        $employer
-    );
+    // preg_match('/<span class="month-label">Month:<\/span>\s*<span>(.*?)<\/span>/is', $html, $month);
+    // preg_match(
+    //     '/Name and Address of the principal Employer\s*:\s*<span[^>]*>(.*?)<\/span>/is',
+    //     $html,
+    //     $employer
+    // );
     $clean = function ($value) {
         return trim(html_entity_decode(strip_tags($value), ENT_QUOTES, 'UTF-8'));
     };
+    $monthValue = '';
+    $employerValue = '';
+    $document = new DOMDocument();
+    $previous = libxml_use_internal_errors(true);
+    $loaded = $document->loadHTML('<?xml encoding="UTF-8">' . $html);
+    libxml_clear_errors();
+    libxml_use_internal_errors($previous);
+
+    if ($loaded) {
+        $xpath = new DOMXPath($document);
+        $monthNodes = $xpath->query(
+            '//*[contains(concat(" ", normalize-space(@class), " "), " month-row ")]'
+            . '/*[not(contains(concat(" ", normalize-space(@class), " "), " month-label "))][last()]'
+        );
+        if ($monthNodes->length > 0) {
+            $monthValue = $monthNodes->item(0)->textContent;
+        }
+
+        $employerNodes = $xpath->query(
+            '//*[contains(concat(" ", normalize-space(@class), " "), " right-line ")]'
+            . '[contains(translate(normalize-space(.), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"),'
+            . ' "name and address of the principal employer")]'
+            . '//*[contains(concat(" ", normalize-space(@class), " "), " normal-weight ")]'
+        );
+        if ($employerNodes->length > 0) {
+            $employerValue = $employerNodes->item(0)->textContent;
+        }
+    }
     return array(
-        'month' => isset($month[1]) ? $clean($month[1]) : '',
-        'employer' => isset($employer[1]) ? $clean($employer[1]) : '',
+        'month' => $clean($monthValue),
+        'employer' => $clean($employerValue),
     );
 }
 

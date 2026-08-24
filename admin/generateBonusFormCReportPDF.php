@@ -3,6 +3,7 @@ ob_start();
 include('../config.php');
 include('IsLogin.php');
 require_once('BonusFormCReport.php');
+require_once('OtherReportOutput.php');
 require_once('tcpdf/config/tcpdf_config.php');
 require_once('tcpdf/tcpdf.php');
 
@@ -29,7 +30,7 @@ try {
         $month,
         getBonusFormCCompanyName($dbconn, $companyId)
     );
-
+    $html = rightAlignOtherReportAmountColumns($html);
     // Column widths are defined once by renderBonusFormCHtml() and applied to
     // its colgroup, headers, numbering row, and every body cell. Do not replace
     // that grid here, otherwise TCPDF can calculate a different body layout.

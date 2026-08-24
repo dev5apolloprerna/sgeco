@@ -1,6 +1,75 @@
 <?php
 
 /**
+ * Right-align values whose register heading explicitly identifies an amount.
+ *
+ * The alignment is applied to body cells only, so report titles, headings and
+ * every non-amount column retain their existing layout.
+ */
+function rightAlignOtherReportAmountColumns($html)
+{
+    $document = new DOMDocument();
+    $previous = libxml_use_internal_errors(true);
+    if (!$document->loadHTML('<?xml encoding="UTF-8">' . $html)) {
+        libxml_clear_errors();
+        libxml_use_internal_errors($previous);
+        return $html;
+    }
+    libxml_clear_errors();
+    libxml_use_internal_errors($previous);
+
+    $xpath = new DOMXPath($document);
+    foreach ($xpath->query('//table[.//th and .//tr[contains(concat(" ", normalize-space(@class), " "), " data-row ")]]') as $table) {
+        $amountColumns = array();
+        $occupied = array();
+        foreach ($xpath->query('.//tr[th]', $table) as $headingRow) {
+            foreach ($occupied as $column => $remainingRows) {
+                if ($remainingRows <= 1) {
+                    unset($occupied[$column]);
+                } else {
+                    $occupied[$column]--;
+                }
+            }
+
+            $column = 0;
+            foreach ($xpath->query('./th', $headingRow) as $heading) {
+                while (isset($occupied[$column])) {
+                    $column++;
+                }
+                $columnSpan = max(1, (int) $heading->getAttribute('colspan'));
+                $rowSpan = max(1, (int) $heading->getAttribute('rowspan'));
+                for ($offset = 0; $offset < $columnSpan; $offset++) {
+                    if ($rowSpan > 1) {
+                        $occupied[$column + $offset] = $rowSpan;
+                    }
+                    if (preg_match('/\b(?:amt|amount)\.?\b/i', trim($heading->textContent))) {
+                        $amountColumns[$column + $offset] = true;
+                    }
+                }
+                $column += $columnSpan;
+            }
+        }
+
+        foreach ($xpath->query('.//tr[contains(concat(" ", normalize-space(@class), " "), " data-row ")]', $table) as $row) {
+            $column = 0;
+            foreach ($xpath->query('./td', $row) as $cell) {
+                $span = max(1, (int) $cell->getAttribute('colspan'));
+                if (isset($amountColumns[$column])) {
+                    $cell->setAttribute('align', 'right');
+                    $style = rtrim(trim($cell->getAttribute('style')), ';');
+                    $cell->setAttribute('style', ($style === '' ? '' : $style . ';') . 'text-align:right');
+                }
+                $column += $span;
+            }
+        }
+    }
+
+    $result = $document->saveHTML();
+    $result = preg_replace('/^<\?xml encoding="UTF-8">\s*/', '', $result);
+    return $result;
+}
+
+/**
  * Add export-only table spacing without changing the browser report templates.
  *
  * TCPDF honours cell padding and line-height more reliably than CSS min-height.
@@ -9,6 +78,7 @@
  */
 function addOtherReportPdfSpacing($html, $repeatTableHeaders = true, $cellPadding = '5px 3px')
 {
+    $html = rightAlignOtherReportAmountColumns($html);
     $cellPadding = htmlspecialchars($cellPadding, ENT_QUOTES, 'UTF-8');
     $style = '<style type="text/css">'
         . '.register-table tbody.register-body td,'

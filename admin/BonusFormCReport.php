@@ -195,7 +195,7 @@ function renderBonusFormCHtml(array $employees, $salaryMonth, $companyName)
     //     '<td width="45%"><span class="contractor">NAME &amp; ADDRESS OF CONTRACTOR</span>&nbsp;&nbsp;SHREE GANESH ENGINEERING CO.<br><span style="margin-left:214px">FF-8, Devshruti Complex,</span><br><span style="margin-left:214px">Nr. HCG Hospital,</span><br><span style="margin-left:214px">Mithakhali, Ahmedabad - 380006</span></td>' .
     //     '<td width="25%"><div class="title">REGISTER OF BONUS</div><div style="text-align:center;font-size:12px;font-weight:bold;padding-top:6px">FORM C</div><div style="text-align:center;text-decoration:underline;font-size:12px">See rule 4(b)</div></td>' .
     //     '<td width="30%" class="info"><strong>Bonus paid to the employees for the accounting year ' . $e($period['accounting_year']) . '<br><br>Bonus for Month of ' . $e($period['bonus_month']) . '<br><br>Name &amp; Address of the principal Employers : ' . $e($companyName) . '</strong></td></tr></table>' .
-    $css = '@page{size:A4 landscape;margin:15mm 10mm}body{font-family:"Times New Roman",Times,serif;color:#000;margin:0;padding:0;font-size:12px}table{border-collapse:collapse}.header-table{margin-bottom:10px}.title{text-align:center;font-size:12px;font-weight:bold;letter-spacing:1px;border-top:3px double #000;border-bottom:3px double #000;padding:4px 0}.main{width:100%;border:1px solid #000;margin-top:15px;table-layout:fixed}.main th,.main td{border:1px solid #000;padding:4px;text-align:center;vertical-align:middle;font-size:12px;white-space:normal;word-wrap:break-word;overflow-wrap:break-word}.left{text-align:left!important;padding-left:6px!important}.note{width:100%;margin-top:6px;text-align:right;font-family:"Brush Script MT",cursive;font-style:italic;font-size:12px;padding-right:260px}';
+    $css = '@page{size:A4 landscape;margin:15mm 10mm}body{font-family:"Times New Roman",Times,serif;color:#000;margin:0;padding:0;font-size:12px}table{border-collapse:collapse}.header-table{margin-bottom:10px}.title{text-align:center;font-size:12px;font-weight:bold;letter-spacing:1px;border-top:3px double #000;border-bottom:3px double #000;padding:4px 0}.main{width:100%;border:1px solid #000;margin-top:15px;table-layout:fixed}.main th,.main td{border:1px solid #000;padding:4px;text-align:center;vertical-align:middle;font-size:12px;white-space:normal;word-wrap:break-word;overflow-wrap:break-word}.left{text-align:left!important;padding-left:6px!important}.amount{text-align:right!important;padding-right:6px!important}.note{width:100%;margin-top:6px;text-align:right;font-family:"Brush Script MT",cursive;font-style:italic;font-size:12px;padding-right:260px}';
     $html = '<html><head><meta charset="UTF-8"><style>' . $css . '</style></head><body><table class="header-table" border="0" cellspacing="0" cellpadding="0"><tr>' .
         '<td class="left-header" width="41%"><table class="info-table" border="0" cellspacing="0" cellpadding="0"><tr><td class="info-label" width="55%" style="font-size:10px;"><strong>NAME AND ADDRESS OF CONTRACTOR :</strong></td><td width="45%" class="normal-weight" style="font-size:10px;">SHREE GANESH ENGINEERING CO.</td></tr><tr><td></td><td class="address-line" style="font-size:10px;">FF-8, Devshruti Complex,</td></tr><tr><td></td><td class="address-line" style="font-size:10px;">Nr. HCG Hospital,</td></tr><tr><td></td><td class="address-line" style="font-size:10px;">Mithakhali, Ahmedabad - 380006</td></tr></table></td>' .
         '<td class="center-header" width="18%"><div class="title">REGISTER OF BONUS</div><div class="form-number" style="padding-top:6px;text-align:center;"><strong>FORM C</strong></div><div style="text-decoration:underline;text-align:center"><strong>See rule 4(b)</strong></div></td>' .
@@ -245,7 +245,11 @@ function renderBonusFormCHtml(array $employees, $salaryMonth, $companyName)
         );
         $html .= '<tr>';
         foreach ($values as $column => $value) {
-            $html .= $cell('td', $column, $value, in_array($column, array(1, 2), true) ? ' class="left"' : '');
+            // $html .= $cell('td', $column, $value, in_array($column, array(1, 2), true) ? ' class="left"' : '');
+            $cellClass = in_array($column, array(1, 2), true)
+                ? 'left'
+                : (in_array($column, array(8, 11, 12), true) ? 'amount' : '');
+            $html .= $cell('td', $column, $value, $cellClass === '' ? '' : ' class="' . $cellClass . '"');
         }
         $html .= '</tr>';
     }
@@ -268,7 +272,13 @@ function renderBonusFormCHtml(array $employees, $salaryMonth, $companyName)
     );
     $html .= '<tr>';
     foreach ($totalValues as $column => $value) {
-        $html .= $cell('td', $column, $value);
+        // $html .= $cell('td', $column, $value);
+        $html .= $cell(
+            'td',
+            $column,
+            $value,
+            in_array($column, array(8, 11, 12), true) ? ' class="amount"' : ''
+        );
     }
     $html .= '</tr></table></body></html>';
     return preg_replace('/(<th(?:\s[^>]*)?>)(.*?)(<\/th>)/s', '$1<strong>$2</strong>$3', $html);
