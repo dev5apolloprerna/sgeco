@@ -7,8 +7,12 @@ require_once('FormXXIReport.php');
 require_once('OtherReportOutput.php');
 
 try {
-    $html = addOtherReportPdfSpacing(getFormXXIRequestData($dbconn));
-     $salaryMonth = isset($_GET['salarymasterId']) ? trim($_GET['salarymasterId']) : '';
+    // $html = addOtherReportPdfSpacing(getFormXXIRequestData($dbconn));
+    // $salaryMonth = isset($_GET['salarymasterId']) ? trim($_GET['salarymasterId']) : '';
+    $html = addFormXXIPdfFormatting(
+        addOtherReportPdfSpacing(getFormXXIRequestData($dbconn))
+    );
+    $salaryMonth = isset($_GET['salarymasterId']) ? trim($_GET['salarymasterId']) : '';
     $html = formXXIApplyMonth($html, $salaryMonth);
 } catch (Exception $exception) {
     ob_clean();

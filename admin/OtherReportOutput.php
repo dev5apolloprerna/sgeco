@@ -185,9 +185,9 @@ function addFormXXPdfFormatting($html)
         . '.main-title strong, .work-title {'
         . 'font-weight: bold;'
         . '}'
-        . '.header-table .left-header { width: 41%; font-size: 8px; }'
+        . '.header-table .left-header { width: 41%; font-size: 9px; }'
         . '.header-table .center-header { width: 18%; }'
-        . '.header-table .right-header { width: 41%; font-size: 7.5px; }'
+        . '.header-table .right-header { width: 41%; font-size: 9px; }'
         . '.header-table .info-label, .header-table .normal-weight,'
         . '.header-table .address-line, .header-table .right-line {'
         . 'white-space: nowrap;'
@@ -197,6 +197,137 @@ function addFormXXPdfFormatting($html)
         . '}'
         . '.register-table tbody .data-row td.text-left {'
         . 'padding-left: 7px;'
+        . '}'
+        . '</style>';
+
+    if (stripos($html, '</head>') !== false) {
+        return preg_replace('/<\/head>/i', $style . '</head>', $html, 1);
+    }
+
+    return $style . $html;
+}
+
+/**
+ * Keep the Form XXII PDF header on the same compact, single-line layout as
+ * Form XX. These rules are export-only because TCPDF does not consistently
+ * honour the template's colgroup widths or white-space declarations.
+ */
+function addFormXXIIPdfFormatting($html)
+{
+    // Explicit width attributes are more reliable than colgroup in TCPDF.
+    $html = preg_replace(
+        '/<td class="left-header"([^>]*)>/i',
+        '<td class="left-header" width="41%"$1>',
+        $html,
+        1
+    );
+    $html = preg_replace(
+        '/<td class="center-header"([^>]*)>/i',
+        '<td class="center-header" width="18%"$1>',
+        $html,
+        1
+    );
+    $html = preg_replace(
+        '/<td class="right-header"([^>]*)>/i',
+        '<td class="right-header" width="41%"$1>',
+        $html,
+        1
+    );
+
+    // Match Form XX's contractor grid and prevent TCPDF from wrapping the
+    // contractor and principal-employer lines despite their fitting widths.
+    $html = preg_replace(
+        '/<td class="contractor-label"([^>]*)>/i',
+        '<td class="contractor-label" width="55%"$1 nowrap="nowrap">',
+        $html,
+        1
+    );
+    $html = preg_replace(
+        '/(<td class="contractor-label"[^>]*>.*?<\/td>\s*)<td([^>]*)>/is',
+        '$1<td width="45%"$2 nowrap="nowrap">',
+        $html,
+        1
+    );
+    $html = preg_replace(
+        '/<div class="right-heading"([^>]*)>/i',
+        '<div class="right-heading"$1 style="white-space: nowrap;">',
+        $html
+    );
+
+    $style = '<style type="text/css">'
+        . '.header-table .left-header { width: 41%; font-size: 9px; }'
+        . '.header-table .center-header { width: 18%; }'
+        . '.header-table .right-header { width: 41%; font-size: 9px; }'
+        . '.header-table .contractor-table td, .header-table .right-heading {'
+        . 'white-space: nowrap;'
+        . '}'
+        . '</style>';
+
+    if (stripos($html, '</head>') !== false) {
+        return preg_replace('/<\/head>/i', $style . '</head>', $html, 1);
+    }
+
+    return $style . $html;
+}
+
+/**
+ * Give the Form XXI PDF the same compact header proportions as Forms XX and
+ * XXII without changing the browser report template.
+ */
+function addFormXXIPdfFormatting($html)
+{
+    $headerWidths = array(
+        'left-header' => '41%',
+        'center-header' => '18%',
+        'right-header' => '41%'
+    );
+
+    foreach ($headerWidths as $className => $width) {
+        $html = preg_replace_callback(
+            '/<td class="' . preg_quote($className, '/') . '"([^>]*)>/i',
+            function ($match) use ($className, $width) {
+                $attributes = preg_replace('/\s+width="[^"]*"/i', '', $match[1]);
+                $attributes = preg_replace_callback(
+                    '/style="([^"]*)"/i',
+                    function ($styleMatch) use ($width) {
+                        $declarations = preg_replace('/(?:^|\s)width\s*:\s*[^;]+;?/i', '', $styleMatch[1]);
+                        return 'style="width: ' . $width . '; ' . ltrim($declarations) . '"';
+                    },
+                    $attributes,
+                    1
+                );
+                return '<td class="' . $className . '" width="' . $width . '"' . $attributes . '>';
+            },
+            $html
+        );
+    }
+
+    // The template already defines the contractor grid. Add TCPDF's nowrap
+    // attribute to its value and address cells, and keep both right-side
+    // headings (including the principal employer value) together.
+    $html = preg_replace(
+        '/<td width="45%"([^>]*)>/i',
+        '<td width="45%"$1 nowrap="nowrap">',
+        $html,
+        1
+    );
+    $html = preg_replace(
+        '/<td class="address-line"([^>]*)>/i',
+        '<td class="address-line"$1 nowrap="nowrap">',
+        $html
+    );
+    $html = preg_replace(
+        '/<div class="right-line"([^>]*)>/i',
+        '<div class="right-line"$1 style="white-space: nowrap;">',
+        $html
+    );
+
+    $style = '<style type="text/css">'
+        . '.header-table .left-header { width: 41%; font-size: 9px; }'
+        . '.header-table .center-header { width: 18%; }'
+        . '.header-table .right-header { width: 41%; font-size: 9px; }'
+        . '.header-table .info-table td, .header-table .right-line {'
+        . 'white-space: nowrap;'
         . '}'
         . '</style>';
 
