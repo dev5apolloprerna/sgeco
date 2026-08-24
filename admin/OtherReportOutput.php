@@ -384,3 +384,64 @@ function addFormCPdfFormatting($html)
 
     return $style . $html;
 }
+
+/**
+ * Keep the Form XIII PDF header aligned with the compact Form XX header.
+ */
+function addFormXIIIPdfFormatting($html)
+{
+    $headerWidths = array(
+        'left-header' => '41%',
+        'center-header' => '18%',
+        'right-header' => '41%'
+    );
+    foreach ($headerWidths as $className => $width) {
+        $html = preg_replace(
+            '/<td class="' . preg_quote($className, '/') . '"([^>]*)>/i',
+            '<td class="' . $className . '" width="' . $width . '"$1>',
+            $html,
+            1
+        );
+    }
+
+    // Put the contractor label and value on the same reliable TCPDF grid.
+    $html = preg_replace(
+        '/<td class="info-label"([^>]*)>/i',
+        '<td class="info-label" width="55%"$1 nowrap="nowrap">',
+        $html,
+        1
+    );
+    $html = preg_replace(
+        '/(<td class="info-label"[^>]*>.*?<\/td>\s*)<td([^>]*)>/is',
+        '$1<td width="45%"$2 nowrap="nowrap">',
+        $html,
+        1
+    );
+    $html = preg_replace(
+        '/<td class="address-line"([^>]*)>/i',
+        '<td class="address-line"$1 nowrap="nowrap">',
+        $html
+    );
+    $html = preg_replace(
+        '/<div class="right-line"([^>]*)>/i',
+        '<div class="right-line"$1 style="white-space: nowrap;">',
+        $html
+    );
+
+    $style = '<style type="text/css">'
+        . '.header-table .left-header { width: 41%; font-size: 8px; }'
+        . '.header-table .center-header { width: 18%; }'
+        . '.header-table .right-header {'
+        . 'width: 41%; font-size: 7.5px; padding-top: 0;'
+        . '}'
+        . '.header-table .info-table td, .header-table .right-line {'
+        . 'white-space: nowrap;'
+        . '}'
+        . '</style>';
+
+    if (stripos($html, '</head>') !== false) {
+        return preg_replace('/<\/head>/i', $style . '</head>', $html, 1);
+    }
+
+    return $style . $html;
+}
