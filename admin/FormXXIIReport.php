@@ -184,9 +184,12 @@ function renderFormXXIIHtml(array $employees, $salaryMonth, $companyName)
         $matches[1],
         1
     );
-    $prefix = preg_replace(
-        '/(Name and Address of the principal Employer\s*:\s*<span\s+class="normal">).*?(<\/span>)/s',
-        '$1' . htmlspecialchars($companyName, ENT_QUOTES, 'UTF-8') . '$2',
+    $escapedCompanyName = htmlspecialchars($companyName, ENT_QUOTES, 'UTF-8');
+    $prefix = preg_replace_callback(
+        '/(Name and Address of the principal Employer\s*:.*?<span\s+class="normal">).*?(<\/span>)/s',
+        function ($match) use ($escapedCompanyName) {
+            return $match[1] . $escapedCompanyName . $match[2];
+        },
         $prefix,
         1
     );
