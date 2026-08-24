@@ -321,7 +321,7 @@ function extractFormXIIIDetails($html)
 {
     preg_match('/<strong>Month:\s*(.*?)<\/strong>/is', $html, $month);
     preg_match(
-        '/Name and Address of the principal Employer\s*:\s*<span[^>]*>(.*?)<\/span>/is',
+        '/Name and Address of the principal Employer\s*:\s*<\/strong>\s*<span[^>]*>(.*?)<\/span>/is',
         $html,
         $employer
     );
@@ -364,7 +364,9 @@ function formatFormXIIIWorksheet($sheet, array $details)
     $sheet->setCellValue('C5', 'Mithakhali, Ahmedabad - 380006');
     $sheet->setCellValue('E2', 'FORM NO. XIII');
     $sheet->setCellValue('E3', '[See Rule 75]');
-    $sheet->setCellValue('E4', 'Month: ' . $details['month']);
+    // Form XIII does not require a month in the Excel header. The selected
+    // salary period is still used to choose employees and calculate ages.
+    $sheet->setCellValue('E4', '');
     $sheet->setCellValue('I2', 'Name and Address of establishment in/under which contract is carried on');
     $sheet->setCellValue('I4', 'Name and Address of the principal Employer :  ' . $details['employer']);
     $sheet->setCellValue('A6', 'NATURE AND LOCATION OF WORK');

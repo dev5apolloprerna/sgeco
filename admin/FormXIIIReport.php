@@ -85,12 +85,28 @@ function formatFormXIIIDate($value)
 
 function getFormXIIIAge($dateOfBirth, $salaryMonth)
 {
-    $timestamp = strtotime(trim((string) $dateOfBirth));
+    $dateOfBirth = trim((string) $dateOfBirth);
     $period = DateTime::createFromFormat('!m/Y', $salaryMonth);
-    if ($timestamp === false || !$period) {
+    if ($dateOfBirth === '' || !$period) {
         return '';
     }
-    $birthDate = new DateTime(date('Y-m-d', $timestamp));
+    // Employee records are entered through a dd-mm-yyyy date picker, while
+    // older imports also contain slash-separated and ISO dates. strtotime()
+    // cannot parse values such as 31/12/1990, so parse the known database
+    // formats explicitly before calculating the age.
+    $birthDate = false;
+    foreach (array('!d-m-Y', '!d/m/Y', '!Y-m-d', '!Y/m/d') as $format) {
+        $candidate = DateTime::createFromFormat($format, $dateOfBirth);
+        $errors = DateTime::getLastErrors();
+        if ($candidate && ($errors === false || ($errors['warning_count'] === 0 && $errors['error_count'] === 0))) {
+            $birthDate = $candidate;
+            break;
+        }
+    }
+    if (!$birthDate) {
+        return '';
+    }
+    
     $period->modify('last day of this month');
     return $birthDate > $period ? '' : (string) $birthDate->diff($period)->y;
 }
