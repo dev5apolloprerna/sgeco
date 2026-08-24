@@ -119,12 +119,10 @@ function formXXIIIApplyMonth($html, $salaryMonth)
 
 function renderFormXXIIIHtml(array $entries, $salaryMonth, $companyName, $repeatPageHeaders = true)
 {
-     // The form heading on the first legal-landscape page leaves room for 17
-    // detail rows. PDF continuation pages omit those headings, so use the
-    // remaining page height for more rows instead of leaving most of each page
-    // blank. Browser/Excel pages retain the original 17-row form layout.
-    $firstPageRows = 17;
-    $continuationPageRows = 45;
+    // Browser/Excel output uses complete repeated form sections. PDF output is
+    // rendered as one continuous table so TCPDF can fill all available space
+    // before creating the next physical page.
+    $rowsPerFormPage = 17;
     $columnWidths = array('3%', '20%', '17%', '4%', '7%', '9%', '9%', '6%', '7%', '5%', '8%', '5%');
     $template = file_get_contents(__DIR__ . '/SGECO-forms/Register_of_Overtime_Form_XXIII_Legal_Landscape.html');
     if ($template === false || !preg_match('/(<section class="form-page">.*?<tbody>)(.*?)(<\/tbody>.*?<\/section>)/s', $template, $matches)) {
@@ -171,16 +169,10 @@ function renderFormXXIIIHtml(array $entries, $salaryMonth, $companyName, $repeat
         $prefix,
         1
     );
-    if (!$detailRows) {
-        $rowPages = array(array());
-    } elseif ($repeatPageHeaders) {
-        $rowPages = array_chunk($detailRows, $firstPageRows);
-    } else {
-        $rowPages = array(array_slice($detailRows, 0, $firstPageRows));
-        foreach (array_chunk(array_slice($detailRows, $firstPageRows), $continuationPageRows) as $pageRows) {
-            $rowPages[] = $pageRows;
-        }
-    }
+
+    $rowPages = $detailRows
+        ? ($repeatPageHeaders ? array_chunk($detailRows, $rowsPerFormPage) : array($detailRows))
+        : array(array());
     $sections = array();
     foreach ($rowPages as $pageIndex => $pageRows) {
         $pagePrefix = $prefix;

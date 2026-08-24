@@ -8,6 +8,8 @@ require_once('OtherReportOutput.php');
 
 try {
     $html = addOtherReportPdfSpacing(getFormXXIRequestData($dbconn));
+     $salaryMonth = isset($_GET['salarymasterId']) ? trim($_GET['salarymasterId']) : '';
+    $html = formXXIApplyMonth($html, $salaryMonth);
 } catch (Exception $exception) {
     ob_clean();
     exit(htmlspecialchars($exception->getMessage(), ENT_QUOTES, 'UTF-8'));

@@ -58,6 +58,32 @@ function getFormXXICompanyName($dbconn, $companyId)
     return $company['companyname'];
 }
 
+function formXXIApplyMonth($html, $salaryMonth)
+{
+    $period = DateTime::createFromFormat('!m/Y', $salaryMonth);
+    if (!$period || $period->format('m/Y') !== $salaryMonth) {
+        throw new InvalidArgumentException('A valid salary month is required.');
+    }
+
+    $periodLabel = htmlspecialchars($period->format('F-Y'), ENT_QUOTES, 'UTF-8');
+    if (strpos($html, '{{FORM_XXI_MONTH}}') !== false) {
+        return str_replace('{{FORM_XXI_MONTH}}', $periodLabel, $html);
+    }
+
+    $replacementCount = 0;
+    $html = preg_replace(
+        '/(<div\b[^>]*class=("|\')[^"\']*\bmonth-row\b[^"\']*\2[^>]*>.*?<span\b[^>]*class=("|\')[^"\']*\bmonth-label\b[^"\']*\3[^>]*>.*?Month\s*:.*?<\/span>.*?<span\b[^>]*>).*?(<\/span>)/is',
+        '$1' . $periodLabel . '$4',
+        $html,
+        1,
+        $replacementCount
+    );
+    if ($html === null || $replacementCount === 0) {
+        throw new RuntimeException('The Form XXI month field could not be populated.');
+    }
+    return $html;
+}
+
 function renderFormXXIHtml(array $employees, $salaryMonth, $companyName)
 {
     $templatePath = __DIR__ . '/SGECO-forms/Register-of-fine-complete.html';
@@ -78,16 +104,16 @@ function renderFormXXIHtml(array $employees, $salaryMonth, $companyName)
         throw new RuntimeException('The Form XXI column-number row could not be found.');
     }
 
-    $sectionPrefix = $matches[1];
+    $sectionPrefix = formXXIApplyMonth($matches[1], $salaryMonth);
     $sectionSuffix = $matches[3];
-    $period = DateTime::createFromFormat('!m/Y', $salaryMonth);
-    $periodLabel = $period ? $period->format('F-Y') : $salaryMonth;
-    $sectionPrefix = preg_replace(
-        '/(<span class="month-label">Month:<\/span>\s*<span>).*?(<\/span>)/s',
-        '$1' . htmlspecialchars($periodLabel, ENT_QUOTES, 'UTF-8') . '$2',
-        $sectionPrefix,
-        1
-    );
+    // $period = DateTime::createFromFormat('!m/Y', $salaryMonth);
+    // $periodLabel = $period ? $period->format('F-Y') : $salaryMonth;
+    // $sectionPrefix = preg_replace(
+    //     '/(<span class="month-label">Month:<\/span>\s*<span>).*?(<\/span>)/s',
+    //     '$1' . htmlspecialchars($periodLabel, ENT_QUOTES, 'UTF-8') . '$2',
+    //     $sectionPrefix,
+    //     1
+    // );
 
     // Keep the report header in a single section. The register table may flow
     // onto additional PDF pages, but the form details must not be duplicated.
