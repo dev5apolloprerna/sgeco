@@ -522,20 +522,20 @@ function formatFormXXWorksheet($sheet, array $details)
         // "Date of recovery\nFirst installment",
         // "Date of recovery\nLast installment",
         // 'Remarks'
-        'A7' => "Sr.\nNo.",
-        'B7' => 'Name of Workmen',
-        'C7' => "Father's / Husband's\nName",
-        'D7' => "Designation / Nature\nof Employment",
-        'E7' => "Particulars of\nDamage or Loss",
-        'F7' => "Date of Damage\nor Loss",
-        'G7' => "Whether workman\nshowed cause against\ndeduction",
-        'H7' => "Name of person in whose\npresence workman's\nexplanation was heard",
-        'I7' => "Amount of deduction\nimposed",
-        'J7' => "No. of\nInstallments",
-        'K7' => 'Date of recovery',
-        'K8' => "First\ninstallment",
-        'L8' => "Last\ninstallment",
-        'M7' => 'Remarks',
+        'A8' => "Sr.\nNo.",
+        'B8' => 'Name of Workmen',
+        'C8' => "Father's / Husband's\nName",
+        'D8' => "Designation / Nature\nof Employment",
+        'E8' => "Particulars of\nDamage or Loss",
+        'F8' => "Date of Damage\nor Loss",
+        'G8' => "Whether workman\nshowed cause against\ndeduction",
+        'H8' => "Name of person in whose\npresence workman's\nexplanation was heard",
+        'I8' => "Amount of deduction\nimposed",
+        'J8' => "No. of\nInstallments",
+        'K8' => 'Date of recovery',
+        'K9' => "First\ninstallment",
+        'L9' => "Last\ninstallment",
+        'M8' => 'Remarks',
     );
 
     foreach ($headings as $cell => $heading) {
@@ -551,7 +551,7 @@ function formatFormXXWorksheet($sheet, array $details)
         }
     }
 
-    $lastRow = max(9, count($details['rows']) + 9);
+    $lastRow = max(10, count($details['rows']) + 9);
     $sheet->getStyle('A1:M' . $lastRow)->getFill()->setFillType(Fill::FILL_SOLID)
         ->getStartColor()->setRGB('FFFFFF');
     $sheet->getStyle('A1:M' . $lastRow)->getFont()->setName('Times New Roman')->setSize(10);
@@ -560,11 +560,18 @@ function formatFormXXWorksheet($sheet, array $details)
     $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
     $sheet->getStyle('E2:H5')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
     $sheet->getStyle('A7:M9')->getFont()->setBold(true);
+    // Do not retain a font colour inherited by the HTML reader. In particular,
+    // the vertically merged heading cells must remain visible in Excel just as
+    // they are in the PDF table header.
+    $sheet->getStyle('A7:M9')->getFont()->getColor()->setRGB('000000');
     $sheet->getStyle('A7:M9')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)
         ->setVertical(Alignment::VERTICAL_CENTER)->setWrapText(true);
     $sheet->getStyle('A7:M' . $lastRow)->getBorders()->getAllBorders()
         ->setBorderStyle(Border::BORDER_THIN)->getColor()->setRGB('000000');
-    $widths = array(5, 27, 23, 19, 14, 13, 16, 18, 13, 11, 12, 12, 11);
+    // Use the same 3/18/17/8/6... proportions as the Form XX HTML consumed by
+    // generateFormXXReportPDF.php. Keeping these proportions in one common
+    // scale makes every Excel border and heading line up with its PDF column.
+    $widths = array(5, 30, 28.333, 13.333, 10, 10, 10, 10, 10, 10, 10, 10, 10);
     foreach (range('A', 'M') as $index => $column) {
         $sheet->getColumnDimension($column)->setWidth($widths[$index]);
     }
