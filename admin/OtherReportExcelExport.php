@@ -94,15 +94,73 @@ function rightAlignOtherReportAmountColumnsInWorksheet($sheet)
     }
 }
 
+/**
+ * Read the common month and principal-employer fields from a statutory form.
+ *
+ * The report templates do not all wrap their labels in the same tags.  Using
+ * DOM text and sibling navigation keeps Excel exports independent of whether
+ * a label is inside a <strong> or whether its value is on the next line.
+ */
+function extractOtherReportHeaderDetails($html)
+{
+    $details = array('month' => '', 'employer' => '');
+    $document = new DOMDocument();
+    $previous = libxml_use_internal_errors(true);
+    $loaded = $document->loadHTML('<?xml encoding="UTF-8">' . $html);
+    libxml_clear_errors();
+    libxml_use_internal_errors($previous);
+    if (!$loaded) {
+        return $details;
+    }
+
+    $clean = function ($value) {
+        return trim(preg_replace('/\s+/', ' ', html_entity_decode($value, ENT_QUOTES, 'UTF-8')));
+    };
+    $xpath = new DOMXPath($document);
+    $monthLabels = $xpath->query(
+        '//*[contains(concat(" ", normalize-space(@class), " "), " month-label ")]'
+    );
+
+    if ($monthLabels->length > 0) {
+        $label = $monthLabels->item(0);
+        $container = $label->parentNode;
+        // Some forms put the label in <strong> and the value beside that
+        // element, while others put both directly in the month-row.
+        if ($container && strtolower($container->nodeName) === 'strong') {
+            $container = $container->parentNode;
+        }
+        if ($container) {
+            $containerText = $clean($container->textContent);
+            $details['month'] = $clean(preg_replace('/^.*?Month\s*:\s*/i', '', $containerText));
+        }
+    }
+
+    foreach ($xpath->query('//*') as $element) {
+        $text = $clean($element->textContent);
+        if (stripos($text, 'Name and Address of the principal Employer') === false) {
+            continue;
+        }
+        $valueNodes = $xpath->query(
+            './/*[contains(concat(" ", normalize-space(@class), " "), " normal ") '
+            . 'or contains(concat(" ", normalize-space(@class), " "), " normal-weight ")]',
+            $element
+        );
+        if ($valueNodes->length > 0) {
+            $value = $clean($valueNodes->item($valueNodes->length - 1)->textContent);
+            if ($value !== '') {
+                $details['employer'] = $value;
+                break;
+            }
+        }
+    }
+
+    return $details;
+}
+
 function extractFormXXIIIDetails($html)
 {
-    preg_match('/<span class="month-label">Month :<\/span>\s*<span>(.*?)<\/span>/is', $html, $month);
-    preg_match('/Name and Address of the principal Employer\s*:\s*<span[^>]*>(.*?)<\/span>/is', $html, $employer);
-    $details = array(
-        'month' => isset($month[1]) ? trim(strip_tags($month[1])) : '',
-        'employer' => isset($employer[1]) ? trim(html_entity_decode(strip_tags($employer[1]), ENT_QUOTES, 'UTF-8')) : '',
-        'rows' => array()
-    );
+    $details = extractOtherReportHeaderDetails($html);
+    $details['rows'] = array();
     $document = new DOMDocument();
     $previous = libxml_use_internal_errors(true);
     $document->loadHTML('<?xml encoding="UTF-8">' . $html);
@@ -202,17 +260,8 @@ function formatFormXXIIIWorksheet($sheet, array $details)
 
 function extractFormXXIIDetails($html)
 {
-    preg_match('/<span class="month-label">Month:<\/span>\s*([^<]*)/is', $html, $month);
-    preg_match(
-        '/Name and Address of the principal Employer\s*:\s*<span[^>]*>(.*?)<\/span>/is',
-        $html,
-        $employer
-    );
-    $details = array(
-        'month' => isset($month[1]) ? trim(strip_tags($month[1])) : '',
-        'employer' => isset($employer[1]) ? trim(html_entity_decode(strip_tags($employer[1]), ENT_QUOTES, 'UTF-8')) : '',
-        'rows' => array()
-    );
+    $details = extractOtherReportHeaderDetails($html);
+    $details['rows'] = array();
 
     $document = new DOMDocument();
     $previous = libxml_use_internal_errors(true);

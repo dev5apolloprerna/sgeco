@@ -178,21 +178,13 @@ function renderFormXXIIHtml(array $employees, $salaryMonth, $companyName)
     if (!$period || $period->format('m/Y') !== $salaryMonth) {
         throw new InvalidArgumentException('A valid salary month is required.');
     }
-    $prefix = preg_replace(
-        '/(<span class="month-label">Month:<\/span>)\s*[^<]*/',
-        '$1 ' . htmlspecialchars($period->format('F-Y'), ENT_QUOTES, 'UTF-8'),
-        $matches[1],
-        1
+    $prefix = str_replace(
+        '{{FORM_XXII_MONTH}}',
+        htmlspecialchars($period->format('F-Y'), ENT_QUOTES, 'UTF-8'),
+        $matches[1]
     );
     $escapedCompanyName = htmlspecialchars($companyName, ENT_QUOTES, 'UTF-8');
-    $prefix = preg_replace_callback(
-        '/(Name and Address of the principal Employer\s*:.*?<span\s+class="normal">).*?(<\/span>)/s',
-        function ($match) use ($escapedCompanyName) {
-            return $match[1] . $escapedCompanyName . $match[2];
-        },
-        $prefix,
-        1
-    );
+    $prefix = str_replace('{{FORM_XXII_COMPANY}}', $escapedCompanyName, $prefix);
     $firstSection = strpos($template, $matches[0]);
     return substr($template, 0, $firstSection) . $prefix . $rows . $matches[3]
         . substr($template, $firstSection + strlen($matches[0]));

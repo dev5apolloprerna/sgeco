@@ -163,12 +163,7 @@ function renderFormXXIIIHtml(array $entries, $salaryMonth, $companyName, $repeat
     }
 
     $prefix = formXXIIIApplyMonth($matches[1], $salaryMonth);
-    $prefix = preg_replace(
-        '/(Name and Address of the principal Employer\s*:\s*<span class="normal">).*?(<\/span>)/s',
-        '$1' . $esc($companyName) . '$2',
-        $prefix,
-        1
-    );
+    $prefix = str_replace('{{FORM_XXIII_COMPANY}}', $esc($companyName), $prefix);
 
     $rowPages = $detailRows
         ? ($repeatPageHeaders ? array_chunk($detailRows, $rowsPerFormPage) : array($detailRows))
