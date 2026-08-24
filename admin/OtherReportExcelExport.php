@@ -488,45 +488,70 @@ function formatFormXXWorksheet($sheet, array $details)
     $sheet->mergeCells('I4:M5');
     $sheet->mergeCells('A6:M6');
 
-    $sheet->setCellValue('A1', 'Register Of Deductions For Damage Or Loss');
+// Keep the exported header text identical to the approved PDF form.
+    $sheet->setCellValue('A1', 'Register of Deductions for Damage or Loss');
     $sheet->setCellValue('A2', 'NAME AND ADDRESS OF CONTRACTOR :');
     $sheet->setCellValue('C2', 'SHREE GANESH ENGINEERING CO.');
     $sheet->setCellValue('C3', 'FF-8, Devshruti Complex,');
     $sheet->setCellValue('C4', 'Nr. HCG Hospital,');
     $sheet->setCellValue('C5', 'Mithakhali, Ahmedabad - 380006');
     $sheet->setCellValue('E2', 'FORM NO. XX');
-    $sheet->setCellValue('E3', '[See Rule 78(2) (d)]');
+    $sheet->setCellValue('E3', '[See rule 78 (2)(d)]');
     $sheet->setCellValue('E4', 'Month: ' . $details['month']);
     $sheet->setCellValue('I2', 'Name and Address of establishment in/under which contract is carried on');
     $sheet->setCellValue('I4', 'Name and Address of the principal Employer :  ' . $details['employer']);
     $sheet->setCellValue('A6', 'NATURE AND LOCATION OF WORK');
 
+    // Match the PDF's two-tier table heading: columns 1-10 and 13 span both
+    // rows, while "Date of recovery" groups the first/last installment cells.
+    foreach (array('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'M') as $column) {
+        $sheet->mergeCells($column . '7:' . $column . '8');
+    }
+    $sheet->mergeCells('K7:L7');
     $headings = array(
-        "Sr.\nNo.",
-        'Name of Workmen',
-        "Father's / Husband's\nName",
-        "Designation / Nature\nof Employment",
-        "Particulars of\nDamage or Loss",
-        "Date of Damage\nor Loss",
-        "Whether workman showed\ncause against deduction",
-        "Name of person in whose presence\nworkman's explanation was heard",
-        "Amount of deduction\nimposed",
-        "No. of\nInstallments",
-        "Date of recovery\nFirst installment",
-        "Date of recovery\nLast installment",
-        'Remarks'
+        // "Sr.\nNo.",
+        // 'Name of Workmen',
+        // "Father's / Husband's\nName",
+        // "Designation / Nature\nof Employment",
+        // "Particulars of\nDamage or Loss",
+        // "Date of Damage\nor Loss",
+        // "Whether workman showed\ncause against deduction",
+        // "Name of person in whose presence\nworkman's explanation was heard",
+        // "Amount of deduction\nimposed",
+        // "No. of\nInstallments",
+        // "Date of recovery\nFirst installment",
+        // "Date of recovery\nLast installment",
+        // 'Remarks'
+        'A7' => "Sr.\nNo.",
+        'B7' => 'Name of Workmen',
+        'C7' => "Father's / Husband's\nName",
+        'D7' => "Designation / Nature\nof Employment",
+        'E7' => "Particulars of\nDamage or Loss",
+        'F7' => "Date of Damage\nor Loss",
+        'G7' => "Whether workman\nshowed cause against\ndeduction",
+        'H7' => "Name of person in whose\npresence workman's\nexplanation was heard",
+        'I7' => "Amount of deduction\nimposed",
+        'J7' => "No. of\nInstallments",
+        'K7' => 'Date of recovery',
+        'K8' => "First\ninstallment",
+        'L8' => "Last\ninstallment",
+        'M7' => 'Remarks',
     );
-    foreach ($headings as $index => $heading) {
-        $sheet->setCellValueByColumnAndRow($index + 1, 7, $heading);
-        $sheet->setCellValueByColumnAndRow($index + 1, 8, $index + 1);
+
+    foreach ($headings as $cell => $heading) {
+        $sheet->setCellValue($cell, $heading);
+    }
+    foreach (range(1, 13) as $column) {
+        $sheet->setCellValueByColumnAndRow($column, 9, $column);
     }
 
     foreach ($details['rows'] as $rowIndex => $values) {
         foreach ($values as $column => $value) {
-            $sheet->setCellValueByColumnAndRow($column + 1, $rowIndex + 9, $value);
+            $sheet->setCellValueByColumnAndRow($column + 1, $rowIndex + 10, $value);
         }
     }
-    $lastRow = max(8, count($details['rows']) + 8);
+
+    $lastRow = max(9, count($details['rows']) + 9);
     $sheet->getStyle('A1:M' . $lastRow)->getFill()->setFillType(Fill::FILL_SOLID)
         ->getStartColor()->setRGB('FFFFFF');
     $sheet->getStyle('A1:M' . $lastRow)->getFont()->setName('Times New Roman')->setSize(10);
@@ -534,8 +559,8 @@ function formatFormXXWorksheet($sheet, array $details)
     $sheet->getStyle('A1')->getFont()->setSize(16);
     $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
     $sheet->getStyle('E2:H5')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-    $sheet->getStyle('A7:M8')->getFont()->setBold(true);
-    $sheet->getStyle('A7:M8')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)
+    $sheet->getStyle('A7:M9')->getFont()->setBold(true);
+    $sheet->getStyle('A7:M9')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)
         ->setVertical(Alignment::VERTICAL_CENTER)->setWrapText(true);
     $sheet->getStyle('A7:M' . $lastRow)->getBorders()->getAllBorders()
         ->setBorderStyle(Border::BORDER_THIN)->getColor()->setRGB('000000');
@@ -544,13 +569,14 @@ function formatFormXXWorksheet($sheet, array $details)
         $sheet->getColumnDimension($column)->setWidth($widths[$index]);
     }
     $sheet->getRowDimension(1)->setRowHeight(24);
-    $sheet->getRowDimension(7)->setRowHeight(82);
-    $sheet->getRowDimension(8)->setRowHeight(22);
-    for ($row = 9; $row <= $lastRow; $row++) {
+    $sheet->getRowDimension(7)->setRowHeight(70);
+    $sheet->getRowDimension(8)->setRowHeight(32);
+    $sheet->getRowDimension(9)->setRowHeight(22);
+    for ($row = 10; $row <= $lastRow; $row++) {
         $sheet->getRowDimension($row)->setRowHeight(24);
     }
-    $sheet->getPageSetup()->setRowsToRepeatAtTopByStartAndEnd(7, 8);
-    configureOtherReportPage($sheet, 'A1:M' . $lastRow, 9);
+    $sheet->getPageSetup()->setRowsToRepeatAtTopByStartAndEnd(7, 9);
+    configureOtherReportPage($sheet, 'A1:M' . $lastRow, 10);
 }
 
 function extractFormXXIDetails($html)
