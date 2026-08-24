@@ -420,17 +420,12 @@ function formatFormXIIIWorksheet($sheet, array $details)
 
 function extractFormXXDetails($html)
 {
-    // preg_match('/<span class="month-label">Month:<\/span>\s*<span>(.*?)<\/span>/is', $html, $month);
-    // preg_match(
-    //     '/Name and Address of the principal Employer\s*:\s*<span[^>]*>(.*?)<\/span>/is',
-    //     $html,
-    //     $employer
-    // );
     $clean = function ($value) {
         return trim(html_entity_decode(strip_tags($value), ENT_QUOTES, 'UTF-8'));
     };
     $monthValue = '';
     $employerValue = '';
+    $rows = array();
     $document = new DOMDocument();
     $previous = libxml_use_internal_errors(true);
     $loaded = $document->loadHTML('<?xml encoding="UTF-8">' . $html);
@@ -456,10 +451,19 @@ function extractFormXXDetails($html)
         if ($employerNodes->length > 0) {
             $employerValue = $employerNodes->item(0)->textContent;
         }
+
+        foreach ($xpath->query('//tr[contains(concat(" ", normalize-space(@class), " "), " data-row ")]') as $row) {
+            $values = array();
+            foreach ($xpath->query('./td', $row) as $cell) {
+                $values[] = $clean(preg_replace('/\s+/', ' ', $cell->textContent));
+            }
+            $rows[] = array_slice(array_pad($values, 13, ''), 0, 13);
+        }
     }
     return array(
         'month' => $clean($monthValue),
         'employer' => $clean($employerValue),
+        'rows' => $rows,
     );
 }
 
@@ -545,9 +549,18 @@ function formatFormXXWorksheet($sheet, array $details)
 
 function extractFormXXIDetails($html)
 {
-    preg_match('/<span class="month-label">Month:<\/span>\s*<span>(.*?)<\/span>/is', $html, $month);
+    // preg_match('/<span class="month-label">Month:<\/span>\s*<span>(.*?)<\/span>/is', $html, $month);
+    // Both labels are wrapped in <strong> while their values are sibling
+    // spans. Account for that closing element instead of assuming the value
+    // span immediately follows the label span.
     preg_match(
-        '/Name and Address of the principal Employer\s*:\s*<span[^>]*>(.*?)<\/span>/is',
+        // '/Name and Address of the principal Employer\s*:\s*<span[^>]*>(.*?)<\/span>/is',
+        '/<span\b[^>]*class=("|\')[^"\']*\bmonth-label\b[^"\']*\1[^>]*>\s*Month\s*:\s*<\/span>\s*<\/strong>\s*<span\b[^>]*>(.*?)<\/span>/is',
+        $html,
+        $month
+    );
+    preg_match(
+        '/Name and Address of the principal Employer\s*:\s*<\/strong>\s*<span\b[^>]*>(.*?)<\/span>/is',
         $html,
         $employer
     );
@@ -557,7 +570,7 @@ function extractFormXXIDetails($html)
     };
 
     return array(
-        'month' => isset($month[1]) ? $clean($month[1]) : '',
+        'month' => isset($month[2]) ? $clean($month[2]) : '',
         'employer' => isset($employer[1]) ? $clean($employer[1]) : '',
     );
 }
