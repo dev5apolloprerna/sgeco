@@ -469,10 +469,10 @@ function extractFormXXDetails($html)
 
 function formatFormXXWorksheet($sheet, array $details)
 {
-    // Rebuild the supplied three-part HTML header so it remains legible in Excel.
-    $sheet->removeRow(1, 7);
-    $sheet->insertNewRowBefore(1, 8);
-    $sheet->mergeCells('A1:K1');
+    // Rebuild the sheet from the extracted records. This avoids the HTML
+    // reader's extra highlighted row and preserves all 13 statutory columns.
+    $sheet->removeRow(1, max(1, $sheet->getHighestRow()));
+    $sheet->mergeCells('A1:M1');
     $sheet->mergeCells('A2:B2');
     $sheet->mergeCells('C2:D2');
     $sheet->mergeCells('A3:B3');
@@ -481,24 +481,24 @@ function formatFormXXWorksheet($sheet, array $details)
     $sheet->mergeCells('C4:D4');
     $sheet->mergeCells('A5:B5');
     $sheet->mergeCells('C5:D5');
-    $sheet->mergeCells('E2:G2');
-    $sheet->mergeCells('E3:G3');
-    $sheet->mergeCells('E4:G5');
-    $sheet->mergeCells('H2:K3');
-    $sheet->mergeCells('H4:K5');
-    $sheet->mergeCells('A6:K6');
+    $sheet->mergeCells('E2:H2');
+    $sheet->mergeCells('E3:H3');
+    $sheet->mergeCells('E4:H5');
+    $sheet->mergeCells('I2:M3');
+    $sheet->mergeCells('I4:M5');
+    $sheet->mergeCells('A6:M6');
 
-    $sheet->setCellValue('A1', 'Register of deductions for damage or loss');
+    $sheet->setCellValue('A1', 'Register Of Deductions For Damage Or Loss');
     $sheet->setCellValue('A2', 'NAME AND ADDRESS OF CONTRACTOR :');
     $sheet->setCellValue('C2', 'SHREE GANESH ENGINEERING CO.');
     $sheet->setCellValue('C3', 'FF-8, Devshruti Complex,');
     $sheet->setCellValue('C4', 'Nr. HCG Hospital,');
     $sheet->setCellValue('C5', 'Mithakhali, Ahmedabad - 380006');
     $sheet->setCellValue('E2', 'FORM NO. XX');
-    $sheet->setCellValue('E3', '[See rule 78 (2)(c)]');
+    $sheet->setCellValue('E3', '[See Rule 78(2) (d)]');
     $sheet->setCellValue('E4', 'Month: ' . $details['month']);
-    $sheet->setCellValue('H2', 'Name and Address of establishment in/under which contract is carried on');
-    $sheet->setCellValue('H4', 'Name and Address of the principal Employer :  ' . $details['employer']);
+    $sheet->setCellValue('I2', 'Name and Address of establishment in/under which contract is carried on');
+    $sheet->setCellValue('I4', 'Name and Address of the principal Employer :  ' . $details['employer']);
     $sheet->setCellValue('A6', 'NATURE AND LOCATION OF WORK');
 
     $headings = array(
@@ -506,12 +506,14 @@ function formatFormXXWorksheet($sheet, array $details)
         'Name of Workmen',
         "Father's / Husband's\nName",
         "Designation / Nature\nof Employment",
-        "Damage or loss caused\nwith date",
+        "Particulars of\nDamage or Loss",
+        "Date of Damage\nor Loss",
         "Whether workman showed\ncause against deduction",
         "Name of person in whose presence\nworkman's explanation was heard",
         "Amount of deduction\nimposed",
-        "Number of\ninstalments",
-        "Date of\nrecovery",
+        "No. of\nInstallments",
+        "Date of recovery\nFirst installment",
+        "Date of recovery\nLast installment",
         'Remarks'
     );
     foreach ($headings as $index => $heading) {
@@ -519,22 +521,26 @@ function formatFormXXWorksheet($sheet, array $details)
         $sheet->setCellValueByColumnAndRow($index + 1, 8, $index + 1);
     }
 
-    $lastRow = $sheet->getHighestDataRow();
-    for ($row = 9, $serial = 1; $row <= $lastRow; $row++, $serial++) {
-        $sheet->setCellValueByColumnAndRow(1, $row, $serial);
+    foreach ($details['rows'] as $rowIndex => $values) {
+        foreach ($values as $column => $value) {
+            $sheet->setCellValueByColumnAndRow($column + 1, $rowIndex + 9, $value);
+        }
     }
-    $sheet->getStyle('A1:K' . $lastRow)->getFont()->setName('Times New Roman')->setSize(10);
-    $sheet->getStyle('A1:K6')->getFont()->setBold(true);
+    $lastRow = max(8, count($details['rows']) + 8);
+    $sheet->getStyle('A1:M' . $lastRow)->getFill()->setFillType(Fill::FILL_SOLID)
+        ->getStartColor()->setRGB('FFFFFF');
+    $sheet->getStyle('A1:M' . $lastRow)->getFont()->setName('Times New Roman')->setSize(10);
+    $sheet->getStyle('A1:M6')->getFont()->setBold(true);
     $sheet->getStyle('A1')->getFont()->setSize(16);
     $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-    $sheet->getStyle('E2:G5')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-    $sheet->getStyle('A7:K8')->getFont()->setBold(true);
-    $sheet->getStyle('A7:K8')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)
+    $sheet->getStyle('E2:H5')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+    $sheet->getStyle('A7:M8')->getFont()->setBold(true);
+    $sheet->getStyle('A7:M8')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)
         ->setVertical(Alignment::VERTICAL_CENTER)->setWrapText(true);
-    $sheet->getStyle('A7:K' . $lastRow)->getBorders()->getAllBorders()
+    $sheet->getStyle('A7:M' . $lastRow)->getBorders()->getAllBorders()
         ->setBorderStyle(Border::BORDER_THIN)->getColor()->setRGB('000000');
-    $widths = array(5, 27, 23, 19, 16, 16, 18, 13, 11, 11, 11);
-    foreach (range('A', 'K') as $index => $column) {
+    $widths = array(5, 27, 23, 19, 14, 13, 16, 18, 13, 11, 12, 12, 11);
+    foreach (range('A', 'M') as $index => $column) {
         $sheet->getColumnDimension($column)->setWidth($widths[$index]);
     }
     $sheet->getRowDimension(1)->setRowHeight(24);
@@ -544,7 +550,7 @@ function formatFormXXWorksheet($sheet, array $details)
         $sheet->getRowDimension($row)->setRowHeight(24);
     }
     $sheet->getPageSetup()->setRowsToRepeatAtTopByStartAndEnd(7, 8);
-    configureOtherReportPage($sheet, 'A1:K' . $lastRow, 9);
+    configureOtherReportPage($sheet, 'A1:M' . $lastRow, 9);
 }
 
 function extractFormXXIDetails($html)
