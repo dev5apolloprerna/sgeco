@@ -6,21 +6,33 @@ require_once('FormXIXReport.php');
 require_once('../vendor/autoload.php');
 
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
+use PhpOffice\PhpSpreadsheet\RichText\RichText;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
+function formXIXLabelWithBoldValue($label, $value)
+{
+    $text = new RichText();
+    $text->createText($label);
+    $valueRun = $text->createTextRun((string) $value);
+    $valueRun->getFont()->setName('Arial')->setSize(10)->setBold(true);
+
+    return $text;
+}
+
 function formXIXBuildWorksheet($sheet, array $slip, $title)
 {
     $sheet->setTitle($title);
     $sheet->mergeCells('A1:G1');
     $sheet->setCellValue('A1', 'FORM - XIX - [ SEE RULE - 78(I)(B) ] - WAGES SLIP');
-    $sheet->setCellValue('A2', 'Sr. No.: ' . $slip['serial']);
-    $sheet->setCellValue('C2', 'PF No.: ' . $slip['pf_number']);
-    $sheet->setCellValue('E2', 'Worker No.: ' . $slip['worker_number']);
-    $sheet->setCellValue('G2', 'Period: ' . $slip['period']);
+    // The PDF emphasizes only the values in this row, not their labels.
+    $sheet->setCellValue('A2', formXIXLabelWithBoldValue('Sr. No.: ', $slip['serial']));
+    $sheet->setCellValue('C2', formXIXLabelWithBoldValue('PF No.: ', $slip['pf_number']));
+    $sheet->setCellValue('E2', formXIXLabelWithBoldValue('Worker No.: ', $slip['worker_number']));
+    $sheet->setCellValue('G2', formXIXLabelWithBoldValue('Period: ', $slip['period']));
     $sheet->mergeCells('A3:B4');
     $sheet->mergeCells('C3:G3');
     $sheet->mergeCells('C4:G4');
@@ -93,8 +105,15 @@ function formXIXBuildWorksheet($sheet, array $slip, $title)
     $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
     $sheet->getStyle('A8:G8')->getFont()->setBold(true);
     $sheet->getStyle('A8:G8')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-    $sheet->getStyle('A22:G22')->getFont()->setBold(true);
-    $sheet->getStyle('A3:A7')->getFont()->setBold(true);
+     // Match the PDF exactly: total labels are bold, while their figures are
+    // regular weight. Net Pay is the only bold total figure.
+    $sheet->getStyle('A22')->getFont()->setBold(true);
+    $sheet->getStyle('C22')->getFont()->setBold(true);
+    $sheet->getStyle('E22')->getFont()->setBold(true);
+    $sheet->getStyle('G22')->getFont()->setBold(true);
+    $sheet->getStyle('A3')->getFont()->setBold(true);
+    $sheet->getStyle('D5')->getFont()->setBold(true);
+    $sheet->getStyle('A6')->getFont()->setBold(true);
     $sheet->getStyle('A23')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT)
         ->setVertical(Alignment::VERTICAL_CENTER);
     $sheet->getStyle('A1:G25')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
