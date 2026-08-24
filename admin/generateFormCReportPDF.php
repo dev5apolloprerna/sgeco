@@ -8,6 +8,9 @@ require_once('OtherReportOutput.php');
 
 try {
     $html = addOtherReportPdfSpacing(getFormCRequestData($dbconn));
+    // $html = addFormCPdfFormatting(
+    //     addOtherReportPdfSpacing(getFormCRequestData($dbconn))
+    // );
 } catch (Exception $exception) {
     ob_clean();
     exit(htmlspecialchars($exception->getMessage(), ENT_QUOTES, 'UTF-8'));

@@ -337,3 +337,50 @@ function addFormXXIPdfFormatting($html)
 
     return $style . $html;
 }
+
+/**
+ * Keep the Form C establishment and principal-employer details on the same
+ * compact header line when TCPDF renders the report.
+ */
+// function addFormCPdfFormatting($html)
+// {
+//     // TCPDF does not reliably use the colgroup widths. Put the four header
+//     // column widths directly on the live cells and remove the invalid colspan
+//     // from the fourth cell so the row remains a four-column grid.
+//     $html = preg_replace(
+//         '/<td class="details-label"([^>]*)>/i',
+//         '<td class="details-label" width="22%"$1 nowrap="nowrap">',
+//         $html
+//     );
+//     $html = preg_replace(
+//         '/<td class="details-value company-value"([^>]*)>/i',
+//         '<td class="details-value company-value" width="24%"$1 nowrap="nowrap">',
+//         $html,
+//         1
+//     );
+//     $html = preg_replace(
+//         '/<td class="principal-label"([^>]*)>/i',
+//         '<td class="principal-label" width="24%"$1 nowrap="nowrap">',
+//         $html
+//     );
+//     $html = preg_replace(
+//         '/<td class="company-value"\s+colspan="3"([^>]*)>/i',
+//         '<td class="company-value" width="30%"$1 nowrap="nowrap">',
+//         $html,
+//         1
+//     );
+
+//     $style = '<style type="text/css">'
+//         . '.details-table { table-layout: fixed; font-size: 8px; }'
+//         . '.details-table .details-label { width: 22%; }'
+//         . '.details-table .details-value { width: 24%; }'
+//         . '.details-table .principal-label { width: 24%; }'
+//         . '.details-table .company-value { white-space: nowrap; }'
+//         . '</style>';
+
+//     if (stripos($html, '</head>') !== false) {
+//         return preg_replace('/<\/head>/i', $style . '</head>', $html, 1);
+//     }
+
+//     return $style . $html;
+// }
