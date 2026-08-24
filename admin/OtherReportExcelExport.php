@@ -488,7 +488,7 @@ function formatFormXXWorksheet($sheet, array $details)
     $sheet->mergeCells('I4:M5');
     $sheet->mergeCells('A6:M6');
 
-// Keep the exported header text identical to the approved PDF form.
+    // Keep the exported header text identical to the approved PDF form.
     $sheet->setCellValue('A1', 'Register of Deductions for Damage or Loss');
     $sheet->setCellValue('A2', 'NAME AND ADDRESS OF CONTRACTOR :');
     $sheet->setCellValue('C2', 'SHREE GANESH ENGINEERING CO.');
@@ -509,33 +509,20 @@ function formatFormXXWorksheet($sheet, array $details)
     }
     $sheet->mergeCells('K7:L7');
     $headings = array(
-        // "Sr.\nNo.",
-        // 'Name of Workmen',
-        // "Father's / Husband's\nName",
-        // "Designation / Nature\nof Employment",
-        // "Particulars of\nDamage or Loss",
-        // "Date of Damage\nor Loss",
-        // "Whether workman showed\ncause against deduction",
-        // "Name of person in whose presence\nworkman's explanation was heard",
-        // "Amount of deduction\nimposed",
-        // "No. of\nInstallments",
-        // "Date of recovery\nFirst installment",
-        // "Date of recovery\nLast installment",
-        // 'Remarks'
-        'A8' => "Sr.\nNo.",
-        'B8' => 'Name of Workmen',
-        'C8' => "Father's / Husband's\nName",
-        'D8' => "Designation / Nature\nof Employment",
-        'E8' => "Particulars of\nDamage or Loss",
-        'F8' => "Date of Damage\nor Loss",
-        'G8' => "Whether workman\nshowed cause against\ndeduction",
-        'H8' => "Name of person in whose\npresence workman's\nexplanation was heard",
-        'I8' => "Amount of deduction\nimposed",
-        'J8' => "No. of\nInstallments",
-        'K8' => 'Date of recovery',
-        'K9' => "First\ninstallment",
-        'L9' => "Last\ninstallment",
-        'M8' => 'Remarks',
+        'A7' => "Sr.\nNo.",
+        'B7' => 'Name of Workmen',
+        'C7' => "Father's / Husband's\nName",
+        'D7' => "Designation / Nature\nof Employment",
+        'E7' => "Particulars of\nDamage or Loss",
+        'F7' => "Date of Damage\nor Loss",
+        'G7' => "Whether workman\nshowed cause against\ndeduction",
+        'H7' => "Name of person in whose\npresence workman's\nexplanation was heard",
+        'I7' => "Amount of deduction\nimposed",
+        'J7' => "No. of\nInstallments",
+        'K7' => 'Date of recovery',
+        'K8' => "First\ninstallment",
+        'L8' => "Last\ninstallment",
+        'M7' => 'Remarks',
     );
 
     foreach ($headings as $cell => $heading) {
