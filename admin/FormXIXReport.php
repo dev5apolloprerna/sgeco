@@ -174,8 +174,8 @@ function renderFormXIXSlipTable(array $slip)
         'SHREE GANESH ENGINEERING COMPANY<br>FF-8, DEVSHRUTI COMPLEX, NR. HCG HOSPITAL, ' .
         'MITHAKHALI, AHMEDABAD-380006.</td></tr></table></td></tr>' .
         '<tr><td colspan="7" height="28" style="' . $sideBorders . '"><table width="100%" cellpadding="4"><tr>' .
-        '<td width="40%"><b>Code/Name and Father\'s/Husband\'s Name of Workman:</b></td><td width="60%">' .
-        $esc($slip['workman']) . '</td></tr></table></td></tr>' .
+        '<td width="40%">Code/Name and Father\'s/Husband\'s Name of Workman:</td><td width="60%"><b>' .
+        $esc($slip['workman']) . '</b></td></tr></table></td></tr>' .
         '<tr><td colspan="7" height="34" style="' . $sideBorders . '"><table width="100%" cellpadding="4"><tr>' .
         '<td width="22%"><b>Nature and Location of Work :</b></td><td width="78%">' . $esc($slip['company']) .
         '</td></tr></table></td></tr>' .
@@ -194,13 +194,13 @@ function renderFormXIXSlipTable(array $slip)
         '<td width="27%" style="border:1px solid #000">&nbsp;&nbsp;Bank Name:&nbsp;&nbsp; ' . $esc($slip['bank_name']) . '<br>' .
         '&nbsp;&nbsp;IFSC Code:&nbsp;&nbsp; ' . $esc($slip['ifsc']) . '<br>&nbsp;&nbsp;UAN No.:&nbsp;&nbsp; ' .
         $esc($slip['uan']) . '</td></tr>' .
-        '<tr style="font-weight:bold"><td width="14%" height="26" style="border-top:1px solid #000;border-left:1px solid #000;border-bottom:1px solid #000;">&nbsp;&nbsp;Work Days</td>' .
+        '<tr><td width="14%" height="26" style="border-top:1px solid #000;border-left:1px solid #000;border-bottom:1px solid #000;font-weight:bold;">&nbsp;&nbsp;Work Days</td>' .
         '<td width="8%" align="right" style="border-right:1px solid #000;border-top:1px solid #000;border-bottom:1px solid #000;">' .
-        formXIXAmount($slip['work_days']) . '&nbsp;&nbsp;</td> <td width="17%" style="border-top:1px solid #000;border-left:1px solid #000;border-bottom:1px solid #000;">&nbsp;&nbsp;Gross Earn.</td>' .
+        formXIXAmount($slip['work_days']) . '&nbsp;&nbsp;</td> <td width="17%" style="border-top:1px solid #000;border-left:1px solid #000;border-bottom:1px solid #000;font-weight:bold;">&nbsp;&nbsp;Gross Earn.</td>' .
         '<td width="10%" align="right" style="border-right:1px solid #000;border-top:1px solid #000;border-bottom:1px solid #000;">' . formXIXAmount($slip['gross']) . '&nbsp;&nbsp;' .
-        '</td><td width="14%" style="border-top:1px solid #000;border-left:1px solid #000;border-bottom:1px solid #000;">&nbsp;&nbsp;Total Deduction</td>' .
+        '</td><td width="14%" style="border-top:1px solid #000;border-left:1px solid #000;border-bottom:1px solid #000;font-weight:bold;">&nbsp;&nbsp;Total Deduction</td>' .
         '<td width="10%" align="right" style="border-right:1px solid #000;border-top:1px solid #000;border-bottom:1px solid #000;">' .
-        formXIXAmount($slip['total_deduction']) . '&nbsp;&nbsp;</td><td width="27%" style="' . $totalBorder . ';border-left:1px solid #000;border-bottom:1px solid #000;">' .
+        formXIXAmount($slip['total_deduction']) . '&nbsp;&nbsp;</td><td width="27%" style="' . $totalBorder . ';border-left:1px solid #000;border-bottom:1px solid #000;font-weight:bold">' .
         '<table width="100%"><tr>' .
         '<td width="50%"><b>&nbsp;&nbsp;Net Pay.</b></td><td width="50%" align="right"><b>' .
         formXIXAmount($slip['net_pay']) . '&nbsp;&nbsp;</b></td></tr></table></td></tr>' .

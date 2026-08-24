@@ -445,3 +445,12 @@ function addFormXIIIPdfFormatting($html)
 
     return $style . $html;
 }
+
+/**
+ * Form XXIII uses the same three-column header markup as Form XXII, so reuse
+ * the established TCPDF-only formatting instead of duplicating its rules.
+ */
+function addFormXXIIIPdfFormatting($html)
+{
+    return addFormXXIIPdfFormatting($html);
+}
