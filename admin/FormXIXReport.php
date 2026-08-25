@@ -15,7 +15,7 @@ function getFormXIXEmployees($dbconn, $companyId, $salaryMonth, $employeeId = 0)
     if ($companyId <= 0 || !preg_match('/^(0[1-9]|1[0-2])\/\d{4}$/', $salaryMonth)) {
         throw new InvalidArgumentException('A valid company, month, and year are required.');
     }
-    $employeeWhere = $employeeId > 0 ? ' AND e.employeeId=' . $employeeId : '';
+    // $employeeWhere = $employeeId > 0 ? ' AND e.employeeId=' . $employeeId : '';
     $sql = "SELECT sd.*, e.employeeId, e.emp_name, e.strFatherName, e.employeecode,
                    e.pfcode, e.uan, e.ecsno, e.ifsccode, e.bankid,
                    COALESCE(b.bankname, '0') AS bankname
@@ -26,14 +26,22 @@ function getFormXIXEmployees($dbconn, $companyId, $salaryMonth, $employeeId = 0)
             WHERE sd.companyId=" . $companyId . "
               AND sd.salaryId IN (SELECT salarymasterId FROM salarymaster
                   WHERE month='" . $month . "' AND isDelete='0' AND istatus='1')
-              AND sd.isDelete='0' AND sd.istatus='1' AND sd.workingdays > 0"
-        . $employeeWhere . " ORDER BY e.emp_name ASC, sd.salarydetailsId ASC";
+              AND sd.isDelete='0' AND sd.istatus='1' AND sd.workingdays > 0
+            ORDER BY sd.salarydetailsId ASC";
     $result = mysqli_query($dbconn, $sql);
     if ($result === false) {
         throw new RuntimeException('Unable to retrieve wages-slip employees.');
     }
     $employees = array();
+    $serial = 0;
     while ($row = mysqli_fetch_assoc($result)) {
+        $serial++;
+        if ($employeeId > 0 && (int) $row['employeeId'] !== $employeeId) {
+            continue;
+        }
+        // Company Report/Wage Register numbers rows in salary-detail order.
+        // Retain that number even when only one employee's slip is requested.
+        $row['report_serial'] = $serial;
         $employees[] = $row;
     }
     return $employees;
@@ -68,7 +76,7 @@ function getFormXIXSlipData(array $employees, $salaryMonth, $companyName, array 
         $advance = getEmployeeCompanyReportAdvance($advances, $employee['employeeId']);
         // $fatherName = formXIXValue($employee['strFatherName']);
         $slips[] = array(
-            'serial' => formXIXValue($employee['employeecode']),
+            'serial' => formXIXValue($employee['report_serial']),
             'pf_number' => formXIXValue($employee['pfcode']),
             'worker_number' => formXIXValue($employee['employeecode']),
             'period' => $period ? $period->format('F-Y') : '0',
