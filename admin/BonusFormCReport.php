@@ -267,10 +267,9 @@ function renderBonusFormCHtml(array $employees, $salaryMonth, $companyName)
             // $html .= $cell('td', $column, $value, in_array($column, array(1, 2), true) ? ' class="left"' : '');
             $cellClass = in_array($column, array(1, 2), true)
                 ? 'left'
-                // Right-align every monetary value, from Daily Rate through
-                // Actually Amount Paid. Keep days worked centred because it
-                // is a quantity rather than an amount.
-                : (in_array($column, range(6, 12), true) ? 'amount' : '');
+                 // Right-align Days Worked and every monetary value through
+                // Actually Amount Paid.
+                : (in_array($column, range(5, 12), true) ? 'amount' : '');
             $html .= $cell('td', $column, $value, $cellClass === '' ? '' : ' class="' . $cellClass . '"');
         }
         $html .= '</tr>';
