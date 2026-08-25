@@ -71,6 +71,11 @@ function formXXIIIFormatAmount($number)
     return number_format((float) $number, 2, '.', '');
 }
 
+function formXXIIIFormatRoundedUpAmount($number)
+{
+    return formXXIIIFormatAmount(ceil((float) $number));
+}
+
 function formXXIIIFormatDate($date)
 {
     $date = trim((string) $date);
@@ -164,7 +169,7 @@ function renderFormXXIIIHtml(array $entries, $salaryMonth, $companyName, $repeat
             formXXIIIFormatNumber($entry['othours']),
             formXXIIIFormatAmount($entry['skillrate']), // formXXIIIFormatNumber($entry['skillrate']),
             formXXIIIFormatAmount($overtimeWages), // formXXIIIFormatNumber($overtimeWages),
-            formXXIIIFormatAmount($entry['totalovertime']), // formXXIIIFormatNumber($entry['totalovertime']),
+            formXXIIIFormatRoundedUpAmount($entry['totalovertime']),
             formXXIIIFormatDate($entry['salarypaiddate']),
             ''
         );
@@ -179,7 +184,10 @@ function renderFormXXIIIHtml(array $entries, $salaryMonth, $companyName, $repeat
         $detailRows[] = $row . '</tr>';
         $totals['hours'] += (float) $entry['othours'];
         $totals['overtime_wages'] += $overtimeWages;
-        $totals['earnings'] += (float) $entry['totalovertime'];
+        // The payable overtime earning is always rounded towards the next
+        // whole amount. Add the displayed values so the register total agrees
+        // in the list and in its Excel and PDF exports.
+        $totals['earnings'] += ceil((float) $entry['totalovertime']);
     }
     $totalValues = array(
         '',
