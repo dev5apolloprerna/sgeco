@@ -88,6 +88,17 @@ function bonusFormCNumber($value)
     return number_format((float) ($value === null || $value === '' ? 0 : $value), 2, '.', '');
 }
 
+/**
+ * Display wage values with paise, including whole-rupee values such as 500.00.
+ *
+ * Keep this wage-specific formatter separate so changes to the Register of
+ * Bonus wage columns do not alter unrelated fields in the Other reports.
+ */
+function bonusFormCWageNumber($value)
+{
+    return number_format((float) ($value === null || $value === '' ? 0 : $value), 2, '.', '');
+}
+
 function bonusFormCText($value)
 {
     return trim((string) $value) === '' ? '0' : (string) $value;
@@ -133,8 +144,10 @@ function getBonusFormCRows(array $employees, $salaryMonth)
             'adult' => bonusFormCAdult($employee['dateofbirth'], $yearStart),
             'designation' => trim((string) $employee['designation']),
             'days' => bonusFormCNumber($employee['workingdays']),
-            'rate' => bonusFormCNumber($employee['skillrate']),
-            'salary' => bonusFormCNumber($employee['basicwages']),
+            // 'rate' => bonusFormCNumber($employee['skillrate']),
+            // 'salary' => bonusFormCNumber($employee['basicwages']),
+            'rate' => bonusFormCWageNumber($employee['skillrate']),
+            'salary' => bonusFormCWageNumber($employee['basicwages']),
             'bonus' => bonusFormCNumber($bonus),
             'customary' => '',
             'advance' => '',
