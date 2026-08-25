@@ -9,6 +9,7 @@ require_once('OtherReportExcelExport.php');
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
@@ -70,12 +71,25 @@ try {
         $sheet->getStyle($amountColumn . '8:' . $amountColumn . $totalRow)
             ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
     }
+    // Excel otherwise displays whole-number wage values without their paise.
+    // Keep the statutory Wage Rate and Salary/Wage columns at two decimals,
+    // matching the PDF output even when the value ends in .00.
+    $sheet->getStyle('G8:H' . $totalRow)->getNumberFormat()
+        ->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
     $widths = array(6, 20, 20, 23, 18, 12, 12, 18, 18, 18, 18, 18, 15, 15, 18);
     foreach ($widths as $index => $width) {
         $sheet->getColumnDimensionByColumn($index + 1)->setWidth($width);
     }
     $sheet->getRowDimension(5)->setRowHeight(52);
     $sheet->getRowDimension(6)->setRowHeight(65);
+    // Give wrapped employee details more vertical room in the Excel export.
+    foreach (range(8, $totalRow) as $rowNumber) {
+        $sheet->getRowDimension($rowNumber)->setRowHeight(24);
+    }
+    for ($row = 8; $row <= $totalRow; $row++) {
+        $sheet->getRowDimension($row)->setRowHeight(28);
+    }
+    $sheet->getStyle('G8:G' . ($totalRow - 1))->getNumberFormat()->setFormatCode('0.00');
     $sheet->getPageSetup()->setOrientation(PageSetup::ORIENTATION_LANDSCAPE)->setPaperSize(PageSetup::PAPERSIZE_A4)->setFitToWidth(1)->setFitToHeight(0);
     $sheet->getPageSetup()->setPrintArea('A1:O' . $totalRow);
     rightAlignOtherReportAmountColumnsInWorksheet($sheet);

@@ -142,7 +142,7 @@ function extractOtherReportHeaderDetails($html)
         }
         $valueNodes = $xpath->query(
             './/*[contains(concat(" ", normalize-space(@class), " "), " normal ") '
-            . 'or contains(concat(" ", normalize-space(@class), " "), " normal-weight ")]',
+                . 'or contains(concat(" ", normalize-space(@class), " "), " normal-weight ")]',
             $element
         );
         if ($valueNodes->length > 0) {
@@ -173,6 +173,14 @@ function extractFormXXIIIDetails($html)
             $values[] = trim(preg_replace('/\s+/', ' ', $cell->textContent));
         }
         $details['rows'][] = array_slice(array_pad($values, 12, ''), 0, 12);
+    }
+    $details['total'] = array();
+    $totalRow = $xpath->query('//tr[contains(concat(" ", normalize-space(@class), " "), " total-row ")]')->item(0);
+    if ($totalRow) {
+        foreach ($xpath->query('./td', $totalRow) as $cell) {
+            $details['total'][] = trim(preg_replace('/\s+/', ' ', $cell->textContent));
+        }
+        $details['total'] = array_slice(array_pad($details['total'], 12, ''), 0, 12);
     }
     return $details;
 }
@@ -237,6 +245,13 @@ function formatFormXXIIIWorksheet($sheet, array $details)
         }
     }
     $lastRow = max(8, count($details['rows']) + 8);
+if (!empty($details['total'])) {
+        $lastRow++;
+        foreach ($details['total'] as $column => $value) {
+            $sheet->setCellValueByColumnAndRow($column + 1, $lastRow, $value);
+        }
+        $sheet->getStyle('A' . $lastRow . ':L' . $lastRow)->getFont()->setBold(true);
+    }
     $sheet->getStyle('A1:L' . $lastRow)->getFont()->setName('Times New Roman')->setSize(9);
     $sheet->getStyle('A1:L6')->getFont()->setBold(true);
     $sheet->getStyle('A1')->getFont()->setSize(18);
@@ -252,8 +267,10 @@ function formatFormXXIIIWorksheet($sheet, array $details)
     $sheet->getRowDimension(1)->setRowHeight(26);
     $sheet->getRowDimension(7)->setRowHeight(70);
     for ($row = 9; $row <= $lastRow; $row++) {
-        $sheet->getRowDimension($row)->setRowHeight(28);
+        $sheet->getRowDimension($row)->setRowHeight(34); // $sheet->getRowDimension($row)->setRowHeight(28);
     }
+    $sheet->getStyle('H9:J' . $lastRow)->getNumberFormat()->setFormatCode('0.00');
+    $sheet->getStyle('H9:J' . $lastRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
     // $sheet->getPageSetup()->setRowsToRepeatAtTopByStartAndEnd(7, 8);
     configureOtherReportPage($sheet, 'A1:L' . $lastRow, 9);
 }
@@ -487,7 +504,7 @@ function extractFormXXDetails($html)
         $xpath = new DOMXPath($document);
         $monthNodes = $xpath->query(
             '//*[contains(concat(" ", normalize-space(@class), " "), " month-row ")]'
-            . '/*[not(contains(concat(" ", normalize-space(@class), " "), " month-label "))][last()]'
+                . '/*[not(contains(concat(" ", normalize-space(@class), " "), " month-label "))][last()]'
         );
         if ($monthNodes->length > 0) {
             $monthValue = $monthNodes->item(0)->textContent;
@@ -495,9 +512,9 @@ function extractFormXXDetails($html)
 
         $employerNodes = $xpath->query(
             '//*[contains(concat(" ", normalize-space(@class), " "), " right-line ")]'
-            . '[contains(translate(normalize-space(.), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"),'
-            . ' "name and address of the principal employer")]'
-            . '//*[contains(concat(" ", normalize-space(@class), " "), " normal-weight ")]'
+                . '[contains(translate(normalize-space(.), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"),'
+                . ' "name and address of the principal employer")]'
+                . '//*[contains(concat(" ", normalize-space(@class), " "), " normal-weight ")]'
         );
         if ($employerNodes->length > 0) {
             $employerValue = $employerNodes->item(0)->textContent;

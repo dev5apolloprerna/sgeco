@@ -223,6 +223,14 @@
             text-align: left;
         }
 
+        /* Keep monetary values right-aligned in the on-screen report list.
+           PDF and Excel apply the same alignment in their export formatters. */
+        .register-table td.amount {
+            text-align: right;
+            padding-right: 6px;
+        }
+
+
         @page {
             size: 14in 8.5in;
             margin: 0;

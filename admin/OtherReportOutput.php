@@ -522,5 +522,11 @@ function addFormXIIIPdfFormatting($html)
  */
 function addFormXXIIIPdfFormatting($html)
 {
-    return addFormXXIIPdfFormatting($html);
+    $html = addFormXXIIPdfFormatting($html);
+    $style = '<style type="text/css">'
+        . '.register-table tbody .data-row td,.register-table tbody .total-row td{'
+        . 'padding:7px 3px;line-height:1.35;vertical-align:middle;}'
+        . '.register-table td.amount{text-align:right;padding-right:6px;}'
+        . '</style>';
+    return preg_replace('/<\/head>/i', $style . '</head>', $html, 1);
 }

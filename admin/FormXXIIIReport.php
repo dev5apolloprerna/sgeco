@@ -66,6 +66,11 @@ function formXXIIIFormatNumber($number)
     return rtrim(rtrim(number_format((float) $number, 2, '.', ''), '0'), '.');
 }
 
+function formXXIIIFormatAmount($number)
+{
+    return number_format((float) $number, 2, '.', '');
+}
+
 function formXXIIIFormatDate($date)
 {
     $date = trim((string) $date);
@@ -85,6 +90,15 @@ function formXXIIIFormatMonth($salaryMonth)
         throw new InvalidArgumentException('A valid salary month is required.');
     }
     return $period->format('F-Y');
+}
+
+function formXXIIIFormatWorkMonth($salaryMonth)
+{
+    $period = DateTime::createFromFormat('!m/Y', $salaryMonth);
+    if (!$period || $period->format('m/Y') !== $salaryMonth) {
+        throw new InvalidArgumentException('A valid salary month is required.');
+    }
+    return $period->format('M-y');
 }
 
 /**
@@ -135,6 +149,7 @@ function renderFormXXIIIHtml(array $entries, $salaryMonth, $companyName, $repeat
         return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
     };
     $detailRows = array();
+    $totals = array('hours' => 0, 'overtime_wages' => 0, 'earnings' => 0);
     foreach ($entries as $index => $entry) {
         // This intermediate amount is the template's "Overtime of wages":
         // daily normal wage multiplied by the stored payroll OT multiplier.
@@ -143,24 +158,50 @@ function renderFormXXIIIHtml(array $entries, $salaryMonth, $companyName, $repeat
             $index + 1,
             $entry['emp_name'],
             $entry['strFatherName'],
-            $entry['gender'],
+            'Male', // $entry['gender'],
             $entry['designation'],
-            formXXIIIFormatDate($entry['strEntryDate']),
+            formXXIIIFormatWorkMonth($salaryMonth), // formXXIIIFormatDate($entry['strEntryDate']),
             formXXIIIFormatNumber($entry['othours']),
-            formXXIIIFormatNumber($entry['skillrate']),
-            formXXIIIFormatNumber($overtimeWages),
-            formXXIIIFormatNumber($entry['totalovertime']),
+            formXXIIIFormatAmount($entry['skillrate']), // formXXIIIFormatNumber($entry['skillrate']),
+            formXXIIIFormatAmount($overtimeWages), // formXXIIIFormatNumber($overtimeWages),
+            formXXIIIFormatAmount($entry['totalovertime']), // formXXIIIFormatNumber($entry['totalovertime']),
             formXXIIIFormatDate($entry['salarypaiddate']),
             ''
         );
         $row = '<tr class="data-row">';
         foreach ($values as $column => $value) {
             $row .= '<td width="' . $columnWidths[$column] . '" class="'
-                . (in_array($column, array(1, 2, 4), true) ? 'text-left' : 'text-center')
+                // . (in_array($column, array(1, 2, 4), true) ? 'text-left' : 'text-center')
+                . (in_array($column, array(1, 2, 4), true) ? 'text-left'
+                    : (in_array($column, array(7, 8, 9), true) ? 'amount' : 'text-center'))
                 . '">' . $esc($value) . '</td>';
         }
         $detailRows[] = $row . '</tr>';
+        $totals['hours'] += (float) $entry['othours'];
+        $totals['overtime_wages'] += $overtimeWages;
+        $totals['earnings'] += (float) $entry['totalovertime'];
     }
+    $totalValues = array(
+        '',
+        '<strong>TOTAL</strong>',
+        '',
+        '',
+        '',
+        '',
+        formXXIIIFormatNumber($totals['hours']),
+        '',
+        formXXIIIFormatAmount($totals['overtime_wages']),
+        formXXIIIFormatAmount($totals['earnings']),
+        '',
+        ''
+    );
+    $totalRow = '<tr class="total-row" nobr="true">';
+    foreach ($totalValues as $column => $value) {
+        $totalRow .= '<td width="' . $columnWidths[$column] . '" class="'
+            . ($column === 1 ? 'text-left' : (in_array($column, array(7, 8, 9), true) ? 'amount' : 'text-center'))
+            . '">' . $value . '</td>';
+    }
+    $detailRows[] = $totalRow . '</tr>';
 
     $prefix = formXXIIIApplyMonth($matches[1], $salaryMonth);
     $prefix = str_replace('{{FORM_XXIII_COMPANY}}', $esc($companyName), $prefix);
