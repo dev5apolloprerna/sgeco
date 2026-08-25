@@ -90,6 +90,7 @@ function formXIXBuildWorksheet($sheet, array $slip, $title)
     $sheet->setCellValue('G9', 'Bank Name: ' . $slip['bank_name']);
     $sheet->setCellValue('G10', 'IFSC Code: ' . $slip['ifsc']);
     $sheet->setCellValueExplicit('G11', 'UAN No.: ' . $slip['uan'], DataType::TYPE_STRING);
+    $sheet->setCellValueExplicit('G12', 'ESIC No.: ' . $slip['esic'], DataType::TYPE_STRING);
     $sheet->setCellValue('A22', 'Work Days');
     $sheet->setCellValue('B22', (float) $slip['work_days']);
     $sheet->setCellValue('C22', 'Gross Earn.');

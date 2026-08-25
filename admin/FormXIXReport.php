@@ -17,7 +17,7 @@ function getFormXIXEmployees($dbconn, $companyId, $salaryMonth, $employeeId = 0)
     }
     $employeeWhere = $employeeId > 0 ? ' AND e.employeeId=' . $employeeId : '';
     $sql = "SELECT sd.*, e.employeeId, e.emp_name, e.strFatherName, e.employeecode,
-                   e.pfcode, e.uan, e.ifsccode, e.bankid,
+                   e.pfcode, e.uan, e.ecsno, e.ifsccode, e.bankid,
                    COALESCE(b.bankname, '0') AS bankname
             FROM salarydetails sd
             INNER JOIN employee e ON e.employeeId=sd.emp_id
@@ -64,16 +64,16 @@ function getFormXIXSlipData(array $employees, $salaryMonth, $companyName, array 
 {
     $period = DateTime::createFromFormat('!m/Y', $salaryMonth);
     $slips = array();
-    foreach ($employees as $index => $employee) {
+    foreach ($employees as $employee) {
         $advance = getEmployeeCompanyReportAdvance($advances, $employee['employeeId']);
-        $fatherName = formXIXValue($employee['strFatherName']);
+        // $fatherName = formXIXValue($employee['strFatherName']);
         $slips[] = array(
-            'serial' => $index + 1,
+            'serial' => formXIXValue($employee['employeecode']),
             'pf_number' => formXIXValue($employee['pfcode']),
             'worker_number' => formXIXValue($employee['employeecode']),
             'period' => $period ? $period->format('F-Y') : '0',
             'company' => formXIXValue($companyName),
-            'workman' => trim(formXIXValue($employee['emp_name']) . ($fatherName === '0' ? '' : ' ' . $fatherName)),
+            'workman' => formXIXValue($employee['emp_name']),
             'wages' => array($employee['skillrate'], 0, 0, 0, 0, 0, $employee['othours']),
             'earnings' => array(
                 $employee['basicwages'],
@@ -101,6 +101,7 @@ function getFormXIXSlipData(array $employees, $salaryMonth, $companyName, array 
             'bank_name' => formXIXValue($employee['bankname']),
             'ifsc' => formXIXValue($employee['ifsccode']),
             'uan' => formXIXValue($employee['uan']),
+            'esic' => formXIXValue($employee['ecsno']),
             'work_days' => $employee['workingdays'],
             'gross' => (float) $employee['total'] + (float) $employee['MedicalAllowanceamt'],
             'total_deduction' => (float) $employee['pt'] + (float) $employee['pf'] +
@@ -193,7 +194,7 @@ function renderFormXIXSlipTable(array $slip)
         '<td width="10%" align="right" style="border:none">' . $amountLines($slip['deductions']) . '</td>' .
         '<td width="27%" style="border:1px solid #000">&nbsp;&nbsp;Bank Name:&nbsp;&nbsp; ' . $esc($slip['bank_name']) . '<br>' .
         '&nbsp;&nbsp;IFSC Code:&nbsp;&nbsp; ' . $esc($slip['ifsc']) . '<br>&nbsp;&nbsp;UAN No.:&nbsp;&nbsp; ' .
-        $esc($slip['uan']) . '</td></tr>' .
+        $esc($slip['uan']) . '<br>&nbsp;&nbsp;ESIC No.:&nbsp;&nbsp; ' . $esc($slip['esic']) . '</td></tr>' .
         '<tr><td width="14%" height="26" style="border-top:1px solid #000;border-left:1px solid #000;border-bottom:1px solid #000;font-weight:bold;">&nbsp;&nbsp;Work Days</td>' .
         '<td width="8%" align="right" style="border-right:1px solid #000;border-top:1px solid #000;border-bottom:1px solid #000;">' .
         formXIXAmount($slip['work_days']) . '&nbsp;&nbsp;</td> <td width="17%" style="border-top:1px solid #000;border-left:1px solid #000;border-bottom:1px solid #000;font-weight:bold;">&nbsp;&nbsp;Gross Earn.</td>' .
