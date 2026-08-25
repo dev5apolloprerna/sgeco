@@ -88,6 +88,12 @@ function bonusFormCNumber($value)
     return number_format((float) ($value === null || $value === '' ? 0 : $value), 2, '.', '');
 }
 
+/** Display worked days without an unnecessary trailing .00. */
+function bonusFormCDaysNumber($value)
+{
+    return rtrim(rtrim(bonusFormCNumber($value), '0'), '.');
+}
+
 /**
  * Display wage values with paise, including whole-rupee values such as 500.00.
  *
@@ -143,7 +149,7 @@ function getBonusFormCRows(array $employees, $salaryMonth)
             'father' => bonusFormCText($employee['strFatherName']),
             'adult' => bonusFormCAdult($employee['dateofbirth'], $yearStart),
             'designation' => trim((string) $employee['designation']),
-            'days' => bonusFormCNumber($employee['workingdays']),
+            'days' => bonusFormCDaysNumber($employee['workingdays']),
             // 'rate' => bonusFormCNumber($employee['skillrate']),
             // 'salary' => bonusFormCNumber($employee['basicwages']),
             'rate' => bonusFormCWageNumber($employee['skillrate']),
@@ -261,7 +267,10 @@ function renderBonusFormCHtml(array $employees, $salaryMonth, $companyName)
             // $html .= $cell('td', $column, $value, in_array($column, array(1, 2), true) ? ' class="left"' : '');
             $cellClass = in_array($column, array(1, 2), true)
                 ? 'left'
-                : (in_array($column, array(8, 11, 12), true) ? 'amount' : '');
+                // Right-align every monetary value, from Daily Rate through
+                // Actually Amount Paid. Keep days worked centred because it
+                // is a quantity rather than an amount.
+                : (in_array($column, range(6, 12), true) ? 'amount' : '');
             $html .= $cell('td', $column, $value, $cellClass === '' ? '' : ' class="' . $cellClass . '"');
         }
         $html .= '</tr>';
@@ -272,7 +281,7 @@ function renderBonusFormCHtml(array $employees, $salaryMonth, $companyName)
         '',
         '',
         '',
-        bonusFormCNumber($totals['days']),
+        bonusFormCDaysNumber($totals['days']),
         '',
         bonusFormCNumber($totals['salary']),
         bonusFormCNumber($totals['bonus']),
@@ -290,7 +299,7 @@ function renderBonusFormCHtml(array $employees, $salaryMonth, $companyName)
             'td',
             $column,
             $value,
-            in_array($column, array(8, 11, 12), true) ? ' class="amount"' : ''
+            in_array($column, range(6, 12), true) ? ' class="amount"' : ''
         );
     }
     $html .= '</tr></table></body></html>';
