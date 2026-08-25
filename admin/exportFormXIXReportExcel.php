@@ -111,6 +111,7 @@ function formXIXBuildWorksheet($sheet, array $slip, $title)
     $sheet->getStyle('C22')->getFont()->setBold(true);
     $sheet->getStyle('E22')->getFont()->setBold(true);
     $sheet->getStyle('G22')->getFont()->setBold(true);
+    $sheet->getStyle('G22')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
     $sheet->getStyle('A3')->getFont()->setBold(true);
     $sheet->getStyle('D5')->getFont()->setBold(true);
     $sheet->getStyle('A6')->getFont()->setBold(true);
@@ -124,7 +125,11 @@ function formXIXBuildWorksheet($sheet, array $slip, $title)
     foreach (array('A1:G1', 'A2:G7', 'A8:G22', 'A23:G25') as $range) {
         $sheet->getStyle($range)->getBorders()->getOutline()->setBorderStyle(Border::BORDER_THIN);
     }
-    $sheet->getStyle('A8:G22')->getBorders()->getVertical()->setBorderStyle(Border::BORDER_THIN);
+    // Keep the three label/value pairs visually together. Only draw vertical
+    // borders between the Wages, Earning, Deduction, and Signature sections.
+    foreach (array('B8:B22', 'D8:D22', 'F8:F22') as $range) {
+        $sheet->getStyle($range)->getBorders()->getRight()->setBorderStyle(Border::BORDER_THIN);
+    }
     $sheet->getStyle('A8:G8')->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
     $sheet->getStyle('A22:G22')->getBorders()->getTop()->setBorderStyle(Border::BORDER_THIN);
     $widths = array('A' => 17, 'B' => 12, 'C' => 20, 'D' => 13, 'E' => 18, 'F' => 13, 'G' => 34);
