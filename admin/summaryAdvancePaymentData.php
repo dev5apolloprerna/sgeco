@@ -94,7 +94,8 @@ function summaryAdvancePaymentData($dbconn, $source)
 function summaryAdvancePaymentMonth($filters)
 {
     $date = DateTime::createFromFormat('!m/Y', $filters['month'] . '/' . $filters['year']);
-    return $date ? $date->format('F - Y') : '';
+    // return $date ? $date->format('F - Y') : '';
+    return $date ? $date->format('M-y') : '';
 }
 
 function summaryAdvancePaymentNumber($amount)

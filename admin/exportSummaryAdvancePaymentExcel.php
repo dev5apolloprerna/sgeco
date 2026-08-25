@@ -76,7 +76,12 @@ $sheet->getStyle('A' . $row . ':' . $lastColumn . $row)->getFill()->setFillType(
 $sheet->getStyle('A5:' . $lastColumn . $row)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
 $sheet->getStyle('A5:' . $lastColumn . $row)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setWrapText(true);
 $sheet->getStyle('A5:' . $lastColumn . '6')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+$sheet->getStyle('C7:' . $lastColumn . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 $sheet->getStyle('C7:' . $lastColumn . $row)->getNumberFormat()->setFormatCode('#,##0.00');
+$sheet->getRowDimension(5)->setRowHeight(24);
+$sheet->getRowDimension(6)->setRowHeight(24);
+for ($dataRow = 7; $dataRow <= $row; $dataRow++) $sheet->getRowDimension($dataRow)->setRowHeight(22);
+$sheet->getRowDimension($row)->setRowHeight(26);
 $sheet->getColumnDimension('A')->setWidth(8);
 $sheet->getColumnDimension('B')->setWidth(32);
 for ($i = 3; $i <= $lastIndex; $i++) $sheet->getColumnDimension(Coordinate::stringFromColumnIndex($i))->setWidth(15);
