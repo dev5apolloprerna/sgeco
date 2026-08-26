@@ -257,8 +257,9 @@ switch ($action) {
             "month" => $_POST['month'],
             "fromdate" => $_POST['fromdate'],
             "todate" => $_POST['todate'],
-            "DeductESIC" => $_POST['DeductESIC'],
-            "DeductPF" => $_POST['DeductPF'],
+            // Only an explicit Yes enables a deduction; missing or invalid input is safe by default.
+            "DeductESIC" => isset($_POST['DeductESIC']) && strtoupper($_POST['DeductESIC']) === 'YES' ? 'YES' : 'NO',
+            "DeductPF" => isset($_POST['DeductPF']) && strtoupper($_POST['DeductPF']) === 'YES' ? 'YES' : 'NO',
             "strEntryDate" => date('d-m-Y H:i:s'),
             "strIP" => $_SERVER['REMOTE_ADDR'],
             "iEntryBy" => $_SESSION['AdminId'],
@@ -294,8 +295,9 @@ switch ($action) {
             "month" => $_POST['month'],
             "fromdate" => $_POST['fromdate'],
             "todate" => $_POST['todate'],
-            "DeductESIC" => $_POST['DeductESIC'],
-            "DeductPF" => $_POST['DeductPF'],
+            // Only an explicit Yes enables a deduction; missing or invalid input is safe by default.
+            "DeductESIC" => isset($_POST['DeductESIC']) && strtoupper($_POST['DeductESIC']) === 'YES' ? 'YES' : 'NO',
+            "DeductPF" => isset($_POST['DeductPF']) && strtoupper($_POST['DeductPF']) === 'YES' ? 'YES' : 'NO',
             "strEntryDate" => date('d-m-Y H:i:s'),
             "strIP" => $_SERVER['REMOTE_ADDR'],
             "iUpdatedBy" => $_SESSION['AdminId'],
