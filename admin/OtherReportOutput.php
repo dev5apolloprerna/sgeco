@@ -436,6 +436,41 @@ function addFormCPdfFormatting($html)
         $html,
         1
     );
+
+    
+    // A repeated THEAD is laid out independently by TCPDF on every new page.
+    // If only its first row has widths, TCPDF can recalculate the numbered row
+    // as thirteen equal columns and shift the headings away from the body
+    // grid. Stamp the statutory 6/28/6... grid on both heading rows so every
+    // continuation page starts at exactly the same column boundaries.
+    $registerColumnWidths = array(6, 28, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6);
+    $html = preg_replace_callback(
+        '/<thead class="register-heading">(.*?)<\/thead>/is',
+        function ($headingMatch) use ($registerColumnWidths) {
+            $heading = preg_replace_callback(
+                '/<tr\b([^>]*)>(.*?)<\/tr>/is',
+                function ($rowMatch) use ($registerColumnWidths) {
+                    $columnIndex = 0;
+                    $cells = preg_replace_callback(
+                        '/<th\b([^>]*)>/i',
+                        function ($cellMatch) use (&$columnIndex, $registerColumnWidths) {
+                            if (!isset($registerColumnWidths[$columnIndex])) {
+                                return $cellMatch[0];
+                            }
+                            $attributes = preg_replace('/\s+width="[^"]*"/i', '', $cellMatch[1]);
+                            return '<th width="' . $registerColumnWidths[$columnIndex++] . '%"' . $attributes . '>';
+                        },
+                        $rowMatch[2]
+                    );
+                    return '<tr' . $rowMatch[1] . '>' . $cells . '</tr>';
+                },
+                $headingMatch[1]
+            );
+            return '<thead class="register-heading">' . $heading . '</thead>';
+        },
+        $html,
+        1
+    );
     
     // TCPDF does not reliably use the colgroup widths. Put the four header
     // column widths directly on the live cells and remove the invalid colspan
