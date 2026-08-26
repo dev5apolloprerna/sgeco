@@ -91,6 +91,32 @@ function configureOtherReportPdfTableHeader($html, $repeatTableHeaders)
     libxml_use_internal_errors($previous);
 
     $xpath = new DOMXPath($document);
+    
+    // TCPDF treats every THEAD as a repeatable page header.  The report also
+    // contains layout tables for the statutory form and establishment
+    // details; those are document headings, not continuation-page headings.
+    // Demote any THEAD which is not a direct child of the register table so
+    // that only the register's column labels can be repeated.
+    $nonRegisterHeadings = array();
+    foreach ($xpath->query('//thead') as $heading) {
+        $parent = $heading->parentNode;
+        if (!$parent || strtolower($parent->nodeName) !== 'table') {
+            $nonRegisterHeadings[] = $heading;
+            continue;
+        }
+        $classes = ' ' . preg_replace('/\s+/', ' ', trim($parent->getAttribute('class'))) . ' ';
+        if (strpos($classes, ' register-table ') === false) {
+            $nonRegisterHeadings[] = $heading;
+        }
+    }
+    foreach ($nonRegisterHeadings as $heading) {
+        $body = $document->createElement('tbody');
+        while ($heading->firstChild) {
+            $body->appendChild($heading->firstChild);
+        }
+        $heading->parentNode->replaceChild($body, $heading);
+    }
+
     $tables = $xpath->query(
         '//table[contains(concat(" ", normalize-space(@class), " "), " register-table ")]'
     );
