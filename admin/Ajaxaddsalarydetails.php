@@ -61,7 +61,7 @@ if ($_POST['action'] == 'ListUser') {
                         <th class="all">HRA</th>
                         <th class="all">No of National Holiday</th>
                         <!-- <th class="all">Prof <br /> Tax</th> -->
-                        <th class="all">Advance</th>
+                        <th class="all">Advance Paid By Bank</th>
                         <th class="all">Action</th>
                     </tr>
                 </thead>

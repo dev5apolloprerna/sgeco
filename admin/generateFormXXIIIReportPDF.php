@@ -6,11 +6,15 @@ require_once('FormXXIIIReport.php');
 require_once('OtherReportOutput.php');
 
 try {
-    // $html = addOtherReportPdfSpacing(getFormXXIIIRequestData($dbconn, false), false);
     // Render one continuous register and let TCPDF repeat only its THEAD at
     // automatic page breaks (not the legal form/establishment heading).
     $html = addFormXXIIIPdfFormatting(
-        addOtherReportPdfSpacing(getFormXXIIIRequestData($dbconn, false), true)
+        addOtherReportPdfSpacing(
+            // Do not create fixed-size form sections: those sections duplicate
+            // the complete legal heading rather than only the table heading.
+            getFormXXIIIRequestData($dbconn, false),
+            true
+        )
     );
     // Apply the request month to the final PDF document as well. This keeps
     // the export dynamic even if PDF-only preprocessing changes the header.

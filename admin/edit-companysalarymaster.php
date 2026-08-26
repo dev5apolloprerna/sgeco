@@ -101,6 +101,20 @@ if (mysqli_num_rows($result) > 0) {
                                                     <label for="form_control_1">Salary  Date</label>
                                                     <input type="text" id="salarypaiddate" value="<?php echo $row['salarypaiddate'] ?>" name="salarypaiddate" class="form-control date-picker" placeholder="Enter Salary Date" required=""/>
                                                 </div>
+                                                <div class="form-group">
+                                                    <label for="DeductESIC">Deduct ESIC</label>
+                                                    <select name="DeductESIC" id="DeductESIC" class="form-control" required>
+                                                        <option value="YES" <?php echo $row['DeductESIC'] == 'YES' ? 'selected' : ''; ?>>Yes</option>
+                                                        <option value="NO" <?php echo $row['DeductESIC'] == 'NO' ? 'selected' : ''; ?>>No</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="DeductPF">Deduct Provident Fund (PF)</label>
+                                                    <select name="DeductPF" id="DeductPF" class="form-control" required>
+                                                        <option value="YES" <?php echo $row['DeductPF'] == 'YES' ? 'selected' : ''; ?>>Yes</option>
+                                                        <option value="NO" <?php echo $row['DeductPF'] == 'NO' ? 'selected' : ''; ?>>No</option>
+                                                    </select>
+                                                </div>
                                             </div>
 
 

@@ -9,7 +9,9 @@ require_once('OtherReportOutput.php');
 try {
     // $html = addOtherReportPdfSpacing(getFormCRequestData($dbconn));
     $html = addFormCPdfFormatting(
-        addOtherReportPdfSpacing(getFormCRequestData($dbconn))
+        // Keep the register as one flowing table. TCPDF will repeat its
+        // promoted THEAD, but not the Form C title and establishment details.
+        addOtherReportPdfSpacing(getFormCRequestData($dbconn), true)
     );
 } catch (Exception $exception) {
     ob_clean();

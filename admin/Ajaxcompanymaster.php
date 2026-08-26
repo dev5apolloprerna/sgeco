@@ -54,7 +54,6 @@ if ($_POST['action'] == 'ListUser') {
                     
                     <th class="all">ESI</th>
                     <th class="all">Professional Tax</th>
-                    <th class="all">Provident Fund (PF)</th>
                     <th class="all">Medical Allowance</th>
                     <th class="all">Medical Allowance Per</th>
                     <th class="all">Bonus</th>
@@ -98,10 +97,6 @@ if ($_POST['action'] == 'ListUser') {
                             </div>
                         </td>
                         <td>
-                            <div class="form-group form-md-line-input "><?php echo $rowfilter['ProvidentFund']; ?>
-                            </div>
-                        </td>
-                         <td>
                             <div class="form-group form-md-line-input "><?php echo $rowfilter['MedicalAllowance']; ?> 
                             </div>
                         </td>

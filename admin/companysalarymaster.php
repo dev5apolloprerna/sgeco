@@ -76,6 +76,20 @@ include('IsLogin.php');
                                                         <label for="form_control_1">Salary  Date</label>
                                                         <input type="text" id="salarypaiddate" name="salarypaiddate" class="form-control date-picker" placeholder="Enter Salary Date" required=""/>
                                                     </div>
+                                                    <div class="form-group">
+                                                        <label for="DeductESIC">Deduct ESIC</label>
+                                                        <select name="DeductESIC" id="DeductESIC" class="form-control" required>
+                                                            <option value="YES">Yes</option>
+                                                            <option value="NO">No</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="DeductPF">Deduct Provident Fund (PF)</label>
+                                                        <select name="DeductPF" id="DeductPF" class="form-control" required>
+                                                            <option value="YES">Yes</option>
+                                                            <option value="NO">No</option>
+                                                        </select>
+                                                    </div>
                                                 </div>
                                                 <div class="form-actions noborder">
                                                     <input class="btn blue margin-top-20" type="submit" id="Btnmybtn"  value="Submit" name="submit">      
@@ -229,36 +243,6 @@ include('IsLogin.php');
                                                                 });
                                                             });
 
-//                                                            function setEditdata(id)
-//                                                            {
-//                                                                $('#errorDIV').css('display', 'none');
-//                                                                $('#errorDIV').html('');
-//                                                                $('#loading').css("display", "block");
-//                                                                $.ajax({
-//                                                                    type: 'POST',
-//                                                                    url: '<?php echo $web_url; ?>admin/querydata.php',
-//                                                                    data: {action: "GetAdminCompanySalary", ID: id},
-//                                                                    success: function (response) {
-//                                                                        document.getElementById("editCompanySalary").innerHTML = "EDIT Company Salary";
-//                                                                        $('#loading').css("display", "none");
-//                                                                        var json = JSON.parse(response);
-//                                                                        //alert(json.val());
-//                                                                        var companymaster = json.companymasterId;
-//                                                                        //alert(companymasterId.length);
-//                                                                        for (i = 0; i <= companymaster.length; i++) {                                                                                                                                                      
-//                                                                            $('#Company').val(json.companymasterId[i]['companymasterId']).prop("selected", true);
-//                                                                        }                                                                       
-//                                                                        $('#month').val(json.month);
-//                                                                        $('#year').val(json.year);
-//                                                                        $('#fromdate').val(json.fromdate);
-//                                                                        $('#todate').val(json.todate);
-//                                                                        $('#Company').val(json.companymasterId);
-//                                                                        $('#salarypaiddate').val(json.salarypaiddate);
-//                                                                        $('#action').val('EditCompanySalaryname');
-//                                                                        $('<input>').attr('type', 'hidden').attr('name', 'companysalarymasterId').attr('value', json.companysalarymasterId).attr('id', 'companysalarymasterId').appendTo('#frmparameter');
-//                                                                    }
-//                                                                });
-//                                                            }
                                                             function deletedata(task, id)
                                                             {
                                                                 var errMsg = '';

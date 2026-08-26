@@ -43,6 +43,7 @@ try {
     );
     // The renderer places only the three column-heading rows in THEAD, so
     // TCPDF repeats the table head without repeating the report title/details.
+    // Keep the legal header as a separate table above `.main` for that reason.
     $html = str_replace(
         '</style>',
         '.main{width:100%;table-layout:fixed}.main th{font-weight:bold!important}' .

@@ -145,7 +145,6 @@ switch ($action) {
                 "highlyskilled" => $_POST['highlyskilled'],
                 "ESI" => $_POST['ESI'],
                 "pf" => $_POST['pf'],
-                "ProvidentFund" => $_POST['ProvidentFund'],
                 "MedicalAllowance" => $_POST['MedicalAllowance'],
                 "MedicalAllowancePer" => $_POST['MedicalAllowancePer'],
                 "strBonus" => $_POST['strBonus'],
@@ -181,7 +180,6 @@ switch ($action) {
                 "highlyskilled" => $_POST['highlyskilled'],
                 "ESI" => $_POST['ESI'],
                 "pf" => $_POST['pf'],
-                "ProvidentFund" => $_POST['ProvidentFund'],
                 "MedicalAllowance" => $_POST['MedicalAllowance'],
                 "MedicalAllowancePer" => $_POST['MedicalAllowancePer'],
                 "strBonus" => $_POST['strBonus'],
@@ -259,6 +257,8 @@ switch ($action) {
             "month" => $_POST['month'],
             "fromdate" => $_POST['fromdate'],
             "todate" => $_POST['todate'],
+            "DeductESIC" => $_POST['DeductESIC'],
+            "DeductPF" => $_POST['DeductPF'],
             "strEntryDate" => date('d-m-Y H:i:s'),
             "strIP" => $_SERVER['REMOTE_ADDR'],
             "iEntryBy" => $_SESSION['AdminId'],
@@ -294,6 +294,8 @@ switch ($action) {
             "month" => $_POST['month'],
             "fromdate" => $_POST['fromdate'],
             "todate" => $_POST['todate'],
+            "DeductESIC" => $_POST['DeductESIC'],
+            "DeductPF" => $_POST['DeductPF'],
             "strEntryDate" => date('d-m-Y H:i:s'),
             "strIP" => $_SERVER['REMOTE_ADDR'],
             "iUpdatedBy" => $_SESSION['AdminId'],
@@ -1140,7 +1142,8 @@ switch ($action) {
                 }
                 
                 //$pf = $basicrate * 0.12;
-                $pf = $Company['ProvidentFund'] == 'YES' ? $basicpf * 0.12 : 0; // $pf = $basicpf * 0.12;
+                // $pf = $Company['ProvidentFund'] == 'YES' ? $basicpf * 0.12 : 0; // $pf = $basicpf * 0.12;
+                $pf = $basicpf * 0.12;
                 if($Company['iDailyWorkingRate'] > 0){
                     $iDailyWorkingRate = $Company['iDailyWorkingRate'];
                 } else {
@@ -1447,7 +1450,8 @@ switch ($action) {
         }
         $basicpf = $basicrate + $national_holiday_payment;
         //$pf = $basicrate * 0.12;
-        $pf = $Company['ProvidentFund'] == 'YES' ? $basicpf * 0.12 : 0; // $pf = $basicpf * 0.12;
+        // $pf = $Company['ProvidentFund'] == 'YES' ? $basicpf * 0.12 : 0; // $pf = $basicpf * 0.12;
+        $pf = $basicpf * 0.12;
         // $iBonusAmt = $basicrate * 0.0833;
         // $iLeaveAmt = $basicrate / 20;
         $iBonusAmt = 0;
@@ -1676,14 +1680,18 @@ switch ($action) {
             $PresentAmount = $_POST['workingdays_' . $inc] * $_POST['rate_' . $inc];
             $totalamt = $otamt + $PresentAmount;
             $totalAdv = $_POST['adv_' . $inc] + $_POST['adv_two_' . $inc];
-            $salaryMaster = mysqli_fetch_assoc(mysqli_query($dbconn, "SELECT month FROM companysalarymaster WHERE companysalarymasterId='" . (int) $_POST['companysalarymasterId'] . "'"));
+            $salaryMaster = mysqli_fetch_assoc(mysqli_query($dbconn, "SELECT month, DeductESIC, DeductPF FROM companysalarymaster WHERE companysalarymasterId='" . (int) $_POST['companysalarymasterId'] . "'"));
             $salaryAdvances = $salaryMaster ? getMultiCompanyReportAdvances($dbconn, $_POST['companysalarymasterId'], $salaryMaster['month']) : array();
             $storedAdvance = getEmployeeCompanyReportAdvance($salaryAdvances, $inc);
             $advancePaidByBank = $storedAdvance > 0
                 ? $storedAdvance
                 : max(0, (float) $_POST['advance_paid_by_bank_' . $inc]);
-            $pfAmount = max(0, (float) $_POST['pf_amount_' . $inc]);
-            $esicAmount = max(0, (float) $_POST['esic_amount_' . $inc]);
+            $pfAmount = $salaryMaster && $salaryMaster['DeductPF'] == 'YES'
+                ? max(0, (float) $_POST['pf_amount_' . $inc])
+                : 0;
+            $esicAmount = $salaryMaster && $salaryMaster['DeductESIC'] == 'YES'
+                ? max(0, (float) $_POST['esic_amount_' . $inc])
+                : 0;
             $total = $totalamt - $totalAdv - $advancePaidByBank - $pfAmount - $esicAmount;
             $balance1 = $total + $_POST['fa_' . $inc] + $_POST['ta_' . $inc];
             $dataarray = array

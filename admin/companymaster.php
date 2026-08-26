@@ -89,14 +89,6 @@ include('IsLogin.php');
                                                         </select>
                                                     </div>
                                                     <div class="form-group">
-                                                        <label for="ProvidentFund">Provident Fund (PF) (Yes/No)</label>
-                                                        <select name="ProvidentFund" id="ProvidentFund" class="form-control" required="" >
-                                                            <option value="">Select Provident Fund</option>
-                                                            <option value="YES">Yes</option>
-                                                            <option value="NO">No</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="form-group">
                                                         <label for="form_control_1">Medical Allowance</label>
                                                         <select name="MedicalAllowance" id="MedicalAllowance" class="form-control" required="" onchange='checkvalue(this.value)'>
                                                             <option value="">Select Medical Allowance</option>
@@ -244,7 +236,6 @@ include('IsLogin.php');
                         $('#highlyskilled').val(json.highlyskilled);
                         $('#ESI').val(json.ESI);
                         $('#pf').val(json.pf);
-                        $('#ProvidentFund').val(json.ProvidentFund);
                         $('#MedicalAllowance').val(json.MedicalAllowance);
                         $('#MedicalAllowancePer').val(json.MedicalAllowancePer);
                         

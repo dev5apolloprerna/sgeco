@@ -44,6 +44,8 @@ if ($_POST['action'] == 'ListUser') {
                     <th class="all">To Date</th>
                     <th class="all">Company Name</th>
                     <th class="all">Salary  Date</th>
+                    <th class="all">Deduct ESIC</th>
+                    <th class="all">Deduct PF</th>
                     <th class="desktop">Action</th>
                 </tr>
             </thead>
@@ -78,6 +80,14 @@ if ($_POST['action'] == 'ListUser') {
                         </td>
                         <td>
                             <div class="form-group form-md-line-input "><?php echo $rowfilter['salarypaiddate']; ?> 
+                            </div>
+                        </td>
+                        <td>
+                            <div class="form-group form-md-line-input "><?php echo $rowfilter['DeductESIC']; ?> 
+                            </div>
+                        </td>
+                        <td>
+                            <div class="form-group form-md-line-input "><?php echo $rowfilter['DeductPF']; ?> 
                             </div>
                         </td>
                         <td>
