@@ -68,7 +68,8 @@ if ($_POST['action'] == 'ListUser') {
                     <?php
                     $Total = array_fill(0, 13, 0);
                     while ($rowfilter = mysqli_fetch_array($resultfilter)) {
-                        $advanceAmount = getEmployeeCompanyReportAdvance($companyReportAdvances, $rowfilter['emp_id']);
+                        // $advanceAmount = getEmployeeCompanyReportAdvance($companyReportAdvances, $rowfilter['emp_id']);
+                        $advanceAmount = getSalaryReportAdvance($rowfilter, $companyReportAdvances);
                         $desg = mysqli_fetch_array(mysqli_query($dbconn, "SELECT * FROM `employee`  where isDelete='0' and employeeId='" . $rowfilter['emp_id'] . "'"));
 
                     ?>
@@ -191,8 +192,8 @@ if ($_POST['action'] == 'ListUser') {
                                 </div>
                             </td>
                             <td>
-                                <div class="form-group form-md-line-input "><?php echo ceil($rowfilter['netamountpaid'] - $advanceAmount);
-                                                                            $Total[3] = ceil($rowfilter['netamountpaid'] - $advanceAmount) + $Total[3];
+                                <div class="form-group form-md-line-input "><?php echo ceil(getSalaryReportNetAmount($rowfilter, $advanceAmount));
+                                                                        $Total[3] = ceil(getSalaryReportNetAmount($rowfilter, $advanceAmount)) + $Total[3];
                                                                             ?>
                                 </div>
                             </td>

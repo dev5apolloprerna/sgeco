@@ -4,6 +4,7 @@ include('../common.php');
 include('IsLogin.php');
 $connect = new connect();
 include ('User_Paging.php');
+include_once 'companyReportAdvance.php';
 
 if ($_POST['action'] == 'ListUser') {
     //$where = "where 1=1";
@@ -60,13 +61,16 @@ if ($_POST['action'] == 'ListUser') {
                         <th class="all">HRA</th>
                         <th class="all">No of National Holiday</th>
                         <!-- <th class="all">Prof <br /> Tax</th> -->
+                        <th class="all">Advance</th>
                         <th class="all">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php
                     $salarymaster = mysqli_fetch_assoc(mysqli_query($dbconn, "SELECT * FROM salarymaster where salarymasterId='" . $_POST['salarymasterId'] . "' "));
+                    $salaryAdvances = getCompanyReportAdvances($dbconn, $salarymaster['companymasterId'], $salarymaster['month']);
                     while ($rowfilter = mysqli_fetch_array($resultfilter)) {
+                        $advanceAmount = getEmployeeCompanyReportAdvance($salaryAdvances, $rowfilter['employeeId']);
                         if($rowfilter['isExitEmployee']==1){
                         ?>
                         <tr style="background: #ffc107!important;">
@@ -142,6 +146,9 @@ if ($_POST['action'] == 'ListUser') {
                     </td>
                     <td>
                         <input class="form-control" name="national_holiday_payment_<?php echo $i ?>" <?= $rowfilter['isExitEmployee']==1 ? 'readonly' : ""; ?> id="national_holiday_payment_<?php echo $i ?>" onkeypress="return isNumberKey(event)">
+                    </td>
+                    <td>
+                        <input type="number" min="0" step="0.01" class="form-control" value="<?php echo htmlspecialchars(number_format($advanceAmount, 2, '.', ''), ENT_QUOTES, 'UTF-8'); ?>" name="advance_<?php echo $i ?>" id="advance_<?php echo $i ?>" <?php echo ($advanceAmount > 0 || $rowfilter['isExitEmployee'] == 1) ? 'readonly' : ''; ?>>
                     </td>
                     <!-- <td>
                         <input class="form-control" name="pt_<?php echo $i ?>" id="pt_<?php echo $i ?>" onkeypress="return isNumberKey(event)">

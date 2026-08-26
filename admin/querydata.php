@@ -7,6 +7,7 @@ $connect = new connect();
 include 'IsLogin.php';
 include 'password_hash.php';
 include '../PHPMailer-master/PHPMailerAutoload.php';
+include_once 'companyReportAdvance.php';
 
 $action = $_REQUEST['action'];
 
@@ -1057,7 +1058,8 @@ switch ($action) {
         $workingdays = $_POST['workingdays_' . $inc];
         $othours = $_POST['othours_' . $inc];
         $otrate = $_POST['otrate_' . $inc];
-        $deductionifany = $_POST['deductionifany_' . $inc];
+        $salaryMaster = mysqli_fetch_assoc(mysqli_query($dbconn, "SELECT month FROM salarymaster WHERE salarymasterId='" . (int) $_POST['salaryId'] . "'"));
+        $salaryAdvances = $salaryMaster ? getCompanyReportAdvances($dbconn, $_POST['companyId'], $salaryMaster['month']) : array(); // $deductionifany = $_POST['deductionifany_' . $inc];
 
         
         $count = $inc;
@@ -1072,7 +1074,12 @@ switch ($action) {
             $hra = $_POST['hra_' . $inc];
             //$pt = $_POST['pt_'.$inc];
             $national_holiday = $_POST['national_holiday_payment_' . $inc];
-        
+            $deductionifany = isset($_POST['deductionifany_' . $inc]) ? max(0, (float) $_POST['deductionifany_' . $inc]) : 0;
+            $storedAdvance = getEmployeeCompanyReportAdvance($salaryAdvances, $_POST['emp_id_' . $inc]);
+            $advance = $storedAdvance > 0
+                ? $storedAdvance
+                : (isset($_POST['advance_' . $inc]) ? max(0, (float) $_POST['advance_' . $inc]) : 0);
+
             if ($_POST['workingdays_' . $inc] != '' || $_POST['workingdays_' . $inc] != null) {
                 $Sql123 = mysqli_query($dbconn, "delete from salarydetails where salarydetails.salaryId = '" . $_POST['salaryId'] . "' and salarydetails.companyId = '" . $_POST['companyId'] . "' and salarydetails.emp_id = '" . $_POST['emp_id_' . $inc] . "'");
                 //    echo "SELECT * FROM `comskill`  where   empid='" . $_POST['emp_id'][$iCounter] . "' and companyid = '" . $_POST['companyId'] . "' and skill != '' ";
@@ -1182,7 +1189,7 @@ switch ($action) {
                 }
                 // $pf = round($total) * 0.12;
 
-                $netamt1 = $total - $ecs - $pf - $pt - $deductionifany;
+                $netamt1 = $total - $ecs - $pf - $pt - $deductionifany - $advance; // $netamt1 = $total - $ecs - $pf - $pt - $deductionifany;
                 $netamt = $netamt1 + $MedicalAllowance;
                 $dataarray = array(
                     "salaryId" => $_POST['salaryId'],
@@ -1209,6 +1216,7 @@ switch ($action) {
                     "pt" => $pt,
                     "iNoOfNatioanHoliday" => $national_holiday,
                     "deductionifany" => $deductionifany,
+                    "advance" => round((float) $advance, 2),
                     "netamountpaid" => ceil((float)$netamt),
                     //"salaryamt" => $_POST['salaryamt'][$iCounter],
                     "iBonusAmt" => round((float)$iBonusAmt),

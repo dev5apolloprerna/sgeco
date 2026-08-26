@@ -73,7 +73,8 @@ function getFormXIXSlipData(array $employees, $salaryMonth, $companyName, array 
     $period = DateTime::createFromFormat('!m/Y', $salaryMonth);
     $slips = array();
     foreach ($employees as $employee) {
-        $advance = getEmployeeCompanyReportAdvance($advances, $employee['employeeId']);
+        // $advance = getEmployeeCompanyReportAdvance($advances, $employee['employeeId']);
+        $advance = getSalaryReportAdvance($employee, $advances);
         // $fatherName = formXIXValue($employee['strFatherName']);
         $slips[] = array(
             'serial' => formXIXValue($employee['report_serial']),
@@ -114,7 +115,8 @@ function getFormXIXSlipData(array $employees, $salaryMonth, $companyName, array 
             'gross' => (float) $employee['total'] + (float) $employee['MedicalAllowanceamt'],
             'total_deduction' => (float) $employee['pt'] + (float) $employee['pf'] +
                 (float) $employee['esi'] + (float) $employee['deductionifany'] + (float) $advance,
-            'net_pay' => (float) $employee['netamountpaid'] - (float) $advance
+            // 'net_pay' => (float) $employee['netamountpaid'] - (float) $advance
+            'net_pay' => getSalaryReportNetAmount($employee, $advance)
         );
     }
     return $slips;

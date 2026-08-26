@@ -43,3 +43,19 @@ function getEmployeeCompanyReportAdvance($advances, $employeeId)
     $employeeId = (int) $employeeId;
     return isset($advances[$employeeId]) ? (float) $advances[$employeeId] : 0;
 }
+
+/** Prefer the advance saved with a salary while retaining legacy report data. */
+function getSalaryReportAdvance($salary, $advances)
+{
+    $savedAdvance = isset($salary['advance']) ? (float) $salary['advance'] : 0;
+    return $savedAdvance > 0
+        ? $savedAdvance
+        : getEmployeeCompanyReportAdvance($advances, $salary['emp_id']);
+}
+
+/** Avoid deducting an advance twice when it is already included in net pay. */
+function getSalaryReportNetAmount($salary, $advance)
+{
+    $savedAdvance = isset($salary['advance']) ? (float) $salary['advance'] : 0;
+    return (float) $salary['netamountpaid'] - ($savedAdvance > 0 ? 0 : (float) $advance);
+}

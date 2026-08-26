@@ -24,7 +24,8 @@ $mailFormat_main = file_get_contents("newform.html");
 $i = 1;
 $mailFormat_rows = "";
 while ($rowapplication = mysqli_fetch_array($result)) {
-    $advanceAmount = getEmployeeCompanyReportAdvance($companyReportAdvances, $rowapplication['emp_id']);
+    // $advanceAmount = getEmployeeCompanyReportAdvance($companyReportAdvances, $rowapplication['emp_id']);
+    $advanceAmount = getSalaryReportAdvance($rowapplication, $companyReportAdvances);
 
     $desg = mysqli_fetch_array(mysqli_query($dbconn, "SELECT * FROM `employee`  where isDelete='0' and employeeId='" . $rowapplication['emp_id'] . "'"));
     $comp = mysqli_fetch_array(mysqli_query($dbconn, "SELECT * FROM `companymaster`  where isDelete='0'  and  istatus='1' and companymasterId='" . $_REQUEST['Company'] . "'"));
@@ -81,7 +82,8 @@ while ($rowapplication = mysqli_fetch_array($result)) {
     $mailFormat = str_replace("#Deductionifany#", (((int)$rowapplication['deductionifany'])), $mailFormat);
     $Deduction_total = $rowapplication['pf'] + $rowapplication['esi'] + $advanceAmount + $rowapplication['pt'];
     $mailFormat = str_replace("#Deduction_total#", (( number_format($Deduction_total, 2, '.', '') )), $mailFormat);
-    $mailFormat = str_replace("#Net_Amount_Paid#", ((ceil($rowapplication['netamountpaid'] - $advanceAmount))), $mailFormat);
+    // $mailFormat = str_replace("#Net_Amount_Paid#", ((ceil($rowapplication['netamountpaid'] - $advanceAmount))), $mailFormat);
+    $mailFormat = str_replace("#Net_Amount_Paid#", ((ceil(getSalaryReportNetAmount($rowapplication, $advanceAmount)))), $mailFormat);
     $mailFormat = str_replace("#Signature_Thumb_impression_of_Workman#", (('')), $mailFormat);
     $mailFormat = str_replace("#Initials_of_Contractor_of_his_Representive#", (('')), $mailFormat);
     $mailFormat = str_replace("#Account_No#", (((int)$desg['accountno'])), $mailFormat);
@@ -93,7 +95,8 @@ while ($rowapplication = mysqli_fetch_array($result)) {
     $Total[2] = $rowapplication['pf'] + $Total[2];
     $Total[4] = $rowapplication['pt'] + $Total[4];
     $Total[5] = $rowapplication['deductionifany'] + $Total[5];
-    $Total[3] = ceil($rowapplication['netamountpaid'] - $advanceAmount) + $Total[3];
+    // $Total[3] = ceil($rowapplication['netamountpaid'] - $advanceAmount) + $Total[3];
+    $Total[3] = ceil(getSalaryReportNetAmount($rowapplication, $advanceAmount)) + $Total[3];
     //$Total[6] = (!empty($rowapplication['workingdays']) ? $rowapplication['workingdays'] : 0) + !empty($Total[6]) ? $Total[6] : 0;
     $Total[6] = $rowapplication['workingdays'] + $Total[6];
     //$Total[7] = $rowapplication['basicwages'] + !empty($Total[7]) ? $Total[7] : 0;

@@ -398,9 +398,11 @@ $lineOne .='Sr. No'
         }
         // and  istatus='1'
         $desg = mysqli_fetch_array(mysqli_query($dbconn, "SELECT * FROM `employee`  where isDelete='0' and employeeId='" . $row['emp_id'] . "'"));
-        $advanceAmount = getEmployeeCompanyReportAdvance($companyReportAdvances, $row['emp_id']);
+        // $advanceAmount = getEmployeeCompanyReportAdvance($companyReportAdvances, $row['emp_id']);
+        $advanceAmount = getSalaryReportAdvance($row, $companyReportAdvances);
         $Deduction_total = $row['pf'] + $row['esi'] + $advanceAmount + $row['pt'];
-        $netAmountPaid = ceil($row['netamountpaid'] - $advanceAmount);
+        // $netAmountPaid = ceil($row['netamountpaid'] - $advanceAmount);
+        $netAmountPaid = ceil(getSalaryReportNetAmount($row, $advanceAmount));
         $emp_name="";
         if(isset($desg['emp_name']) && $desg['emp_name'] != ""){
             $emp_name = ucwords(strtolower($desg['emp_name']));
