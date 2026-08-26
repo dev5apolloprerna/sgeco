@@ -78,11 +78,14 @@ function renderFormCHtml(array $employees, $salaryMonth, $companyName)
     foreach ($employees as $employeeName) {
         $cells = '<td>' . $serialNumber . '</td><td class="name-cell">' . htmlspecialchars($employeeName, ENT_QUOTES, 'UTF-8') . '</td>';
         $cells .= str_repeat('<td>NIL</td>', 11);
-        $rows .= '<tr>' . $cells . '</tr>';
+        // Mark every employee as an indivisible PDF row. The shared PDF
+        // formatter adds TCPDF's nobr attribute to data rows so a wrapped name
+        // cannot be split above the repeated table heading on the next page.
+        $rows .= '<tr class="data-row">' . $cells . '</tr>';
         $serialNumber++;
     }
     if (!$employees) {
-        $rows = '<tr>' . str_repeat('<td>NIL</td>', 13) . '</tr>';
+        $rows = '<tr class="data-row">' . str_repeat('<td>NIL</td>', 13) . '</tr>';
     }
     $firstSection = strpos($template, $matches[0]);
 

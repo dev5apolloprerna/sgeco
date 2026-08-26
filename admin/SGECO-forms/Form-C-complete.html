@@ -288,8 +288,8 @@
                     <col style="width: 6%;">
                     <col style="width: 6%;">
                 </colgroup>
-                <!-- Use an ordinary row group: TCPDF automatically repeats a
-                     thead after page breaks, but Form C requires it once only. -->
+                <!-- The PDF formatter promotes this row group to THEAD so the
+                     complete column heading repeats after every page break. -->
                 <tbody class="register-heading">
                     <tr>
                         <!-- TCPDF does not reliably apply colgroup widths, so
