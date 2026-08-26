@@ -99,11 +99,24 @@ function addOtherReportPdfSpacing($html, $repeatTableHeaders = true, $cellPaddin
         $html
     );
 
-    // TCPDF automatically repeats every THEAD when a table flows onto a new
-    // page. Some registers, including Form XXIII, must continue as one list
-    // without printing the column header again. Use a regular table body for
-    // PDF rendering in that case; the browser and Excel HTML stay unchanged.
-    if (!$repeatTableHeaders) {
+    // The supplied register templates keep the statutory column-number row at
+    // the start of TBODY. For PDF output it is part of the table heading too:
+    // move it into the preceding THEAD so TCPDF repeats the complete table
+    // heading (labels and column numbers), but not the form/establishment
+    // details, after an automatic page break.
+    if ($repeatTableHeaders) {
+        $html = preg_replace_callback(
+            '/(<thead\b[^>]*>.*?)(<\/thead>)(\s*<tbody\b[^>]*>\s*)'
+                . '(<tr\b[^>]*class=("|\')[^"\']*\bcolumn-number-row\b[^"\']*\5[^>]*>.*?<\/tr>)/is',
+            function ($matches) {
+                return $matches[1] . $matches[4] . $matches[2] . $matches[3];
+            },
+            $html
+        );
+    } else {
+        // Some exports may deliberately continue without a repeated heading.
+        // Use a regular table body in that case; browser and Excel HTML remain
+        // unchanged because this formatter is used by PDF generators only.
         $html = preg_replace('/<thead\b([^>]*)>/i', '<tbody$1>', $html);
         $html = preg_replace('/<\/thead>/i', '</tbody>', $html);
     }
