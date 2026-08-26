@@ -414,6 +414,16 @@ function addFormXXIPdfFormatting($html)
  */
 function addFormCPdfFormatting($html)
 {
+    // Only the register's column headings belong in THEAD. TCPDF repeats this
+    // row group after an automatic page break while leaving the legal form
+    // title and establishment details on the first page.
+    $html = preg_replace(
+        '/<tbody class="register-heading">(.*?)<\/tbody>/is',
+        '<thead class="register-heading">$1</thead>',
+        $html,
+        1
+    );
+    
     // TCPDF does not reliably use the colgroup widths. Put the four header
     // column widths directly on the live cells and remove the invalid colspan
     // from the fourth cell so the row remains a four-column grid.

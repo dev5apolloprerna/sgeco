@@ -219,7 +219,7 @@ function renderBonusFormCHtml(array $employees, $salaryMonth, $companyName)
         '<td class="left-header" width="41%"><table class="info-table" border="0" cellspacing="0" cellpadding="0"><tr><td class="info-label" width="55%" style="font-size:10px;"><strong>NAME AND ADDRESS OF CONTRACTOR :</strong></td><td width="45%" class="normal-weight" style="font-size:10px;">SHREE GANESH ENGINEERING CO.</td></tr><tr><td></td><td class="address-line" style="font-size:10px;">FF-8, Devshruti Complex,</td></tr><tr><td></td><td class="address-line" style="font-size:10px;">Nr. HCG Hospital,</td></tr><tr><td></td><td class="address-line" style="font-size:10px;">Mithakhali, Ahmedabad - 380006</td></tr></table></td>' .
         '<td class="center-header" width="18%"><div class="title">REGISTER OF BONUS</div><div class="form-number" style="padding-top:6px;text-align:center;"><strong>FORM C</strong></div><div style="text-decoration:underline;text-align:center"><strong>See rule 4(b)</strong></div></td>' .
         '<td class="right-header" width="41%"><div class="right-line" style="font-size:10px;"><strong>Name and Address of establishment in/under which contract is carried on</strong></div><div class="right-line" style="font-size:10px;"><strong>Bonus paid to the employees for the accounting year:</strong> <span class="normal-weight">' . $e($period['bonus_month']) . '</span></div><div class="right-line" style="font-size:10px;"><strong>Name and Address of the principal Employer :</strong> <span class="normal-weight">' . $e($companyName) . '</span></div></td></tr></table>' .
-        '<table class="main">' . $colgroup . '<tr>' .
+        '<table class="main">' . $colgroup . '<thead><tr>' .
         $cell('th', 0, 'Sr.<br>No.', ' style="text-align:center" rowspan="2"') .
         $cell('th', 1, 'Name of Workmen', ' style="text-align:center" rowspan="2"') .
         $cell('th', 2, 'Father Name', ' style="text-align:center" rowspan="2"') .
@@ -239,7 +239,7 @@ function renderBonusFormCHtml(array $employees, $salaryMonth, $companyName)
         $cell('th', 11, 'Amount of income tax deducted 10-A', ' style="text-align:center"') .
         '</tr><tr>' . implode('', array_map(function ($n) use ($cell) {
             return $cell('td', $n - 1, $n, ' align="center" style="text-align:center;font-weight: 700;"');
-        }, range(1, 15))) . '</tr>';
+        }, range(1, 15))) . '</tr></thead><tbody>';
     $totals = array('days' => 0, 'salary' => 0, 'bonus' => 0, 'paid' => 0);
     foreach ($rows as $index => $row) {
         foreach (array_keys($totals) as $key) {
@@ -301,6 +301,6 @@ function renderBonusFormCHtml(array $employees, $salaryMonth, $companyName)
             in_array($column, range(6, 12), true) ? ' class="amount"' : ''
         );
     }
-    $html .= '</tr></table></body></html>';
+    $html .= '</tr></tbody></table></body></html>';
     return preg_replace('/(<th(?:\s[^>]*)?>)(.*?)(<\/th>)/s', '$1<strong>$2</strong>$3', $html);
 }

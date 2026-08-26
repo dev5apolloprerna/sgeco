@@ -41,9 +41,8 @@ try {
         '<table class="main" border="1" cellspacing="0" cellpadding="3">',
         $html
     );
-    // Keep the rows in the normal table flow, as generateFormCReportPDF.php
-    // does. Wrapping them in THEAD makes TCPDF repeat the complete three-row
-    // heading at every automatic page break.
+    // The renderer places only the three column-heading rows in THEAD, so
+    // TCPDF repeats the table head without repeating the report title/details.
     $html = str_replace(
         '</style>',
         '.main{width:100%;table-layout:fixed}.main th{font-weight:bold!important}' .

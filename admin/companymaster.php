@@ -121,16 +121,7 @@ include('IsLogin.php');
                                                             <option value="NO">NO</option>
                                                         </select>
                                                     </div>
-
-                                                    <div class="form-group">
-                                                        <label for="form_control_1">Leave (YES/NO)</label>
-                                                        <select name="strLeave" id="strLeave" class="form-control" required="" >
-                                                            <option value="">Select Leave </option>
-                                                            <option value="YES">YES</option>
-                                                            <option value="NO">NO</option>
-                                                        </select>
-                                                    </div>
-                                                    
+                                                   
                                                     <div class="form-group">
                                                         <label for="form_control_1">Daily Working Hours</label>
                                                         <input type="number" step="0.01" id="iDailyWorkingRate"  name="iDailyWorkingRate" class="form-control" placeholder="Enter the Company Daily Working Hours" required>
