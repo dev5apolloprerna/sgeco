@@ -70,6 +70,62 @@ function rightAlignOtherReportAmountColumns($html)
 }
 
 /**
+ * Prepare only the register table heading for TCPDF continuation pages.
+ *
+ * TCPDF repeats THEAD after an automatic page break. The statutory column
+ * numbers are kept in TBODY by the browser templates, so move that one row
+ * into the register table's THEAD for PDF output. Scoping the operation to a
+ * direct child of .register-table prevents headings from layout or nested
+ * tables from becoming continuation-page headers.
+ */
+function configureOtherReportPdfTableHeader($html, $repeatTableHeaders)
+{
+    $document = new DOMDocument();
+    $previous = libxml_use_internal_errors(true);
+    if (!$document->loadHTML('<?xml encoding="UTF-8">' . $html)) {
+        libxml_clear_errors();
+        libxml_use_internal_errors($previous);
+        return $html;
+    }
+    libxml_clear_errors();
+    libxml_use_internal_errors($previous);
+
+    $xpath = new DOMXPath($document);
+    $tables = $xpath->query(
+        '//table[contains(concat(" ", normalize-space(@class), " "), " register-table ")]'
+    );
+    foreach ($tables as $table) {
+        $headings = $xpath->query('./thead[1]', $table);
+        if ($headings->length === 0) {
+            continue;
+        }
+        $heading = $headings->item(0);
+
+        if ($repeatTableHeaders) {
+            $numberRows = $xpath->query(
+                './tbody[1]/tr[1][contains(concat(" ", normalize-space(@class), " "), " column-number-row ")]',
+                $table
+            );
+            if ($numberRows->length > 0) {
+                $heading->appendChild($numberRows->item(0));
+            }
+            continue;
+        }
+
+        // Replacing THEAD with TBODY disables TCPDF's automatic repetition
+        // without changing any heading cells or their visual formatting.
+        $body = $document->createElement('tbody');
+        while ($heading->firstChild) {
+            $body->appendChild($heading->firstChild);
+        }
+        $heading->parentNode->replaceChild($body, $heading);
+    }
+
+    $result = $document->saveHTML();
+    return preg_replace('/^<\?xml encoding="UTF-8">\s*/', '', $result);
+}
+
+/**
  * Add export-only table spacing without changing the browser report templates.
  *
  * TCPDF honours cell padding and line-height more reliably than CSS min-height.
@@ -104,23 +160,7 @@ function addOtherReportPdfSpacing($html, $repeatTableHeaders = true, $cellPaddin
     // move it into the preceding THEAD so TCPDF repeats the complete table
     // heading (labels and column numbers), but not the form/establishment
     // details, after an automatic page break.
-    if ($repeatTableHeaders) {
-        $html = preg_replace_callback(
-            '/(<thead\b[^>]*>.*?)(<\/thead>)(\s*<tbody\b[^>]*>\s*)'
-                . '(<tr\b[^>]*class=("|\')[^"\']*\bcolumn-number-row\b[^"\']*\5[^>]*>.*?<\/tr>)/is',
-            function ($matches) {
-                return $matches[1] . $matches[4] . $matches[2] . $matches[3];
-            },
-            $html
-        );
-    } else {
-        // Some exports may deliberately continue without a repeated heading.
-        // Use a regular table body in that case; browser and Excel HTML remain
-        // unchanged because this formatter is used by PDF generators only.
-        $html = preg_replace('/<thead\b([^>]*)>/i', '<tbody$1>', $html);
-        $html = preg_replace('/<\/thead>/i', '</tbody>', $html);
-    }
-
+    $html = configureOtherReportPdfTableHeader($html, $repeatTableHeaders);
     if (stripos($html, '</head>') !== false) {
         return preg_replace('/<\/head>/i', $style . '</head>', $html, 1);
     }
