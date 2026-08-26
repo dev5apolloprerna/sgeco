@@ -427,6 +427,19 @@ function addFormXXIPdfFormatting($html)
  */
 function addFormCPdfFormatting($html)
 {
+    // Form C rows are deliberately single-line (the employee name is nowrap),
+    // so they do not need TCPDF's transactional `nobr` handling.  When a
+    // nobr row is the first row moved to an automatic continuation page,
+    // TCPDF restores the row at the cell's padded X position instead of the
+    // table's X position.  The repeated THEAD then starts at the correct left
+    // edge while every body column is shifted to the right.  Remove that
+    // shared-export safeguard for this fixed-height register before rendering.
+    $html = preg_replace(
+        '/(<tr\s+class=("|\')data-row\2)\s+nobr=("|\')true\3/i',
+        '$1',
+        $html
+    );
+
     // Give TCPDF an explicit table width and zero HTML cell spacing. CSS-only
     // table sizing can be recalculated when THEAD is repeated, causing the
     // continuation-page heading to be a few pixels wider than its body.
@@ -436,7 +449,7 @@ function addFormCPdfFormatting($html)
         $html,
         1
     );
-    
+
     // Only the register's column headings belong in THEAD. TCPDF repeats this
     // row group after an automatic page break while leaving the legal form
     // title and establishment details on the first page.
@@ -509,6 +522,13 @@ function addFormCPdfFormatting($html)
     );
 
     $style = '<style type="text/css">'
+        // A CSS-padded wrapper only affects the first fragment when TCPDF
+        // splits a table across pages.  Continuation fragments are placed at
+        // the PDF margin, which shifts the repeated heading and body to the
+        // left.  Let the PDF margins provide the page inset on every page.
+        . '.form-page {'
+        . 'width: 100%; min-height: 0; margin: 0; padding: 0; overflow: visible;'
+        . '}'
         . '.details-table { table-layout: fixed; font-size: 10px; }'
         . '.details-table .details-label { width: 22%; }'
         . '.details-table .details-value { width: 24%; }'
