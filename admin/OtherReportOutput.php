@@ -427,6 +427,16 @@ function addFormXXIPdfFormatting($html)
  */
 function addFormCPdfFormatting($html)
 {
+    // Give TCPDF an explicit table width and zero HTML cell spacing. CSS-only
+    // table sizing can be recalculated when THEAD is repeated, causing the
+    // continuation-page heading to be a few pixels wider than its body.
+    $html = preg_replace(
+        '/<table class="register-table"([^>]*)>/i',
+        '<table class="register-table" width="100%" cellspacing="0" cellpadding="0"$1>',
+        $html,
+        1
+    );
+    
     // Only the register's column headings belong in THEAD. TCPDF repeats this
     // row group after an automatic page break while leaving the legal form
     // title and establishment details on the first page.

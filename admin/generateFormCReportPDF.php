@@ -11,7 +11,10 @@ try {
     $html = addFormCPdfFormatting(
         // Keep the register as one flowing table. TCPDF will repeat its
         // promoted THEAD, but not the Form C title and establishment details.
-        addOtherReportPdfSpacing(getFormCRequestData($dbconn), true)
+        // Use the same horizontal padding as the repeated header cells.
+        // TCPDF lays a repeated THEAD out separately on continuation pages;
+        // differing header/body padding makes their percentage grids drift.
+        addOtherReportPdfSpacing(getFormCRequestData($dbconn), true, '5px 2px')
     );
 } catch (Exception $exception) {
     ob_clean();
@@ -33,7 +36,7 @@ $pdf->setPrintFooter(false);
 // the legal-landscape page can accommodate substantially more employee rows.
 $pdf->SetMargins(5, 5, 5);
 $pdf->SetAutoPageBreak(true, 5);
-$pdf->SetFont('helvetica', '', 9);
+$pdf->SetFont('helvetica', '', 10);
 $pdf->AddPage('L', 'LEGAL');
 $pdf->writeHTML($html, true, false, true, false, '');
 $pdf->Output('Form-C.pdf', 'I');
