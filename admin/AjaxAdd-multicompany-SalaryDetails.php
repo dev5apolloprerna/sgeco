@@ -4,6 +4,7 @@ include('../common.php');
 include('IsLogin.php');
 $connect = new connect();
 include('User_Paging.php');
+include_once 'companyReportAdvance.php';
 
 if ($_POST['action'] == 'ListUser') {
 
@@ -64,7 +65,9 @@ if ($_POST['action'] == 'ListUser') {
             <tbody>
                 <?php
                 $salarymaster = mysqli_fetch_assoc(mysqli_query($dbconn, "SELECT * FROM companysalarymaster where companysalarymasterId='" . $_POST['companysalarymasterId'] . "' "));
+                $salaryAdvances = getMultiCompanyReportAdvances($dbconn, $salarymaster['companysalarymasterId'], $salarymaster['month']);
                 while ($rowfilter = mysqli_fetch_array($resultfilter)) {
+                    $advanceAmount = getEmployeeCompanyReportAdvance($salaryAdvances, $rowfilter['employeeId']);
                     if ($rowfilter['isExitEmployee'] == 1) {
                 ?>
                         <tr style="background: #ffc107!important;">
@@ -117,7 +120,7 @@ if ($_POST['action'] == 'ListUser') {
                         <td>
                             <input type="text" class="form-control" <?= $rowfilter['isExitEmployee'] == 1 ? 'readonly' : ""; ?> name="adv_two_paid_<?php echo $rowfilter['employeeId'] ?>" id="adv_two_paid_<?php echo $rowfilter['employeeId'] ?>" />
                         </td>
-                        <td><input type="text" class="form-control" value="0" <?= $rowfilter['isExitEmployee'] == 1 ? 'readonly' : ""; ?> name="advance_paid_by_bank_<?php echo $rowfilter['employeeId'] ?>" id="advance_paid_by_bank_<?php echo $rowfilter['employeeId'] ?>" onkeypress="return isNumberKey(event)" /></td>
+                        <td><input type="number" min="0" step="0.01" class="form-control" value="<?php echo htmlspecialchars(number_format($advanceAmount, 2, '.', ''), ENT_QUOTES, 'UTF-8'); ?>" <?= ($advanceAmount > 0 || $rowfilter['isExitEmployee'] == 1) ? 'readonly' : ""; ?> name="advance_paid_by_bank_<?php echo $rowfilter['employeeId'] ?>" id="advance_paid_by_bank_<?php echo $rowfilter['employeeId'] ?>" /></td>
                         <td><input type="text" class="form-control" value="0" <?= $rowfilter['isExitEmployee'] == 1 ? 'readonly' : ""; ?> name="pf_amount_<?php echo $rowfilter['employeeId'] ?>" id="pf_amount_<?php echo $rowfilter['employeeId'] ?>" onkeypress="return isNumberKey(event)" /></td>
                         <td><input type="text" class="form-control" value="0" <?= $rowfilter['isExitEmployee'] == 1 ? 'readonly' : ""; ?> name="esic_amount_<?php echo $rowfilter['employeeId'] ?>" id="esic_amount_<?php echo $rowfilter['employeeId'] ?>" onkeypress="return isNumberKey(event)" /></td>
                         <td>

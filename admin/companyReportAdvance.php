@@ -38,6 +38,45 @@ function getCompanyReportAdvances($dbconn, $companyId, $wageMonth)
     return $advances;
 }
 
+/**
+ * Return advance payments for every company attached to a multicompany salary.
+ */
+function getMultiCompanyReportAdvances($dbconn, $companySalaryMasterId, $wageMonth)
+{
+    $advances = array();
+    $companySalaryMasterId = (int) $companySalaryMasterId;
+
+    if ($companySalaryMasterId <= 0 || !preg_match('/^(0[1-9]|1[0-2])\/(\d{4})$/', $wageMonth, $matches)) {
+        return $advances;
+    }
+
+    $month = (int) $matches[1];
+    $year = (int) $matches[2];
+    $periodStart = sprintf('%04d-%02d-01', $year, $month);
+    $periodEnd = date('Y-m-d', strtotime($periodStart . ' +1 month'));
+    $periodStart = mysqli_real_escape_string($dbconn, $periodStart);
+    $periodEnd = mysqli_real_escape_string($dbconn, $periodEnd);
+    $sql = "SELECT advanced_details.iEmployeeId, COALESCE(SUM(advanced_details.iAmount), 0) AS advanceAmount
+            FROM advanced_details
+            INNER JOIN (
+                SELECT DISTINCT companymasterId
+                FROM multiycompanysalarymaster
+                WHERE companysalarymasterId=" . $companySalaryMasterId . "
+            ) selected_companies ON selected_companies.companymasterId = advanced_details.iCompanyId
+            WHERE advanced_details.strDate >= '" . $periodStart . "'
+              AND advanced_details.strDate < '" . $periodEnd . "'
+            GROUP BY advanced_details.iEmployeeId";
+    $result = mysqli_query($dbconn, $sql);
+
+    if ($result) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            $advances[(int) $row['iEmployeeId']] = (float) $row['advanceAmount'];
+        }
+    }
+
+    return $advances;
+}
+
 function getEmployeeCompanyReportAdvance($advances, $employeeId)
 {
     $employeeId = (int) $employeeId;

@@ -1676,7 +1676,12 @@ switch ($action) {
             $PresentAmount = $_POST['workingdays_' . $inc] * $_POST['rate_' . $inc];
             $totalamt = $otamt + $PresentAmount;
             $totalAdv = $_POST['adv_' . $inc] + $_POST['adv_two_' . $inc];
-            $advancePaidByBank = max(0, (float) $_POST['advance_paid_by_bank_' . $inc]);
+            $salaryMaster = mysqli_fetch_assoc(mysqli_query($dbconn, "SELECT month FROM companysalarymaster WHERE companysalarymasterId='" . (int) $_POST['companysalarymasterId'] . "'"));
+            $salaryAdvances = $salaryMaster ? getMultiCompanyReportAdvances($dbconn, $_POST['companysalarymasterId'], $salaryMaster['month']) : array();
+            $storedAdvance = getEmployeeCompanyReportAdvance($salaryAdvances, $inc);
+            $advancePaidByBank = $storedAdvance > 0
+                ? $storedAdvance
+                : max(0, (float) $_POST['advance_paid_by_bank_' . $inc]);
             $pfAmount = max(0, (float) $_POST['pf_amount_' . $inc]);
             $esicAmount = max(0, (float) $_POST['esic_amount_' . $inc]);
             $total = $totalamt - $totalAdv - $advancePaidByBank - $pfAmount - $esicAmount;
