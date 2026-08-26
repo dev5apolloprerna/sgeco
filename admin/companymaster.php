@@ -75,7 +75,7 @@ include('IsLogin.php');
                                                     <div class="form-group">
                                                         <label for="form_control_1">ESIC (YES/NO)</label>
                                                         <select name="ESI" id="ESI" class="form-control" required="" >
-                                                            <option value="">Select ESI</option>
+                                                            <option value="">Select ESIC</option>
                                                             <option value="YES">YES</option>
                                                             <option value="NO">NO</option>
                                                         </select>
