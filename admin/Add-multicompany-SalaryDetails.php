@@ -149,6 +149,9 @@ if (mysqli_num_rows($result) > 0) {
                                                                 var adv_one = $('#adv_one_paid_' + empId).val();
                                                                 var adv_two = $('#adv_two_' + empId).val();
                                                                 var adv_two_paid = $('#adv_two_paid_' + empId).val();
+                                                                var advance_paid_by_bank = $('#advance_paid_by_bank_' + empId).val();
+                                                                var pf_amount = $('#pf_amount_' + empId).val();
+                                                                var esic_amount = $('#esic_amount_' + empId).val();
                                                                 var pay_cash = $("#pay_cash_" + empId).val();
                                                                 var fa = $('#fa_' + empId).val();
                                                                 var ta = $('#ta_' + empId).val();
@@ -167,6 +170,9 @@ if (mysqli_num_rows($result) > 0) {
                                                                 extraData += "&adv_two_paid_" + empId + "=" + adv_two_paid;
                                                                 extraData += "&adv_one_paid_" + empId + "=" + adv_one;
                                                                 extraData += "&adv_two_" + empId + "=" + adv_two;
+                                                                extraData += "&advance_paid_by_bank_" + empId + "=" + advance_paid_by_bank;
+                                                                extraData += "&pf_amount_" + empId + "=" + pf_amount;
+                                                                extraData += "&esic_amount_" + empId + "=" + esic_amount;
                                                                 
                                                                 extraData += "&fa_" + empId + "=" + fa;
                                                                 extraData += "&ta_" + empId + "=" + ta;

@@ -145,6 +145,7 @@ switch ($action) {
                 "highlyskilled" => $_POST['highlyskilled'],
                 "ESI" => $_POST['ESI'],
                 "pf" => $_POST['pf'],
+                "ProvidentFund" => $_POST['ProvidentFund'],
                 "MedicalAllowance" => $_POST['MedicalAllowance'],
                 "MedicalAllowancePer" => $_POST['MedicalAllowancePer'],
                 "strBonus" => $_POST['strBonus'],
@@ -180,6 +181,7 @@ switch ($action) {
                 "highlyskilled" => $_POST['highlyskilled'],
                 "ESI" => $_POST['ESI'],
                 "pf" => $_POST['pf'],
+                "ProvidentFund" => $_POST['ProvidentFund'],
                 "MedicalAllowance" => $_POST['MedicalAllowance'],
                 "MedicalAllowancePer" => $_POST['MedicalAllowancePer'],
                 "strBonus" => $_POST['strBonus'],
@@ -1138,7 +1140,7 @@ switch ($action) {
                 }
                 
                 //$pf = $basicrate * 0.12;
-                $pf = $basicpf * 0.12;
+                $pf = $Company['ProvidentFund'] == 'YES' ? $basicpf * 0.12 : 0; // $pf = $basicpf * 0.12;
                 if($Company['iDailyWorkingRate'] > 0){
                     $iDailyWorkingRate = $Company['iDailyWorkingRate'];
                 } else {
@@ -1445,7 +1447,7 @@ switch ($action) {
         }
         $basicpf = $basicrate + $national_holiday_payment;
         //$pf = $basicrate * 0.12;
-        $pf = $basicpf * 0.12;
+        $pf = $Company['ProvidentFund'] == 'YES' ? $basicpf * 0.12 : 0; // $pf = $basicpf * 0.12;
         // $iBonusAmt = $basicrate * 0.0833;
         // $iLeaveAmt = $basicrate / 20;
         $iBonusAmt = 0;
@@ -1667,11 +1669,17 @@ switch ($action) {
         //echo $_POST['workingdays_'.$inc];
 
         if ($_POST['workingdays_' . $inc] != '') {
-            $otamt = (($_POST['rate_' . $inc] / 8) * $_POST['otrate_' . $inc]) * $_POST['othours_' . $inc];
+            $overtimeSelection = explode('|', $_POST['otrate_' . $inc]);
+            $overtimeMultiplier = isset($overtimeSelection[0]) ? (float) $overtimeSelection[0] : 0;
+            $overtimeHours = isset($overtimeSelection[1]) && (float) $overtimeSelection[1] > 0 ? (float) $overtimeSelection[1] : 8;
+            $otamt = (($_POST['rate_' . $inc] / $overtimeHours) * $overtimeMultiplier) * $_POST['othours_' . $inc];
             $PresentAmount = $_POST['workingdays_' . $inc] * $_POST['rate_' . $inc];
             $totalamt = $otamt + $PresentAmount;
             $totalAdv = $_POST['adv_' . $inc] + $_POST['adv_two_' . $inc];
-            $total = $totalamt - $totalAdv;
+            $advancePaidByBank = max(0, (float) $_POST['advance_paid_by_bank_' . $inc]);
+            $pfAmount = max(0, (float) $_POST['pf_amount_' . $inc]);
+            $esicAmount = max(0, (float) $_POST['esic_amount_' . $inc]);
+            $total = $totalamt - $totalAdv - $advancePaidByBank - $pfAmount - $esicAmount;
             $balance1 = $total + $_POST['fa_' . $inc] + $_POST['ta_' . $inc];
             $dataarray = array
                 (
@@ -1687,6 +1695,9 @@ switch ($action) {
                 "adv_one_paid" => $_POST['adv_one_paid_' . $inc],
                 "adv_two" => $_POST['adv_two_' . $inc],
                 "adv_two_paid" => $_POST['adv_two_paid_' . $inc],
+                "advance_paid_by_bank" => $advancePaidByBank,
+                "pf_amount" => $pfAmount,
+                "esic_amount" => $esicAmount,
                 "total" => $total,
                 "Fa" => $_POST['fa_' . $inc],
                 "Ta" => $_POST['ta_' . $inc],

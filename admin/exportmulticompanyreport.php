@@ -39,7 +39,7 @@ if (mysqli_num_rows($result) > 0) {
 
     $f = fopen('php://memory', 'w');
     //set column headers
-    $fields = array('Name','Rate', 'PresentDays', 'O.THours',  'PresentAmount','O.TAmount', 'TotalAmoun',  'Adv',  'Total', 'F.A.', 'T.A.',  'Balance',$HeaderCompany ,'Balance','BankName','Bank A/c No.','PaidDate');
+    $fields = array('Name','Rate', 'PresentDays', 'O.THours',  'PresentAmount','O.TAmount', 'TotalAmount',  'Adv',  'Total', 'Advance Paid By Bank', 'PF Amount', 'ESIC Amount', 'F.A.', 'T.A.',  'Balance',$HeaderCompany ,'Balance','BankName','Bank A/c No.','PaidDate');
     fputcsv($f, $fields, $delimiter);
     //output each row of the data, format line as csv and write to file pointer
 
@@ -133,6 +133,9 @@ exit;
             $row['totalamt'], 
             $row['adv'], 
             $row['total'], 
+            $row['advance_paid_by_bank'],
+            $row['pf_amount'],
+            $row['esic_amount'],
             $row['Fa'], 
             $row['Ta'], 
             $row['balance1'], 

@@ -170,11 +170,9 @@ while ($row = mysqli_fetch_assoc($result)) {
 
 //    $Total[0] = $bal2 + $Total[0];
     $CompanysTotal = '';
-    $companyIds = implode(',', array_map('intval', $comnymasid));
-    $statutoryAmounts = mysqli_fetch_array(mysqli_query($dbconn, "SELECT COALESCE(SUM(pf), 0) AS pfAmount, COALESCE(SUM(esi), 0) AS esicAmount FROM salarydetails WHERE isDelete=0 AND emp_id='" . $row['emp_id'] . "' AND salaryId IN (SELECT salarymasterId FROM salarymaster WHERE isDelete='0' AND istatus='1' AND month='" . $month . "' AND companymasterId IN (" . $companyIds . "))"));
-    $advPaidByBank = (float) $row['adv_one_paid'] + (float) $row['adv_two_paid'];
-    $pfAmount = (float) $statutoryAmounts['pfAmount'];
-    $esicAmount = (float) $statutoryAmounts['esicAmount'];
+    $advPaidByBank = (float) $row['advance_paid_by_bank'];
+    $pfAmount = (float) $row['pf_amount'];
+    $esicAmount = (float) $row['esic_amount'];
     $lineData = array(
         $desg['pfcode'],
         $desg['ecsno'],

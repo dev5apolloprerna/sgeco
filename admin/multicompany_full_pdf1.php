@@ -84,7 +84,7 @@ while ($rowapplication = mysqli_fetch_array($result)) {
     $Totaltotalamt += (float) $rowapplication['totalamt'];
     $Totaladv += (float) $rowapplication['adv'];
     $TotaladvTwo += (float) $rowapplication['adv_two'];
-    $advPaidByBank = (float) $rowapplication['adv_one_paid'] + (float) $rowapplication['adv_two_paid'];
+    $advPaidByBank = (float) $rowapplication['advance_paid_by_bank'];
     $TotalAdvPaidByBank += $advPaidByBank;
 
     $desg = mysqli_fetch_array(mysqli_query($dbconn, "SELECT * FROM `employee`  where isDelete='0' and employeeId='" . $rowapplication['emp_id'] . "'"));
@@ -103,9 +103,8 @@ while ($rowapplication = mysqli_fetch_array($result)) {
     $companymasterId = rtrim($companymasterId, ',');
 
     $companymasterId = rtrim($companymasterId, ", ");
-    $statutoryAmounts = mysqli_fetch_array(mysqli_query($dbconn, "SELECT COALESCE(SUM(pf), 0) AS pfAmount, COALESCE(SUM(esi), 0) AS esicAmount FROM salarydetails WHERE isDelete=0 AND emp_id='" . $rowapplication['emp_id'] . "' AND salaryId IN (SELECT salarymasterId FROM salarymaster WHERE isDelete='0' AND istatus='1' AND month='" . $month . "' AND companymasterId IN (" . $companymasterId . "))"));
-    $pfAmount = (float) $statutoryAmounts['pfAmount'];
-    $esicAmount = (float) $statutoryAmounts['esicAmount'];
+    $pfAmount = (float) $rowapplication['pf_amount'];
+    $esicAmount = (float) $rowapplication['esic_amount'];
     $TotalPfAmount += $pfAmount;
     $TotalEsicAmount += $esicAmount;
     $mailFormat_main = str_replace("#hedar#", ucfirst(urldecode($HeaderCompany)), $mailFormat_main);

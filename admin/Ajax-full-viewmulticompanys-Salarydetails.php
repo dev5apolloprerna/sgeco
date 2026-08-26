@@ -170,10 +170,9 @@ if ($_POST['action'] == 'ListUser') {
                                 </div>
                             </td>
                             <?php
-                            $advPaidByBank = (float) $rowfilter['adv_one_paid'] + (float) $rowfilter['adv_two_paid'];
-                            $statutoryAmounts = mysqli_fetch_array(mysqli_query($dbconn, "SELECT COALESCE(SUM(pf), 0) AS pfAmount, COALESCE(SUM(esi), 0) AS esicAmount FROM salarydetails WHERE isDelete=0 AND emp_id='" . $rowfilter['emp_id'] . "' AND salaryId IN (SELECT salarymasterId FROM salarymaster WHERE isDelete='0' AND istatus='1' AND month='" . $month . "' AND companymasterId IN (" . $companymasterId . "))"));
-                            $pfAmount = (float) $statutoryAmounts['pfAmount'];
-                            $esicAmount = (float) $statutoryAmounts['esicAmount'];
+                            $advPaidByBank = (float) $rowfilter['advance_paid_by_bank'];
+                            $pfAmount = (float) $rowfilter['pf_amount'];
+                            $esicAmount = (float) $rowfilter['esic_amount'];
                             $TotalAdvPaidByBank += $advPaidByBank;
                             $TotalPfAmount += $pfAmount;
                             $TotalEsicAmount += $esicAmount;

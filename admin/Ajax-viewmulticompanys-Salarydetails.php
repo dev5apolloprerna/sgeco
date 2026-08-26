@@ -50,8 +50,11 @@ if ($_POST['action'] == 'ListUser') {
                     <th class="all">Present Amount</th>
                     <th class="desktop">O.T.Amount</th>
                     <th class="desktop">Total Amt</th>
-                   <th class="desktop">ADV</th>
+                    <th class="desktop">ADV</th>
                     <th class="desktop">Total</th>
+                    <th class="desktop">Advance Paid By Bank</th>
+                    <th class="desktop">PF Amount</th>
+                    <th class="desktop">ESIC Amount</th>
                     <th class="desktop">F.A</th>
                     <th class="desktop">T.A</th>
                     <th class="all">Balance</th>                                 
@@ -59,7 +62,7 @@ if ($_POST['action'] == 'ListUser') {
             </thead>
             <tbody>
                 <?php
-                     $Total=array(0,0,0,0);
+                     $Total=array(0,0,0,0,0,0,0);
                 while ($rowfilter = mysqli_fetch_array($resultfilter)) {
                     ?>
                     <tr>
@@ -115,6 +118,9 @@ if ($_POST['action'] == 'ListUser') {
                             ?>                                 
                             </div>
                         </td>
+                        <td><div class="form-group form-md-line-input "><?php echo $rowfilter['advance_paid_by_bank']; $Total[4] = $rowfilter['advance_paid_by_bank'] + $Total[4]; ?></div></td>
+                        <td><div class="form-group form-md-line-input "><?php echo $rowfilter['pf_amount']; $Total[5] = $rowfilter['pf_amount'] + $Total[5]; ?></div></td>
+                        <td><div class="form-group form-md-line-input "><?php echo $rowfilter['esic_amount']; $Total[6] = $rowfilter['esic_amount'] + $Total[6];?></div></td>
                         <td>
                             <div class="form-group form-md-line-input "><?php echo $rowfilter['Fa']; 
                               $Total[1] = $rowfilter['Fa'] + $Total[1];
@@ -151,8 +157,11 @@ if ($_POST['action'] == 'ListUser') {
             <td></td>
             <td></td>
             <td></td>
-             <td></td>
+            <td></td>
             <td><?php echo $Total[0]; ?></td>
+            <td><?php echo $Total[4]; ?></td>
+            <td><?php echo $Total[5]; ?></td>
+            <td><?php echo $Total[6]; ?></td>
             <td><?php echo $Total[1]; ?></td>
             <td><?php echo $Total[2]; ?></td>           
             <td><?php echo $Total[3]; ?></td>
