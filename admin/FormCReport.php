@@ -76,8 +76,12 @@ function renderFormCHtml(array $employees, $salaryMonth, $companyName)
     $serialNumber = 1;
     $rows = '';
     foreach ($employees as $employeeName) {
-        $cells = '<td>' . $serialNumber . '</td><td class="name-cell">' . htmlspecialchars($employeeName, ENT_QUOTES, 'UTF-8') . '</td>';
-        $cells .= str_repeat('<td>NIL</td>', 11);
+        // TCPDF calculates each TBODY independently from the repeated THEAD.
+        // Repeat the statutory column widths on every data row so employee
+        // cells remain directly below their headings on every PDF page.
+        $cells = '<td width="6%">' . $serialNumber . '</td>';
+        $cells .= '<td class="name-cell" width="28%">' . htmlspecialchars($employeeName, ENT_QUOTES, 'UTF-8') . '</td>';
+        $cells .= str_repeat('<td width="6%">NIL</td>', 11);
         // Mark every employee as an indivisible PDF row. The shared PDF
         // formatter adds TCPDF's nobr attribute to data rows so a wrapped name
         // cannot be split above the repeated table heading on the next page.
@@ -85,7 +89,8 @@ function renderFormCHtml(array $employees, $salaryMonth, $companyName)
         $serialNumber++;
     }
     if (!$employees) {
-        $rows = '<tr class="data-row">' . str_repeat('<td>NIL</td>', 13) . '</tr>';
+        $rows = '<tr class="data-row"><td width="6%">NIL</td><td class="name-cell" width="28%">NIL</td>'
+            . str_repeat('<td width="6%">NIL</td>', 11) . '</tr>';
     }
     $firstSection = strpos($template, $matches[0]);
 
