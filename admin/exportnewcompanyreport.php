@@ -11,16 +11,17 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 //$connect = new connect();
 //get records from database
 
-// The report is tab-delimited, so Excel otherwise imports whole decimal amounts
-// as General numbers and hides their trailing zeroes.  Returning a numeric
-// formula keeps the requested two-decimal display when the file is opened.
+// Return a real number. The workbook applies an Excel number format later, so
+// amounts retain two decimal places without becoming text-only formula values.
 function formatCompanyReportExcelAmount($amount)
 {
-    return '="' . number_format((float)$amount, 2, '.', '') . '"';
+    return (float)$amount;
 }
 
 
@@ -530,6 +531,7 @@ if (mysqli_num_rows($query1) > 0) {
     $sheet = $spreadsheet->getActiveSheet();
     $sheet->setTitle('Company Report');
     $sheet->fromArray($reportRows, null, 'A1', true);
+    $sheet->getParent()->getDefaultStyle()->getFont()->setName('Arial')->setSize(9);
 
     $lastRow = count($reportRows);
     $lastColumnNumber = 28;
@@ -605,12 +607,13 @@ if (mysqli_num_rows($query1) > 0) {
     $sheet->getStyle('D3:H5')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
     $sheet->getStyle('L3:N5')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
     $sheet->getStyle('D7:D9')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-    $sheet->getStyle('D3:H5')->getBorders()->getOutline()->setBorderStyle(Border::BORDER_THIN);
-    $sheet->getStyle('L3:N5')->getBorders()->getOutline()->setBorderStyle(Border::BORDER_THIN);
-    $sheet->getStyle('P3:V5')->getBorders()->getOutline()->setBorderStyle(Border::BORDER_THIN);
-    $sheet->getStyle('D7:H9')->getBorders()->getOutline()->setBorderStyle(Border::BORDER_THIN);
-    $sheet->getStyle('L9:N9')->getBorders()->getOutline()->setBorderStyle(Border::BORDER_THIN);
-    $sheet->getStyle('P9:V9')->getBorders()->getOutline()->setBorderStyle(Border::BORDER_THIN);
+    // Use real cell borders for every header block so the layout remains a table
+    // when gridlines are hidden or the report is printed.
+    foreach (array('D3:H5', 'L3:N5', 'P3:V5', 'D7:H9', 'L9:N9', 'P9:V9') as $headerBlock) {
+        $sheet->getStyle($headerBlock)->getBorders()->getAllBorders()
+            ->setBorderStyle(Border::BORDER_THIN)
+            ->getColor()->setRGB('000000');
+    }
     $sheet->getRowDimension(3)->setRowHeight(24);
     $sheet->getRowDimension(4)->setRowHeight(24);
     $sheet->getRowDimension(5)->setRowHeight(24);
@@ -658,19 +661,35 @@ if (mysqli_num_rows($query1) > 0) {
         ->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('D9EAF7');
     $sheet->getStyle('A1:' . $lastColumn . ($headerRow - 1))->getAlignment()->setWrapText(true);
 
-    for ($column = 1; $column <= $lastColumnNumber; $column++) {
-        $columnLetter = Coordinate::stringFromColumnIndex($column);
-        $sheet->getColumnDimension($columnLetter)->setWidth($column >= 3 && $column <= 4 ? 24 : 14);
+    // Preserve payroll values as numbers and display them consistently. This also
+    // keeps totals usable for filtering and calculations in the downloaded file.
+    $sheet->getStyle('F' . ($headerRow + 1) . ':Z' . $lastRow)
+        ->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
+    $sheet->getStyle('A' . ($headerRow + 1) . ':' . $lastColumn . $lastRow)
+        ->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+
+    $columnWidths = array(
+        'A' => 8, 'B' => 12, 'C' => 25, 'D' => 24, 'E' => 11, 'F' => 14,
+        'G' => 11, 'H' => 14, 'I' => 10, 'J' => 10, 'K' => 14, 'L' => 11,
+        'M' => 11, 'N' => 12, 'O' => 14, 'P' => 12, 'Q' => 12, 'R' => 12,
+        'S' => 13, 'T' => 11, 'U' => 11, 'V' => 11, 'W' => 11, 'X' => 14,
+        'Y' => 14, 'Z' => 18, 'AA' => 30, 'AB' => 15,
+    );
+    foreach ($columnWidths as $columnLetter => $columnWidth) {
+        $sheet->getColumnDimension($columnLetter)->setWidth($columnWidth);
     }
     $sheet->getRowDimension($headerRow)->setRowHeight(45);
     $sheet->getRowDimension($groupHeaderRow)->setRowHeight(22);
     $sheet->freezePane('A' . ($headerRow + 1));
     $sheet->setAutoFilter('A' . $headerRow . ':' . $lastColumn . ($lastRow - 1));
     $sheet->setShowGridlines(false);
-    $sheet->getPageSetup()->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_LANDSCAPE);
+    $sheet->getSheetView()->setZoomScale(70);
+    $sheet->getPageSetup()->setOrientation(PageSetup::ORIENTATION_LANDSCAPE);
+    $sheet->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_A3);
     $sheet->getPageSetup()->setFitToWidth(1)->setFitToHeight(0);
     $sheet->getPageSetup()->setRowsToRepeatAtTopByStartAndEnd($groupHeaderRow, $headerRow);
     $sheet->getPageMargins()->setTop(0.3)->setRight(0.3)->setBottom(0.3)->setLeft(0.3);
+    $sheet->getPageSetup()->setHorizontalCentered(true);
     $sheet->getPageSetup()->setPrintArea('A1:' . $lastColumn . $lastRow);
 
     $filename = 'companyreport_' . date('Y-m-d_H-i-s') . '.xlsx';
