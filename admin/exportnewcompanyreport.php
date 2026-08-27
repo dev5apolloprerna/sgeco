@@ -512,7 +512,6 @@ if (mysqli_num_rows($query1) > 0) {
         . "\t" . ""
         . "\t" . ""
         . "\t" . ""
-        . "\t" . ""
         . "\t" . $Total[23]
         . "\t" . number_format($Total[24], 2, '.', '')
         . "\t" . number_format($Total[15], 2, '.', '')
