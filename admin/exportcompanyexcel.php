@@ -13,7 +13,6 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -526,8 +525,7 @@ $sheet->getStyle($tableRange)->applyFromArray(array(
     'alignment' => array('vertical' => Alignment::VERTICAL_CENTER),
 ));
 $sheet->getStyle('A' . $headerRow . ':' . $lastColumn . $headerRow)->applyFromArray(array(
-    'font' => array('bold' => true, 'color' => array('rgb' => 'FFFFFF')),
-    'fill' => array('fillType' => Fill::FILL_SOLID, 'startColor' => array('rgb' => '4472C4')),
+    'font' => array('bold' => true),
     'alignment' => array(
         'horizontal' => Alignment::HORIZONTAL_CENTER,
         'vertical' => Alignment::VERTICAL_CENTER,
@@ -540,8 +538,7 @@ $sheet->getRowDimension($headerRow)->setRowHeight(48);
 $sheet->mergeCells('A' . $summaryTitleRow . ':F' . $summaryTitleRow);
 $sheet->setCellValue('A' . $summaryTitleRow, 'SUMMARY');
 $sheet->getStyle('A' . $summaryTitleRow . ':F' . $summaryTitleRow)->applyFromArray(array(
-    'font' => array('bold' => true, 'size' => 12, 'color' => array('rgb' => 'FFFFFF')),
-    'fill' => array('fillType' => Fill::FILL_SOLID, 'startColor' => array('rgb' => '4472C4')),
+    'font' => array('bold' => true, 'size' => 12),
     'alignment' => array('horizontal' => Alignment::HORIZONTAL_CENTER),
 ));
 $sheet->getStyle('A' . $summaryHeaderRow . ':F' . $summaryLastRow)->applyFromArray(array(
