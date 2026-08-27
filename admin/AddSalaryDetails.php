@@ -20,6 +20,23 @@ if (mysqli_num_rows($result) > 0) {
         <title><?php echo $ProjectName; ?> | Add Salary Details</title>
         <?php include_once 'include.php'; ?>
         <link href="<?php echo $web_url; ?>admin/assets/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker.css" rel="stylesheet" type="text/css" />
+        <style>
+            #PlaceUsersDataHere {
+                max-height: 65vh;
+                overflow: auto;
+            }
+
+            #PlaceUsersDataHere #tableC {
+                margin-bottom: 0;
+            }
+
+            #PlaceUsersDataHere #tableC thead th {
+                position: sticky;
+                top: 0;
+                z-index: 2;
+                background: #658397; 
+            }
+        </style>
     </head>
     <body class="page-container-bg-solid page-boxed">
         <?php include_once './header.php'; ?>
