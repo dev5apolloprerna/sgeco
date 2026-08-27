@@ -1688,16 +1688,15 @@ switch ($action) {
             $advancePaidByBank = $storedAdvance > 0
                 ? $storedAdvance
                 : max(0, (float) $_POST['advance_paid_by_bank_' . $inc]);
-            // Multi-company deductions are calculated here rather than trusting the
-            // values displayed by the browser.  The old implementation accepted the
-            // two fields' default value (zero), so enabling PF/ESIC on the salary
-            // master did not actually deduct anything unless a user calculated and
-            // entered the amounts manually.
+            // Keep the entry and saved totals aligned with the Excel/PDF reports,
+            // which roll up deductions already calculated for the selected companies.
+            $salaryDeductions = getMultiCompanyReportDeductions($dbconn, $_POST['companysalarymasterId']);
+            $employeeDeductions = getEmployeeMultiCompanyReportDeductions($salaryDeductions, $inc);
             $pfAmount = $salaryMaster && $salaryMaster['DeductPF'] == 'YES'
-                ? round(max(0, (float) $PresentAmount) * 0.12, 2)
+                ? $employeeDeductions['pf']
                 : 0;
             $esicAmount = $salaryMaster && $salaryMaster['DeductESIC'] == 'YES'
-                ? round(max(0, (float) $totalamt) * 0.0075, 2)
+                ? $employeeDeductions['esic']
                 : 0;
             $total = $totalamt - $totalAdv - $advancePaidByBank - $pfAmount - $esicAmount;
             $balance1 = $total + $_POST['fa_' . $inc] + $_POST['ta_' . $inc];
