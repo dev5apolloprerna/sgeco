@@ -4,6 +4,14 @@
 include('../config.php');
 include('IsLogin.php');
 include_once 'companyReportAdvance.php';
+require_once '../vendor/autoload.php';
+
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 //$connect = new connect();
 //get records from database
 
@@ -512,13 +520,78 @@ $lineOne .='Sr. No'
     . "\t" . ""
     . "\n";
     
-$filename = 'companyreport' . date('Y-m-d H:i:s') . '.xls';
-header("Content-Type: application/vnd.ms-excel; charset=utf-8");
-header("Content-disposition: attachment; filename=" . $filename);
-ob_end_clean();
-echo chr(255) . chr(254) .mb_convert_encoding($lineOne, 'UTF-16LE', 'UTF-8');
-echo chr(255) . chr(254) .mb_convert_encoding($data, 'UTF-16LE', 'UTF-8');
-echo chr(255) . chr(254) .mb_convert_encoding($lastLine, 'UTF-16LE', 'UTF-8');
+$reportRows = array();
+$reportText = rtrim($lineOne . $data . $lastLine, "\r\n");
+foreach (preg_split('/\r\n|\r|\n/', $reportText) as $reportLine) {
+    $reportRows[] = explode("\t", $reportLine);
+}
+
+$spreadsheet = new Spreadsheet();
+$sheet = $spreadsheet->getActiveSheet();
+$sheet->setTitle('Company Report');
+$sheet->fromArray($reportRows, null, 'A1', true);
+
+$lastRow = count($reportRows);
+$lastColumnNumber = 28;
+$lastColumn = Coordinate::stringFromColumnIndex($lastColumnNumber);
+$headerRow = 1;
+foreach ($reportRows as $rowIndex => $reportRow) {
+    if (isset($reportRow[0]) && trim($reportRow[0]) === 'Sr. No') {
+        $headerRow = $rowIndex + 1;
+        break;
+    }
+}
+
+// Draw a clear, printable table instead of relying on Excel's worksheet gridlines.
+$tableRange = 'A' . ($headerRow - 1) . ':' . $lastColumn . $lastRow;
+$sheet->getStyle($tableRange)->applyFromArray(array(
+    'borders' => array(
+        'allBorders' => array(
+            'borderStyle' => Border::BORDER_THIN,
+            'color' => array('rgb' => '000000'),
+        ),
+    ),
+    'alignment' => array(
+        'vertical' => Alignment::VERTICAL_CENTER,
+    ),
+));
+$sheet->getStyle('A' . $headerRow . ':' . $lastColumn . $headerRow)->applyFromArray(array(
+    'font' => array('bold' => true, 'color' => array('rgb' => 'FFFFFF')),
+    'fill' => array('fillType' => Fill::FILL_SOLID, 'startColor' => array('rgb' => '1F4E78')),
+    'alignment' => array(
+        'horizontal' => Alignment::HORIZONTAL_CENTER,
+        'vertical' => Alignment::VERTICAL_CENTER,
+        'wrapText' => true,
+    ),
+));
+$sheet->getStyle('A' . $lastRow . ':' . $lastColumn . $lastRow)->getFont()->setBold(true);
+$sheet->getStyle('A' . $lastRow . ':' . $lastColumn . $lastRow)
+    ->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('D9EAF7');
+$sheet->getStyle('A1:' . $lastColumn . ($headerRow - 1))->getAlignment()->setWrapText(true);
+
+for ($column = 1; $column <= $lastColumnNumber; $column++) {
+    $columnLetter = Coordinate::stringFromColumnIndex($column);
+    $sheet->getColumnDimension($columnLetter)->setWidth($column >= 3 && $column <= 4 ? 24 : 14);
+}
+$sheet->getRowDimension($headerRow)->setRowHeight(45);
+$sheet->freezePane('A' . ($headerRow + 1));
+$sheet->setAutoFilter('A' . $headerRow . ':' . $lastColumn . ($lastRow - 1));
+$sheet->setShowGridlines(false);
+$sheet->getPageSetup()->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_LANDSCAPE);
+$sheet->getPageSetup()->setFitToWidth(1)->setFitToHeight(0);
+$sheet->getPageMargins()->setTop(0.3)->setRight(0.3)->setBottom(0.3)->setLeft(0.3);
+$sheet->getPageSetup()->setPrintArea('A1:' . $lastColumn . $lastRow);
+
+$filename = 'companyreport_' . date('Y-m-d_H-i-s') . '.xlsx';
+header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+header('Content-Disposition: attachment; filename="' . $filename . '"');
+header('Cache-Control: max-age=0');
+while (ob_get_level() > 0) {
+    ob_end_clean();
+}
+(new Xlsx($spreadsheet))->save('php://output');
+$spreadsheet->disconnectWorksheets();
+exit;
 }else {
     header('location: Report.php');
 } ?>
