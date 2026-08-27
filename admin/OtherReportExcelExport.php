@@ -291,7 +291,7 @@ function extractFormXXIIDetails($html)
         foreach ($xpath->query('./td', $row) as $cell) {
             if (count($values) === 8) {
                 $parts = array();
-                foreach ($xpath->query('.//table[contains(@class, "installments")]/tr/td', $cell) as $instalment) {
+                foreach ($xpath->query('.//*[contains(concat(" ", normalize-space(@class), " "), " installment-entry ")]', $cell) as $instalment) {
                     $dateNode = $xpath->query('.//span[contains(@class, "installment-date")]', $instalment)->item(0);
                     $date = $dateNode ? trim($dateNode->textContent) : '';
                     $text = trim(preg_replace('/\s+/', ' ', $instalment->textContent));

@@ -144,22 +144,20 @@ function renderFormXXIIHtml(array $employees, $salaryMonth, $companyName)
         };
         $lastDate = formXXIIFormatDate($employee['last_advance_date']);
         $wageTotal = (float) $employee['workingdays'] * (float) $employee['wage_rate'];
-        $wages = formXXIIFormatNumber($employee['workingdays']) . ' Days &times; Rs. '
-            . formXXIIFormatNumber($employee['wage_rate']) . ' = Rs. '
-            . formXXIIFormatNumber($wageTotal) . '/-';
+        $wages = 'Rs. ' . formXXIIFormatNumber($wageTotal) . '/-';
         $advance = $lastDate === '' ? '' : $lastDate . '<br>Rs. '
             . formXXIIFormatNumber($employee['advance_total']) . '/-';
         $instalments = '';
-        $purposes = array();
+        
         foreach ($employee['instalments'] as $instalment) {
-            $instalments .= '<tr><td><span class="installment-date">'
-                . $esc(formXXIIFormatDate($instalment['date'])) . '</span>Rs. '
-                . $esc(formXXIIFormatNumber($instalment['amount'])) . '/-</td></tr>';
-            if ($instalment['purpose'] !== '') {
-                $purposes[$instalment['purpose']] = true;
-            }
+            // Avoid a nested table here: TCPDF paints its cell edges grey and
+            // can drop block-level span text. A simple div reliably prints
+            // both the date and amount without adding internal borders.
+            $instalments .= '<div class="installment-entry"><span class="installment-date">'
+                . $esc(formXXIIFormatDate($instalment['date'])) . '</span><br>Rs. '
+                . $esc(formXXIIFormatNumber($instalment['amount'])) . '/-</div>';
         }
-        $purpose = implode(' / ', array_keys($purposes));
+        $purpose = 'Personal / Food Allowance';
         $rows .= '<tr class="data-row">'
             . '<td width="' . $columnWidths[0] . '" class="center">' . ($index + 1) . '</td>'
             . '<td width="' . $columnWidths[1] . '" class="left">' . $esc($employee['emp_name']) . '</td>'
@@ -169,7 +167,7 @@ function renderFormXXIIHtml(array $employees, $salaryMonth, $companyName)
             . '<td width="' . $columnWidths[5] . '" class="center">' . $advance . '</td>'
             . '<td width="' . $columnWidths[6] . '" class="center">' . $esc($purpose) . '</td>'
             . '<td width="' . $columnWidths[7] . '" class="center">' . count($employee['instalments']) . '</td>'
-            . '<td width="' . $columnWidths[8] . '"><table class="installments">' . $instalments . '</table></td>'
+            . '<td width="' . $columnWidths[8] . '" class="installments">' . $instalments . '</td>'
             . '<td width="' . $columnWidths[9] . '" class="center">' . $esc($lastDate) . '</td>'
             . '<td width="' . $columnWidths[10] . '"></td></tr>';
     }
