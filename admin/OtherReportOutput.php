@@ -91,7 +91,7 @@ function configureOtherReportPdfTableHeader($html, $repeatTableHeaders)
     libxml_use_internal_errors($previous);
 
     $xpath = new DOMXPath($document);
-    
+
     // TCPDF treats every THEAD as a repeatable page header.  The report also
     // contains layout tables for the statutory form and establishment
     // details; those are document headings, not continuation-page headings.
@@ -329,7 +329,7 @@ function addFormXXPdfFormatting($html)
         . '.header-table, .header-table td, .header-table div, .header-table span {'
         . 'font-weight: normal;'
         . '}'
-         . '.header-table .info-label strong, .header-table .form-number strong,'
+        . '.header-table .info-label strong, .header-table .form-number strong,'
         . '.header-table .month-label strong, .header-table .right-line strong,'
         . '.main-title strong, .work-title {'
         . 'font-weight: bold;'
@@ -505,10 +505,8 @@ function addFormCPdfFormatting($html)
         '$1',
         $html
     );
-
-    // Give TCPDF an explicit table width and zero HTML cell spacing. CSS-only
-    // table sizing can be recalculated when THEAD is repeated, causing the
-    // continuation-page heading to be a few pixels wider than its body.
+    // Give TCPDF an explicit table width and zero HTML cell spacing so the
+    // register keeps the same grid across automatic page breaks.
     $html = preg_replace(
         '/<table class="register-table"([^>]*)>/i',
         '<table class="register-table" width="100%" cellspacing="0" cellpadding="0"$1>',
@@ -516,25 +514,13 @@ function addFormCPdfFormatting($html)
         1
     );
 
-    // Only the register's column headings belong in THEAD. TCPDF repeats this
-    // row group after an automatic page break while leaving the legal form
-    // title and establishment details on the first page.
-    $html = preg_replace(
-        '/<tbody class="register-heading">(.*?)<\/tbody>/is',
-        '<thead class="register-heading">$1</thead>',
-        $html,
-        1
-    );
-
-    
-    // A repeated THEAD is laid out independently by TCPDF on every new page.
-    // If only its first row has widths, TCPDF can recalculate the numbered row
-    // as thirteen equal columns and shift the headings away from the body
-    // grid. Stamp the statutory 6/28/6... grid on both heading rows so every
-    // continuation page starts at exactly the same column boundaries.
+    // Keep the headings in TBODY. TCPDF automatically repeats THEAD groups on
+    // continuation pages, but this report must show its column header only on
+    // the first page. Stamp the statutory grid directly on both heading rows
+    // so the first-page heading still aligns with every body row.
     $registerColumnWidths = array(6, 28, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6);
     $html = preg_replace_callback(
-        '/<thead class="register-heading">(.*?)<\/thead>/is',
+        '/<tbody class="register-heading">(.*?)<\/tbody>/is',
         function ($headingMatch) use ($registerColumnWidths) {
             $heading = preg_replace_callback(
                 '/<tr\b([^>]*)>(.*?)<\/tr>/is',
@@ -555,12 +541,12 @@ function addFormCPdfFormatting($html)
                 },
                 $headingMatch[1]
             );
-            return '<thead class="register-heading">' . $heading . '</thead>';
+            return '<tbody class="register-heading">' . $heading . '</tbody>';
         },
         $html,
         1
     );
-    
+
     // TCPDF does not reliably use the colgroup widths. Put the four header
     // column widths directly on the live cells and remove the invalid colspan
     // from the fourth cell so the row remains a four-column grid.

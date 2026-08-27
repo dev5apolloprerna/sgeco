@@ -9,12 +9,11 @@ require_once('OtherReportOutput.php');
 try {
     // $html = addOtherReportPdfSpacing(getFormCRequestData($dbconn));
     $html = addFormCPdfFormatting(
-        // Keep the register as one flowing table. TCPDF will repeat its
-        // promoted THEAD, but not the Form C title and establishment details.
-        // Use the same horizontal padding as the repeated header cells.
-        // TCPDF lays a repeated THEAD out separately on continuation pages;
-        // differing header/body padding makes their percentage grids drift.
-        addOtherReportPdfSpacing(getFormCRequestData($dbconn), true, '5px 2px')
+        // Keep the register as one flowing table without promoting its column
+        // headings to THEAD; TCPDF would otherwise repeat them on every page.
+        // Keep the same horizontal padding in heading and body cells so their
+        // percentage grids remain aligned.
+        addOtherReportPdfSpacing(getFormCRequestData($dbconn), false, '5px 2px')
     );
 } catch (Exception $exception) {
     ob_clean();

@@ -60,10 +60,13 @@ while ($rowapplication = mysqli_fetch_array($result)) {
     $mailFormat = str_replace("#Serial_of_in_the_register_of_workman#", (('')), $mailFormat);
     $mailFormat = str_replace("#Designation_Nature_of_work_done#", isset($desg['designation']) ? $desg['designation'] : "" , $mailFormat);
     $mailFormat = str_replace("#No_of_Days_Worked#", (((int)$rowapplication['workingdays'])), $mailFormat);
-    $mailFormat = str_replace("#Rate_of_Daily_work_done#", (((int)$rowapplication['skillrate'])), $mailFormat);
-    $mailFormat = str_replace("#othours#", (((int)$rowapplication['othours'])), $mailFormat);
+    // $mailFormat = str_replace("#Rate_of_Daily_work_done#", (((int)$rowapplication['skillrate'])), $mailFormat);
+    $mailFormat = str_replace("#Rate_of_Daily_work_done#", number_format((float)$rowapplication['skillrate'], 2, '.', ''), $mailFormat);
+    //$mailFormat = str_replace("#othours#", (((int)$rowapplication['othours'])), $mailFormat);
+    $mailFormat = str_replace("#othours#", number_format((float)$rowapplication['othours'], 2, '.', ''), $mailFormat);
     $mailFormat = str_replace("#Price_Rate#", (('')), $mailFormat);
-    $mailFormat = str_replace("#Amount_of_Wages#", (((int)$rowapplication['basicwages'])), $mailFormat);
+    // $mailFormat = str_replace("#Amount_of_Wages#", (((int)$rowapplication['basicwages'])), $mailFormat);
+    $mailFormat = str_replace("#Amount_of_Wages#", number_format((float)$rowapplication['basicwages'], 2, '.', ''), $mailFormat);
     $mailFormat = str_replace("#Of_Wages_Erned#", ((($rowapplication['totalovertime'] != '') ? (int)$rowapplication['totalovertime'] : '')), $mailFormat);
     $mailFormat = str_replace("#MedicalAllowanceamt#", (((int)$rowapplication['MedicalAllowanceamt'])), $mailFormat);
 
@@ -118,8 +121,10 @@ while ($rowapplication = mysqli_fetch_array($result)) {
 $mailFormat_main = str_replace("#newform_tr#", (($mailFormat_rows)), $mailFormat_main);
 $mailFormat_main = str_replace("#total#", ((number_format((int)$Total[0],2))), $mailFormat_main);
 $mailFormat_main = str_replace("#totalDay#", (((int)$Total[6])), $mailFormat_main);
-$mailFormat_main = str_replace("#TotalOTHours#", (((int)$Total[8])), $mailFormat_main);
-$mailFormat_main = str_replace("#basic#", (((int)$Total[7])), $mailFormat_main);
+// $mailFormat_main = str_replace("#TotalOTHours#", (((int)$Total[8])), $mailFormat_main);
+$mailFormat_main = str_replace("#TotalOTHours#", number_format((float)$Total[8], 2, '.', ''), $mailFormat_main);
+// $mailFormat_main = str_replace("#basic#", (((int)$Total[7])), $mailFormat_main);
+$mailFormat_main = str_replace("#basic#", number_format((float)$Total[7], 2, '.', ''), $mailFormat_main);
 $mailFormat_main = str_replace("#OTPay#", (((int)$Total[9])), $mailFormat_main);
 
 $mailFormat_main = str_replace("#TotalDA#", (((int)$Total[10])), $mailFormat_main);

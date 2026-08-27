@@ -30,6 +30,15 @@ try {
         $month,
         getBonusFormCCompanyName($dbconn, $companyId)
     );
+    // TCPDF automatically repeats THEAD on continuation pages. The statutory
+    // heading is required only once in this export, so retain the same rows
+    // and styling in a non-repeating TBODY group.
+    $html = preg_replace(
+        '/<thead>(.*?)<\/thead>/is',
+        '<tbody class="register-heading">$1</tbody>',
+        $html,
+        1
+    );
     $html = rightAlignOtherReportAmountColumns($html);
     // Column widths are defined once by renderBonusFormCHtml() and applied to
     // its colgroup, headers, numbering row, and every body cell. Do not replace
@@ -41,9 +50,8 @@ try {
         '<table class="main" border="1" cellspacing="0" cellpadding="3">',
         $html
     );
-    // The renderer places only the three column-heading rows in THEAD, so
-    // TCPDF repeats the table head without repeating the report title/details.
-    // Keep the legal header as a separate table above `.main` for that reason.
+    // Keep the legal header as a separate table above `.main` while the
+    // non-repeating column-heading group remains part of the register table.
     $html = str_replace(
         '</style>',
         '.main{width:100%;table-layout:fixed}.main th{font-weight:bold!important}' .

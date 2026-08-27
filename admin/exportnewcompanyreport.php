@@ -7,6 +7,13 @@ include_once 'companyReportAdvance.php';
 //$connect = new connect();
 //get records from database
 
+// The report is tab-delimited, so Excel otherwise imports whole decimal amounts
+// as General numbers and hides their trailing zeroes.  Returning a numeric
+// formula keeps the requested two-decimal display when the file is opened.
+function formatCompanyReportExcelAmount($amount)
+{
+    return '="' . number_format((float)$amount, 2, '.', '') . '"';
+}
 
 
 //$query = mysqli_fetch_array(mysqli_query($dbconn, "SELECT * FROM `salarydetails` where  companyId='" . $_REQUEST['Company'] . "' and salaryId='" . $_REQUEST['salarymasterId'] . "'  and  isDelete='0'  and  istatus='1'and workingdays > 0 order by salarydetailsId asc"));
@@ -413,7 +420,7 @@ $lineOne .='Sr. No'
         if(isset($desg['designation']) && $desg['designation'] !=""){
             $designation = ucwords(strtolower($desg['designation']));
         }
-        $othours = ($row['othours'] != '0.00') ? $row['othours'] : '';
+        $othours = ($row['othours'] != '0.00') ? formatCompanyReportExcelAmount($row['othours']) : ''; // $othours = ($row['othours'] != '0.00') ? $row['othours'] : '';
         $da = ($row['da'] != '0.00') ? $row['da'] : '';
         $hra = ($row['hra'] != '0.00') ? $row['hra'] : '';
         $iBonusAmt = ($row['iBonusAmt'] != '0.00') ? $row['iBonusAmt'] : '';
@@ -425,9 +432,9 @@ $lineOne .='Sr. No'
             . "\t" . $emp_name
             . "\t" . $designation
             . "\t" . $row['workingdays']
-            . "\t" . $row['skillrate']
+            . "\t" . formatCompanyReportExcelAmount($row['skillrate']) // . "\t" . $row['skillrate']
             . "\t" . $othours
-            . "\t" . $row['basicwages']
+            . "\t" . formatCompanyReportExcelAmount($row['basicwages']) // . "\t" . $row['basicwages']
             // '',
             . "\t" . $da
             . "\t" . $hra
@@ -453,7 +460,7 @@ $lineOne .='Sr. No'
             . "\n";
         $Total[4] += $row['workingdays'];
         $Total[5] += $row['skillrate'];
-        $Total[6] += (int)$row['othours'];
+        $Total[6] += (float)$row['othours']; // $Total[6] += (int)$row['othours'];
         $Total[7] += $row['basicwages'];
         $Total[10] += (int)$row['totalovertime'];
         $Total[14] += $row['total'];
@@ -480,8 +487,8 @@ $lineOne .='Sr. No'
     . "\t" . ""
     . "\t" . $Total[4]
     . "\t" . ""
-    . "\t" . ""
-    . "\t" . $Total[7]
+    . "\t" . formatCompanyReportExcelAmount($Total[6]) // . "\t" . ""
+    . "\t" . formatCompanyReportExcelAmount($Total[7]) // . "\t" . $Total[7]
     . "\t" . $Total[9]
     . "\t" . $Total[11]
     . "\t" . round($Total[10])
