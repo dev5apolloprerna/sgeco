@@ -96,14 +96,7 @@ function renderFormXXIHtml(array $employees, $salaryMonth, $companyName)
         throw new RuntimeException('The Form XXI template has an unexpected format.');
     }
 
-    $columnNumberRow = '';
-    if (preg_match('/<tr class="column-number-row">.*?<\/tr>/s', $matches[2], $numberRowMatch)) {
-        $columnNumberRow = $numberRowMatch[0];
-    }
-    if ($columnNumberRow === '') {
-        throw new RuntimeException('The Form XXI column-number row could not be found.');
-    }
-
+    
     $sectionPrefix = formXXIApplyMonth($matches[1], $salaryMonth);
     $sectionSuffix = $matches[3];
     // $period = DateTime::createFromFormat('!m/Y', $salaryMonth);
@@ -117,7 +110,7 @@ function renderFormXXIHtml(array $employees, $salaryMonth, $companyName)
 
     // Keep the report header in a single section. The register table may flow
     // onto additional PDF pages, but the form details must not be duplicated.
-    $rows = $columnNumberRow;
+    $rows = '';
     $serialNumber = 1;
     foreach ($employees as $employee) {
         $dynamicCells = array(
