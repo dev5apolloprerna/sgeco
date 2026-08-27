@@ -7,8 +7,7 @@ require_once('OtherReportOutput.php');
 
 try {
     $html = addFormXXIIPdfFormatting(
-        // Repeat only the register table's THEAD on continuation pages.
-        addOtherReportPdfSpacing(getFormXXIIRequestData($dbconn), true)
+        addOtherReportPdfSpacing(getFormXXIIRequestData($dbconn), false)
     );
 } catch (Throwable $exception) {
     ob_clean();

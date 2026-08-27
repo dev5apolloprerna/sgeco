@@ -13,7 +13,7 @@ try {
             // Do not create fixed-size form sections: those sections duplicate
             // the complete legal heading rather than only the table heading.
             getFormXXIIIRequestData($dbconn, false),
-            true
+            false
         )
     );
     // Apply the request month to the final PDF document as well. This keeps

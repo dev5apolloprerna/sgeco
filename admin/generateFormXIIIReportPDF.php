@@ -9,8 +9,7 @@ require_once('OtherReportOutput.php');
 try {
     // $html = addOtherReportPdfSpacing(getFormXIIIRequestData($dbconn));
     $html = addFormXIIIPdfFormatting(
-        // Repeat only the register table's THEAD on continuation pages.
-        addOtherReportPdfSpacing(getFormXIIIRequestData($dbconn), true)
+        addOtherReportPdfSpacing(getFormXIIIRequestData($dbconn), false)
     );
 } catch (Throwable $exception) {
     ob_clean();

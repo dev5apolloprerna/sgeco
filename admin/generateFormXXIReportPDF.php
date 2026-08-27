@@ -10,8 +10,7 @@ try {
     // $html = addOtherReportPdfSpacing(getFormXXIRequestData($dbconn));
     // $salaryMonth = isset($_GET['salarymasterId']) ? trim($_GET['salarymasterId']) : '';
     $html = addFormXXIPdfFormatting(
-        // Repeat only the register table's THEAD on continuation pages.
-        addOtherReportPdfSpacing(getFormXXIRequestData($dbconn), true)
+        addOtherReportPdfSpacing(getFormXXIRequestData($dbconn), false)
     );
     $salaryMonth = isset($_GET['salarymasterId']) ? trim($_GET['salarymasterId']) : '';
     $html = formXXIApplyMonth($html, $salaryMonth);
