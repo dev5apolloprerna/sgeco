@@ -121,8 +121,8 @@ if ($_POST['action'] == 'ListUser') {
                             <input type="text" class="form-control" <?= $rowfilter['isExitEmployee'] == 1 ? 'readonly' : ""; ?> name="adv_two_paid_<?php echo $rowfilter['employeeId'] ?>" id="adv_two_paid_<?php echo $rowfilter['employeeId'] ?>" />
                         </td>
                         <td><input type="number" min="0" step="0.01" class="form-control" value="<?php echo htmlspecialchars(number_format($advanceAmount, 2, '.', ''), ENT_QUOTES, 'UTF-8'); ?>" <?= ($advanceAmount > 0 || $rowfilter['isExitEmployee'] == 1) ? 'readonly' : ""; ?> name="advance_paid_by_bank_<?php echo $rowfilter['employeeId'] ?>" id="advance_paid_by_bank_<?php echo $rowfilter['employeeId'] ?>" /></td>
-                        <td><input type="text" class="form-control" value="0" <?= $rowfilter['isExitEmployee'] == 1 ? 'readonly' : ""; ?> name="pf_amount_<?php echo $rowfilter['employeeId'] ?>" id="pf_amount_<?php echo $rowfilter['employeeId'] ?>" onkeypress="return isNumberKey(event)" /></td>
-                        <td><input type="text" class="form-control" value="0" <?= $rowfilter['isExitEmployee'] == 1 ? 'readonly' : ""; ?> name="esic_amount_<?php echo $rowfilter['employeeId'] ?>" id="esic_amount_<?php echo $rowfilter['employeeId'] ?>" onkeypress="return isNumberKey(event)" /></td>
+                        <td><input type="text" class="form-control" value="0.00" readonly data-enabled="<?php echo $salarymaster['DeductPF'] == 'YES' ? '1' : '0'; ?>" name="pf_amount_<?php echo $rowfilter['employeeId'] ?>" id="pf_amount_<?php echo $rowfilter['employeeId'] ?>" /></td>
+                        <td><input type="text" class="form-control" value="0.00" readonly data-enabled="<?php echo $salarymaster['DeductESIC'] == 'YES' ? '1' : '0'; ?>" name="esic_amount_<?php echo $rowfilter['employeeId'] ?>" id="esic_amount_<?php echo $rowfilter['employeeId'] ?>" /></td>
                         <td>
                             <input type="text" class="form-control" value="0" <?= $rowfilter['isExitEmployee'] == 1 ? 'readonly' : ""; ?> name="fa_<?php echo $rowfilter['employeeId'] ?>" id="fa_<?php echo $rowfilter['employeeId'] ?>" onkeypress="return isNumberKey(event)" />
                         </td>
@@ -219,6 +219,26 @@ if ($_REQUEST['action'] == 'Delete') {
 
 
 <SCRIPT language=Javascript>
+    function updateMultiCompanyDeductions(empId) {
+        var workingDays = parseFloat($("#workingdays_" + empId).val()) || 0;
+        var rate = parseFloat($("#rate_" + empId).val()) || 0;
+        var overtimeHours = parseFloat($("#othours_" + empId).val()) || 0;
+        var overtimeParts = String($("#otrate_" + empId).val() || "0|8").split("|");
+        var overtimeMultiplier = parseFloat(overtimeParts[0]) || 0;
+        var dailyHours = parseFloat(overtimeParts[1]) || 8;
+        var presentAmount = workingDays * rate;
+        var totalAmount = presentAmount + ((rate / dailyHours) * overtimeMultiplier * overtimeHours);
+        var pfField = $("#pf_amount_" + empId);
+        var esicField = $("#esic_amount_" + empId);
+
+        pfField.val(pfField.data("enabled") == 1 ? (presentAmount * 0.12).toFixed(2) : "0.00");
+        esicField.val(esicField.data("enabled") == 1 ? (totalAmount * 0.0075).toFixed(2) : "0.00");
+    }
+
+    $("#tableC").on("input change", "input[id^='workingdays_'], input[id^='rate_'], input[id^='othours_'], select[id^='otrate_']", function () {
+        updateMultiCompanyDeductions(this.id.substring(this.id.indexOf("_") + 1));
+    });
+    
     function isNumberKey(evt) {
         var charCode = (evt.which) ? evt.which : event.keyCode
 
