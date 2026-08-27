@@ -2,7 +2,7 @@
 
 ob_start();
 include('../config.php');
-
+include_once 'companyReportAdvance.php';
 
 $sql = "SELECT * FROM `multicompany` where  companysalarymasterId='" . $_REQUEST['token'] . "' and isDelete=0 order by name asc";
 
@@ -69,6 +69,10 @@ $TotalPfAmount = 0;
 $TotalEsicAmount = 0;
 $TotalBalance2 = 0;
 $companyWiseTotal = array();
+$companySalary = mysqli_fetch_assoc(mysqli_query($dbconn, "SELECT month FROM companysalarymaster WHERE companysalarymasterId='" . (int) $_REQUEST['token'] . "'"));
+$reportMonth = $companySalary ? $companySalary['month'] : '';
+$reportAdvances = getMultiCompanyReportAdvances($dbconn, $_REQUEST['token'], $reportMonth);
+$reportDeductions = getMultiCompanyReportDeductions($dbconn, $_REQUEST['token']);
 while ($rowapplication = mysqli_fetch_array($result)) {
 
     $totalofTotal += $rowapplication['total'];
@@ -84,7 +88,8 @@ while ($rowapplication = mysqli_fetch_array($result)) {
     $Totaltotalamt += (float) $rowapplication['totalamt'];
     $Totaladv += (float) $rowapplication['adv'];
     $TotaladvTwo += (float) $rowapplication['adv_two'];
-    $advPaidByBank = (float) $rowapplication['advance_paid_by_bank'];
+    // $advPaidByBank = (float) $rowapplication['advance_paid_by_bank'];
+    $advPaidByBank = getEmployeeCompanyReportAdvance($reportAdvances, $rowapplication['emp_id']);
     $TotalAdvPaidByBank += $advPaidByBank;
 
     $desg = mysqli_fetch_array(mysqli_query($dbconn, "SELECT * FROM `employee`  where isDelete='0' and employeeId='" . $rowapplication['emp_id'] . "'"));
@@ -103,8 +108,9 @@ while ($rowapplication = mysqli_fetch_array($result)) {
     $companymasterId = rtrim($companymasterId, ',');
 
     $companymasterId = rtrim($companymasterId, ", ");
-    $pfAmount = (float) $rowapplication['pf_amount'];
-    $esicAmount = (float) $rowapplication['esic_amount'];
+    $employeeDeductions = getEmployeeMultiCompanyReportDeductions($reportDeductions, $rowapplication['emp_id']);
+    $pfAmount = $employeeDeductions['pf'];
+    $esicAmount = $employeeDeductions['esic'];
     $TotalPfAmount += $pfAmount;
     $TotalEsicAmount += $esicAmount;
     $mailFormat_main = str_replace("#hedar#", ucfirst(urldecode($HeaderCompany)), $mailFormat_main);

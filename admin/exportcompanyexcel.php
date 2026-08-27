@@ -6,6 +6,7 @@ ob_clean();
 //require_once('tcpdf/config/tcpdf_config.php');
 //require_once('tcpdf/tcpdf.php');
 include('../config.php');
+include_once 'companyReportAdvance.php';
 
 $HeaderCompany = "";
 $companymasterId = "";
@@ -147,6 +148,8 @@ $array[5][4] = 0;
 $array[5][5] = 0;
 
 $query = "SELECT * FROM `multicompany` where  companysalarymasterId='" . $_REQUEST['token'] . "' order by multicompanyid desc";
+$reportAdvances = getMultiCompanyReportAdvances($dbconn, $_REQUEST['token'], $month);
+$reportDeductions = getMultiCompanyReportDeductions($dbconn, $_REQUEST['token']);
 $Total = array("Total", "", "", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0");
 $Total[0] = "Total";
 
@@ -170,9 +173,13 @@ while ($row = mysqli_fetch_assoc($result)) {
 
 //    $Total[0] = $bal2 + $Total[0];
     $CompanysTotal = '';
-    $advPaidByBank = (float) $row['advance_paid_by_bank'];
-    $pfAmount = (float) $row['pf_amount'];
-    $esicAmount = (float) $row['esic_amount'];
+    // $advPaidByBank = (float) $row['advance_paid_by_bank'];
+    // $pfAmount = (float) $row['pf_amount'];
+    // $esicAmount = (float) $row['esic_amount'];
+    $advPaidByBank = getEmployeeCompanyReportAdvance($reportAdvances, $row['emp_id']);
+    $employeeDeductions = getEmployeeMultiCompanyReportDeductions($reportDeductions, $row['emp_id']);
+    $pfAmount = $employeeDeductions['pf'];
+    $esicAmount = $employeeDeductions['esic'];
     $lineData = array(
         $desg['pfcode'],
         $desg['ecsno'],

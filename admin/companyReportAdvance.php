@@ -77,6 +77,63 @@ function getMultiCompanyReportAdvances($dbconn, $companySalaryMasterId, $wageMon
     return $advances;
 }
 
+/**
+ * Return the PF and ESIC already calculated in each selected company's salary.
+ *
+ * A multi-company report is a roll-up of the selected companies.  Therefore its
+ * statutory deductions must be summed from those companies' salary rows rather
+ * than recalculated from the multi-company rate (or read from a stale saved
+ * report row).
+ */
+function getMultiCompanyReportDeductions($dbconn, $companySalaryMasterId)
+{
+    $deductions = array();
+    $companySalaryMasterId = (int) $companySalaryMasterId;
+
+    if ($companySalaryMasterId <= 0) {
+        return $deductions;
+    }
+
+    $sql = "SELECT salarydetails.emp_id,
+                   COALESCE(SUM(salarydetails.pf), 0) AS pfAmount,
+                   COALESCE(SUM(salarydetails.esi), 0) AS esicAmount
+            FROM salarydetails
+            INNER JOIN salarymaster
+                ON salarymaster.salarymasterId = salarydetails.salaryId
+               AND salarymaster.companymasterId = salarydetails.companyId
+               AND salarymaster.isDelete = 0
+               AND salarymaster.istatus = 1
+            INNER JOIN multiycompanysalarymaster
+                ON multiycompanysalarymaster.companymasterId = salarydetails.companyId
+               AND multiycompanysalarymaster.companysalarymasterId = " . $companySalaryMasterId . "
+               AND multiycompanysalarymaster.isDelete = 0
+            INNER JOIN companysalarymaster
+                ON companysalarymaster.companysalarymasterId = multiycompanysalarymaster.companysalarymasterId
+               AND companysalarymaster.month = salarymaster.month
+            WHERE salarydetails.isDelete = 0
+            GROUP BY salarydetails.emp_id";
+    $result = mysqli_query($dbconn, $sql);
+
+    if ($result) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            $deductions[(int) $row['emp_id']] = array(
+                'pf' => (float) $row['pfAmount'],
+                'esic' => (float) $row['esicAmount']
+            );
+        }
+    }
+
+    return $deductions;
+}
+
+function getEmployeeMultiCompanyReportDeductions($deductions, $employeeId)
+{
+    $employeeId = (int) $employeeId;
+    return isset($deductions[$employeeId])
+        ? $deductions[$employeeId]
+        : array('pf' => 0, 'esic' => 0);
+}
+
 function getEmployeeCompanyReportAdvance($advances, $employeeId)
 {
     $employeeId = (int) $employeeId;
