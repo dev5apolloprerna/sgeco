@@ -33,9 +33,14 @@ if ($_POST['action'] == 'ListUser') {
     //                 FROM `salarydetails` inner join employee on salarydetails.emp_id=employee.employeeId where  salaryId in (select salarymasterId from salarymaster where  month='".$salaryMonth."' and isDelete='0' and  istatus='1') and  salarydetails.isDelete='0'  and salarydetails.istatus='1' and salarydetails.workingdays > 0 and employee.employeecode !=0 
     //                 and employeecode not in (829,257,815,1063,256,84,2060,259,1131,1444,229,306,1834,1275,1967,1606,2305) and isPermanent=0
     //                 GROUP by employee.employeeId order by employee.employeecode asc";
-    $filterstr = "SELECT employee.employeeId,max(skillrate) as skillrate,(max(skillrate)- min(skillrate)) as Diff,employee.employeecode,
-                    max(CONVERT(workingdays,UNSIGNED)) as workingdays,employee.emp_name,employee.pfcode,employee.uan,employee.ecsno,employee.dateofbirth,max(CONVERT(salarydetails.basicwages,UNSIGNED)) as 'basicAmount',max(CONVERT(salarydetails.total,UNSIGNED)) as 'grossAmount',employee.employeeId, salarydetails.totalovertime
-                    FROM `salarydetails` inner join employee on salarydetails.emp_id=employee.employeeId where  salaryId in (select salarymasterId from salarymaster where  month='".$salaryMonth."' and isDelete='0' and  istatus='1') and  salarydetails.isDelete='0'  and salarydetails.istatus='1' and salarydetails.workingdays > 0 and employee.employeecode !=0 
+    $filterstr = "SELECT employee.employeeId,MAX(CONVERT(salarydetails.skillrate,DECIMAL(12,2))) as skillrate,employee.employeecode,
+                    SUM(CONVERT(salarydetails.workingdays,DECIMAL(12,2))) as workingdays,employee.emp_name,employee.pfcode,employee.uan,employee.ecsno,employee.dateofbirth,
+                    SUM(CASE WHEN UPPER(companymaster.ESI)='YES' THEN COALESCE(salarydetails.iBonusAmt,0) + COALESCE(salarydetails.iLeaveAmt,0) ELSE 0 END) as DifferenceInESIC,
+                    SUM(COALESCE(salarydetails.totalovertime,0)) as totalovertime
+                    FROM `salarydetails` inner join employee on salarydetails.emp_id=employee.employeeId
+                    inner join salarymaster on salarydetails.salaryId=salarymaster.salarymasterId
+                    inner join companymaster on salarymaster.companymasterId=companymaster.companymasterId
+                    where salarymaster.month='".$salaryMonth."' and salarymaster.isDelete='0' and salarymaster.istatus='1' and salarydetails.isDelete='0'  and salarydetails.istatus='1' and salarydetails.workingdays > 0 and employee.employeecode !=0
                      and isPermanent=0
                     GROUP by employee.employeeId order by employee.employeecode asc";
     // $filterstr = "SELECT * FROM `employee`  " . $where . " and isDelete='0'  and  istatus='1' order by employeecode desc";
@@ -91,11 +96,14 @@ if ($_POST['action'] == 'ListUser') {
                                     //     workingdays,max(CONVERT(salarydetails.basicwages,UNSIGNED)) as 'basicAmount',max(CONVERT(salarydetails.total,UNSIGNED)) as 'grossAmount',salarydetails.totalovertime
                                     //     FROM `salarydetails` where  salaryId in (select salarymasterId from salarymaster where  month='".$salaryMonth."' and isDelete='0' and  istatus='1') and  salarydetails.isDelete='0'  and salarydetails.istatus='1' and salarydetails.workingdays > 0 and salarydetails.emp_id='".$row['employeeId']."' GROUP by salarydetails.emp_id");
                                     
-                                    $filterdetails = mysqli_query($dbconn,"SELECT max(skillrate) as skillrate,(max(skillrate)- min(skillrate)) as Diff,
-                                        max(CONVERT(workingdays,UNSIGNED)) as workingdays,max(CONVERT(salarydetails.basicwages,UNSIGNED)) as 'basicAmount',
-                                        max(CONVERT(salarydetails.total,UNSIGNED)) as 'grossAmount',salarydetails.totalovertime
-                                        FROM `salarydetails` where  salaryId in (select salarymasterId from salarymaster where 
-                                        month='".$salaryMonth."' and isDelete='0' and  istatus='1') and  salarydetails.isDelete='0'  and salarydetails.istatus='1' and salarydetails.workingdays > 0 and salarydetails.emp_id='".$row['employeeId']."' GROUP by salarydetails.emp_id");
+                                    $filterdetails = mysqli_query($dbconn,"SELECT MAX(CONVERT(salarydetails.skillrate,DECIMAL(12,2))) as skillrate,
+                                        SUM(CONVERT(salarydetails.workingdays,DECIMAL(12,2))) as workingdays,
+                                        SUM(CASE WHEN UPPER(companymaster.ESI)='YES' THEN COALESCE(salarydetails.iBonusAmt,0) + COALESCE(salarydetails.iLeaveAmt,0) ELSE 0 END) as DifferenceInESIC,
+                                        SUM(COALESCE(salarydetails.totalovertime,0)) as totalovertime
+                                        FROM `salarydetails` inner join salarymaster on salarydetails.salaryId=salarymaster.salarymasterId
+                                        inner join companymaster on salarymaster.companymasterId=companymaster.companymasterId
+                                        where salarymaster.month='".$salaryMonth."' and salarymaster.isDelete='0' and salarymaster.istatus='1'
+                                        and salarydetails.isDelete='0' and salarydetails.istatus='1' and salarydetails.workingdays > 0 and salarydetails.emp_id='".$row['employeeId']."' GROUP by salarydetails.emp_id");
                                     $workingdays = 0;
                                     $skillrate = 0;
                                     $DifferenceInESIC=0;
@@ -105,24 +113,11 @@ if ($_POST['action'] == 'ListUser') {
                                         $workingdays = $rowDetails['workingdays'];
                                         $skillrate = $rowDetails['skillrate'];
                                         
-                                        // if($rowDetails['Diff'] == 0){
-                                            $grossAmount = $rowDetails['grossAmount'];
-                                            $basicAmount = $rowDetails['basicAmount'];
-                                            $DifferenceInESIC = $grossAmount - $basicAmount;
-                                            //echo round($DifferenceInESIC);
-                                        // } else {
-                                        //     $workingdays = $workingdays - 2;
-                                        //     $sql = mysqli_query($dbconn,"SELECT max(CONVERT(salarydetails.basicwages,UNSIGNED)) as 'basicAmount',max(CONVERT(salarydetails.total,UNSIGNED)) as 'grossAmount' FROM `salarydetails` where  workingdays='".$workingdays."' and skillrate='".$rowDetails['skillrate']."' and emp_id='" . $row['employeeId'] . "' and salaryId in (select salarymasterId from salarymaster where  month='" . $salaryMonth . "' and isDelete='0' and  istatus='1') and  isDelete='0'  and  istatus='1' and workingdays > 0 order by salarydetailsId asc");
-                                        //     if(mysqli_num_rows($sql) == 1){
-                                        //         $rowDays= mysqli_fetch_assoc($sql);
-                                        //         $grossAmount = $rowDays['grossAmount'];
-                                        //         $basicAmount = $rowDays['basicAmount'];
-                                        //         $DifferenceInESIC = $grossAmount - $basicAmount;
-                                        //         //echo round($DifferenceInESIC);
-                                        //     } else {
-                                        //         //echo $DifferenceInESIC;
-                                        //     }
-                                        // }
+                                        
+                                        // $grossAmount = $rowDetails['grossAmount'];
+                                        // $basicAmount = $rowDetails['basicAmount'];
+                                        // $DifferenceInESIC = $grossAmount - $basicAmount;
+                                        $DifferenceInESIC = $rowDetails['DifferenceInESIC'];
                                         $totalovertime = $rowDetails['totalovertime'];
                                     }  
                                     $salary = mysqli_fetch_assoc(mysqli_query($dbconn, "SELECT max(workingdays) as workingdays,max(netamountpaid) as netamountpaid FROM permanentemployeesalarydetails where salaryId in (select salarymasterId from salarymaster where  month='".$salaryMonth."' and isDelete='0' and  istatus='1') and emp_id='".$row['employeeId']."' group by emp_id"));
@@ -161,7 +156,7 @@ if ($_POST['action'] == 'ListUser') {
                                         </td>
                                         <td>
                                             <div class="form-group form-md-line-input "><?php 
-                                            $dateofbirth = $rowfilter['dateofbirth']=='01/01/1970' ? "" : $rowfilter['dateofbirth'];
+                                            $dateofbirth = $row['dateofbirth']=='01/01/1970' ? "" : $row['dateofbirth'];
                                             echo $dateofbirth; //echo isset($rowfilter['dateofbirth']) && $rowfilter['dateofbirth'] != "" ? date('d-m-Y',strtotime($rowfilter['dateofbirth'])) : ""; ?> 
                                             </div>
                                         </td>
@@ -178,7 +173,8 @@ if ($_POST['action'] == 'ListUser') {
                                         <td>
                                             <div class="form-group form-md-line-input ">
                                                 <?php
-                                                    echo ceil($DifferenceInESIC - $totalovertime);
+                                                    // echo ceil($DifferenceInESIC - $totalovertime);
+                                                    echo ceil($DifferenceInESIC);
                                                 ?>
                                             </div>
                                         </td>
@@ -240,27 +236,14 @@ if ($_POST['action'] == 'ListUser') {
                                         <td>
                                             <div class="form-group form-md-line-input ">
                                                 <?php
-                                                    $Difference_In_ESIC=0;
-                                                    //if($rowfilter['Diff'] == 0){
-                                                        $grossAmount = $rowfilter['grossAmount'];
-                                                        $basicAmount = $rowfilter['basicAmount'];
-                                                        $Difference_In_ESIC = $grossAmount - $basicAmount;
-                                                        $totalovertime = isset($rowfilter['totalovertime']) ? $rowfilter['totalovertime'] : 0;
-                                                        $Difference_In_ESIC = $Difference_In_ESIC - $totalovertime;
-                                                        echo ceil($Difference_In_ESIC);
-                                                    // } else {
-                                                    //     $workingdays = $workingdays - 2;
-                                                    //     $sql = mysqli_query($dbconn,"SELECT max(CONVERT(salarydetails.basicwages,UNSIGNED)) as 'basicAmount',max(CONVERT(salarydetails.total,UNSIGNED)) as 'grossAmount' FROM `salarydetails` where  workingdays='".$workingdays."' and skillrate='".$rowfilter['skillrate']."' and emp_id='" . $rowfilter['employeeId'] . "' and salaryId in (select salarymasterId from salarymaster where  month='" . $salaryMonth . "' and isDelete='0' and  istatus='1') and  isDelete='0'  and  istatus='1' and workingdays > 0 order by salarydetailsId asc");
-                                                    //     if(mysqli_num_rows($sql) == 1){
-                                                    //         $rowDays= mysqli_fetch_assoc($sql);
-                                                    //         $grossAmount = $rowDays['grossAmount'];
-                                                    //         $basicAmount = $rowDays['basicAmount'];
-                                                    //         $DifferenceInESIC = $grossAmount - $basicAmount;
-                                                    //         echo round($DifferenceInESIC);
-                                                    //     } else {
-                                                    //         echo $DifferenceInESIC;
-                                                    //     }
-                                                    // }
+                                                    // $Difference_In_ESIC=0;
+                                                    // $grossAmount = $rowfilter['grossAmount'];
+                                                    // $basicAmount = $rowfilter['basicAmount'];
+                                                    // $Difference_In_ESIC = $grossAmount - $basicAmount;
+                                                    // $totalovertime = isset($rowfilter['totalovertime']) ? $rowfilter['totalovertime'] : 0;
+                                                    // $Difference_In_ESIC = $Difference_In_ESIC - $totalovertime;
+                                                    // echo ceil($Difference_In_ESIC);
+                                                    $Difference_In_ESIC = isset($rowfilter['DifferenceInESIC']) ? $rowfilter['DifferenceInESIC'] : 0;
                                                 ?>
                                             </div>
                                         </td>

@@ -99,7 +99,8 @@ if (mysqli_num_rows($result) > 0) {
                                                     </div>
                                                     <div class="form-group col-md-4">
                                                         <label for="form_control_1">Employee</label><br/>
-                                                        <input type="text" id="employeeId" name="employeeId" class="form-control "  />
+                                                        <input type="text" id="employeeId" name="employeeId" class="form-control" list="employeeSuggestions" autocomplete="off" placeholder="Search by name, UAN or father name" />
+                                                        <datalist id="employeeSuggestions"></datalist>
                                                         <?php
 //                                                        $queryCom = "SELECT * FROM `employee`  where isDelete='0'  and  istatus='1' order by  emp_name asc";
 //                                                        $resultCom = mysqli_query($dbconn, $queryCom) or die(mysql_error());
@@ -110,6 +111,13 @@ if (mysqli_num_rows($result) > 0) {
 //                                                        }
 //                                                        echo "</select>";
                                                         ?>
+                                                    </div>
+                                                    <div class="form-group col-md-4">
+                                                        <label for="permanentStatus">Employee List</label><br/>
+                                                        <select id="permanentStatus" name="permanentStatus" class="form-control">
+                                                            <option value="1">Permanent Employees</option>
+                                                            <option value="0">Add New Permanent Employee</option>
+                                                        </select>
                                                     </div>
                                                     <div class="col-md-4 margin-top-20">
                                                         <a  class="btn blue pull-left"  id="clickbutton" onclick="PageLoadData(1);">Search</a>
@@ -145,7 +153,18 @@ if (mysqli_num_rows($result) > 0) {
                     todayHighlight: true,
                     defaultDate: "now",
                 });
-            });
+
+                 $('#permanentStatus').change(function () {
+                    loadEmployeeSuggestions();
+                    PageLoadData(1);
+                });
+
+                var suggestionTimer;
+                $('#employeeId').on('input', function () {
+                    clearTimeout(suggestionTimer);
+                    suggestionTimer = setTimeout(loadEmployeeSuggestions, 250);
+                });
+            });            
 
             $("#employeeId").keypress(function (event) {
                 if (event.keyCode === 13) {
@@ -157,17 +176,80 @@ if (mysqli_num_rows($result) > 0) {
             function PageLoadData(Page) {
                 var employeeId = $('#employeeId').val();
                 var salarymasterId = $('#salarymasterId').val();
+                var permanentStatus = $('#permanentStatus').val();
                 $('#loading').css("display", "block");
                 $.ajax({
                     type: "POST",
                     url: "<?php echo $web_url; ?>admin/AjaxPermanentEmployeeSalaryDetails.php",
-                    data: {action: 'ListUser', Page: Page, employeeId: employeeId, salarymasterId: salarymasterId},
+                    data: {action: 'ListUser', Page: Page, employeeId: employeeId, salarymasterId: salarymasterId, permanentStatus: permanentStatus},
                     success: function (msg) {
                         $('#loading').css("display", "none");
                         $("#PlaceUsersDataHere").html(msg);
                     },
                 });
             }
+
+            function loadEmployeeSuggestions() {
+                var search = $.trim($('#employeeId').val());
+                if (search.length < 2) {
+                    $('#employeeSuggestions').empty();
+                    return;
+                }
+
+                $.ajax({
+                    type: 'POST',
+                    url: '<?php echo $web_url; ?>admin/AjaxPermanentEmployeeSalaryDetails.php',
+                    dataType: 'json',
+                    data: {
+                        action: 'EmployeeSuggestions',
+                        term: search,
+                        permanentStatus: $('#permanentStatus').val()
+                    },
+                    success: function (employees) {
+                        var options = '';
+                        $.each(employees, function (index, employee) {
+                            options += $('<option>').val(employee.value).attr('label', employee.label).prop('outerHTML');
+                        });
+                        $('#employeeSuggestions').html(options);
+                    }
+                });
+            }
+
+            function updatePermanentEmployee(employeeId, isPermanent) {
+                var message = isPermanent === 1
+                        ? 'Are you sure you want to add this employee to the permanent list?'
+                        : 'Are you sure you want to remove this employee from the permanent list?';
+
+                if (!confirm(message)) {
+                    return false;
+                }
+
+                $('#loading').css('display', 'block');
+                $.ajax({
+                    type: 'POST',
+                    url: '<?php echo $web_url; ?>admin/AjaxPermanentEmployeeSalaryDetails.php',
+                    dataType: 'json',
+                    data: {action: 'UpdatePermanent', employeeId: employeeId, isPermanent: isPermanent},
+                    success: function (response) {
+                        if (!response.success) {
+                            alert(response.message || 'Unable to update employee.');
+                        }
+                        PageLoadData(1);
+                    },
+                    error: function () {
+                        $('#loading').css('display', 'none');
+                        alert('Unable to update employee. Please try again.');
+                    }
+                });
+                return false;
+            }
+
+            function calculatePermanentTotal(rowNumber) {
+                var workingDays = parseFloat($('#workingdays_' + rowNumber).val()) || 0;
+                var wagesRate = parseFloat($('#wagesrate_' + rowNumber).val()) || 0;
+                $('#salary_' + rowNumber).val((workingDays * wagesRate).toFixed(2));
+            }
+
             PageLoadData(1);
 
         </script>
