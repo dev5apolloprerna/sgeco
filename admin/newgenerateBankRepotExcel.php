@@ -644,6 +644,24 @@ if ($_REQUEST['bank'] == 3 || $_REQUEST['bank'] == "") {
     $sheet->getRowDimension($rowNumber)->setRowHeight(20);
 }
 
+if ($_REQUEST['bank'] == 3) {
+    $rowNumber++;
+    $transferNote = new \PhpOffice\PhpSpreadsheet\RichText\RichText();
+    $noteLabel = $transferNote->createTextRun('Note:');
+    $noteLabel->getFont()->setBold(true);
+    $transferNote->createText(' Soft Copy of the Bulk Transfer will be Sent from ');
+    $email = $transferNote->createTextRun('hkshah@sgeco.in');
+    $email->getFont()->setBold(true);
+    $transferNote->createText(' and we are solely responsible for any discrepancy in the soft copy and the hard copy sent to you.');
+
+    $sheet->mergeCells('A' . $rowNumber . ':G' . $rowNumber);
+    $sheet->setCellValue('A' . $rowNumber, $transferNote);
+    $sheet->getStyle('A' . $rowNumber)->getAlignment()->setWrapText(true);
+    $sheet->getStyle('A' . $rowNumber)->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_TOP);
+    $sheet->getStyle('A' . $rowNumber)->getFont()->setSize(10);
+    $sheet->getRowDimension($rowNumber)->setRowHeight(45);
+}
+
 // Set header to appear on every printed page
 $sheet->getHeaderFooter()->setOddHeader('');
 
