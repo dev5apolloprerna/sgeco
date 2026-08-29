@@ -14,7 +14,7 @@ if ($_SESSION['AdminType'] != 1 && (!isset($rights['isAdvancedEntry']) || $right
 }
 
 $advancedId = isset($_GET['token']) ? (int) $_GET['token'] : 0;
-$advancedResult = mysqli_query($dbconn, "SELECT * FROM advanced_master WHERE iAdvancedMasterId=" . $advancedId . " AND isDelete=0 AND istatus=1");
+$advancedResult = mysqli_query($dbconn, "SELECT am.*, c.companyname FROM advanced_master am INNER JOIN companymaster c ON c.companymasterId=am.iCompanyId WHERE am.iAdvancedMasterId=" . $advancedId . " AND am.isDelete=0 AND am.istatus=1");
 if (!$advancedResult || mysqli_num_rows($advancedResult) === 0) {
     http_response_code(404);
     exit('Advanced date range not found.');
@@ -68,7 +68,10 @@ $advancedPeriod = mysqli_fetch_assoc($advancedResult);
                                         <a class="btn blue pull-right" href="advancedmaster.php">Back</a>
                                     </div>
                                     <div class="portlet-body form">
-                                        <div class="alert alert-info">Advanced period: <strong><?php echo htmlspecialchars($advancedPeriod['strMonthYear'], ENT_QUOTES, 'UTF-8'); ?></strong> (<?php echo date('d-m-Y', strtotime($advancedPeriod['fromdate'])); ?> to <?php echo date('d-m-Y', strtotime($advancedPeriod['todate'])); ?>)</div>
+                                        <div class="alert alert-info">
+                                            Company: <strong><?php echo htmlspecialchars($advancedPeriod['companyname'], ENT_QUOTES, 'UTF-8'); ?></strong><br>
+                                            Advanced period: <strong><?php echo htmlspecialchars($advancedPeriod['strMonthYear'], ENT_QUOTES, 'UTF-8'); ?></strong> (<?php echo date('d-m-Y', strtotime($advancedPeriod['fromdate'])); ?> to <?php echo date('d-m-Y', strtotime($advancedPeriod['todate'])); ?>)
+                                        </div>
                                         <form id="searchForm" method="post" role="form">
                                             <input type="hidden" id="advancedId" value="<?php echo $advancedId; ?>">
                                             <input type="hidden" id="companyId" value="<?php echo (int) $advancedPeriod['iCompanyId']; ?>">
