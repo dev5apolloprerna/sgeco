@@ -151,7 +151,10 @@ $mailFormat_main = str_replace("#netamounttotal#", number_format(urldecode($Tota
 
 $mailFormat_main = str_replace("#Balance#", ucfirst(urldecode(number_format($Total[1],2))), $mailFormat_main);
 $mailFormat_main = str_replace("#multicompanybank#", ucfirst(urldecode($mailFormat_rows)), $mailFormat_main);
-
+if ($_REQUEST['bank'] == 3) {
+    $transferNote = '<table width="100%" cellspacing="0" cellpadding="5" border="0"><tr><td style="font-size:15px"><strong>Note:</strong> Soft Copy of the Bulk Transfer will be Sent from <strong>hkshah@sgeco.in</strong> and we are solely responsible for any discrepancy in the soft copy and the hard copy sent to you.</td></tr></table>';
+    $mailFormat_main = str_replace('</html>', $transferNote . '</html>', $mailFormat_main);
+}
 $pdf = new TCPDF(P, PDF_UNIT, PDF_PAGE_FORMAT, 'UTF-8', false);
 
 $pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));

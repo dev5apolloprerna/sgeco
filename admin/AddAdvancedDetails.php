@@ -28,6 +28,23 @@ $advancedPeriod = mysqli_fetch_assoc($advancedResult);
     <meta charset="utf-8" />
     <title><?php echo $ProjectName; ?> | Add Advanced Details</title>
     <?php include_once './include.php'; ?>
+    <style>
+        .advanced-details-table-wrapper {
+            max-height: 65vh;
+            overflow: auto;
+        }
+
+        .advanced-details-table-wrapper .table {
+            margin-bottom: 0;
+        }
+
+        .advanced-details-table-wrapper thead th {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background: #658397;
+        }
+    </style>
 </head>
 
 <body class="page-container-bg-solid page-boxed">
@@ -116,7 +133,7 @@ $advancedPeriod = mysqli_fetch_assoc($advancedResult);
             }
         });
 
-        function submitAdvancedDetails(button) {
+        function submitAdvancedDetails(button, rowElement) {
             var companyId = $('#companyId').val();
             var advancedDate = $('#advancedDate').val();
             if (!companyId || !advancedDate) {
@@ -125,10 +142,14 @@ $advancedPeriod = mysqli_fetch_assoc($advancedResult);
             }
             var details = [];
             var invalidAmount = false;
-            $('#employeeResults .employee-row').each(function() {
+            var rows = rowElement ? $(rowElement) : $('#employeeResults .employee-row').not('.advanced-detail-saved');
+            rows.each(function() {
                 var row = $(this);
                 var amount = $.trim(row.find('.advanced-amount').val());
                 if (amount === '') {
+                    if (rowElement) {
+                        invalidAmount = true;
+                    }
                     return;
                 }
                 if (!/^\d+(\.\d{1,2})?$/.test(amount) || parseFloat(amount) <= 0) {
@@ -142,7 +163,7 @@ $advancedPeriod = mysqli_fetch_assoc($advancedResult);
                 });
             });
             if (invalidAmount) {
-                showMessage('danger', 'Amounts must be greater than zero and have no more than two decimal places.');
+                showMessage('danger', 'Enter an amount greater than zero with no more than two decimal places.');
                 return;
             }
             if (details.length === 0) {
@@ -162,9 +183,13 @@ $advancedPeriod = mysqli_fetch_assoc($advancedResult);
                 if (response.success) {
                     showMessage('success', response.message);
                     details.forEach(function(detail) {
-                        $('#employeeResults .employee-row[data-employee-id="' + detail.employeeId + '"]').find('input').prop('disabled', true);
+                        var savedRow = $('#employeeResults .employee-row[data-employee-id="' + detail.employeeId + '"]');
+                        savedRow.addClass('advanced-detail-saved');
+                        savedRow.find('input, .row-submit-button').prop('disabled', true);
                     });
-                    $(button).prop('disabled', true);
+                    if (!rowElement) {
+                        $(button).prop('disabled', true);
+                    }
                 } else {
                     $(button).prop('disabled', false);
                     showMessage('danger', response.message);

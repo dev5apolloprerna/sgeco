@@ -48,6 +48,7 @@ if ($action === 'SearchEmployees') {
 
 
 ?>
+    <div class="advanced-details-table-wrapper">
     <table class="table table-bordered table-hover table-responsive">
         <thead class="tbg">
             <tr>
@@ -56,7 +57,7 @@ if ($action === 'SearchEmployees') {
                 <th>UAN</th>
                 <th>Amount</th>
                 <th>Remarks</th>
-                <!-- <th>Action</th> -->
+                <th>Action</th>
             </tr>
         </thead>
         <tbody>
@@ -71,9 +72,10 @@ if ($action === 'SearchEmployees') {
                         <input type="hidden" class="advanced-bank" value="<?php echo (int) $employee['bankid']; ?>">
                     </td>
                     <td><input type="text" maxlength="1000" class="form-control advanced-remarks" placeholder="Remarks"></td>
-                    <!-- <td><button type="button" class="btn blue" onclick="addAdvancedDetail(<?php echo (int) $employee['employeeId']; ?>, this)">Add</button></td> -->
+                    <td><button type="button" class="btn blue row-submit-button" onclick="submitAdvancedDetails(this, $(this).closest('.employee-row'))"><i class="fa fa-save"></i> Submit</button></td>
                 </tr><?php } ?></tbody>
     </table>
+     </div>
     <button type="button" class="btn blue pull-right" onclick="submitAdvancedDetails(this)"><i class="fa fa-save"></i> Submit</button>
     <div class="clearfix"></div>
 <?php exit;
