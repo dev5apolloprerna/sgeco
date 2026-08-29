@@ -121,15 +121,14 @@ if ($_POST['action'] == 'ListUser') {
                                         $totalovertime = $rowDetails['totalovertime'];
                                     }  
                                     $salary = mysqli_fetch_assoc(mysqli_query($dbconn, "SELECT max(workingdays) as workingdays,max(netamountpaid) as netamountpaid FROM permanentemployeesalarydetails where salaryId in (select salarymasterId from salarymaster where  month='".$salaryMonth."' and isDelete='0' and  istatus='1') and emp_id='".$row['employeeId']."' group by emp_id"));
-                                    if(isset($skillrate) && $skillrate ==0){
-                                        if(isset($salary['netamountpaid']) && $salary['netamountpaid'] != 0){
-                                            $skillrate = $salary['netamountpaid'];
-                                        }
+                                    // Permanent salary entries are the source of truth for permanent
+                                    // employees.  Do not keep a rate from an old/regular salary detail
+                                    // when a permanent salary has been entered for the selected month.
+                                    if(isset($salary['netamountpaid']) && $salary['netamountpaid'] != 0){
+                                        $skillrate = $salary['netamountpaid'];
                                     }
-                                    if(isset($workingdays) && $workingdays == 0){
-                                        if(isset($salary['workingdays']) && $salary['workingdays'] != ""){
-                                            $workingdays=$salary['workingdays'];
-                                        }
+                                    if(isset($salary['workingdays']) && $salary['workingdays'] != ""){
+                                        $workingdays=$salary['workingdays'];
                                     }
                                     ?>
                                     <tr>

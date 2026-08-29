@@ -229,15 +229,13 @@ if (mysqli_num_rows($result1) > 0) {
                 $totalovertime = $rowDetails['totalovertime'];
             }    
             $salary = mysqli_fetch_assoc(mysqli_query($dbconn, "SELECT max(workingdays) as workingdays,max(netamountpaid) as netamountpaid FROM permanentemployeesalarydetails where salaryId in (select salarymasterId from salarymaster where  month='".$salaryMonth."' and isDelete='0' and  istatus='1') and emp_id='".$row['employeeId']."' group by emp_id"));
-            if(isset($skillrate) && $skillrate ==0){
-                if(isset($salary['netamountpaid']) && $salary['netamountpaid'] != 0){
-                    $skillrate = $salary['netamountpaid'];
-                }
+            // Permanent salary entries take precedence over any regular salary
+            // details that may still exist for the employee in this month.
+            if(isset($salary['netamountpaid']) && $salary['netamountpaid'] != 0){
+                $skillrate = $salary['netamountpaid'];
             }
-            if(isset($workingdays) && $workingdays == 0){
-                if(isset($salary['workingdays']) && $salary['workingdays'] != 0){
-                    $workingdays=$salary['workingdays'];
-                }
+            if(isset($salary['workingdays']) && $salary['workingdays'] != 0){
+                $workingdays=$salary['workingdays'];
             }
             $dateofbirth = $row['dateofbirth']=='01/01/1970' ? "" : $row['dateofbirth'];
 

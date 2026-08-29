@@ -83,10 +83,9 @@ if ($_POST['action'] == 'ListUser') {
                                 <a  class="btn blue" onClick="javascript: return deletedata('Delete', '<?php echo $rowfilter['salarymasterId']; ?>');"   title="Delete"><i class="fa fa-trash-o iconshowFirst"></i></a>
                                 <a  class="btn blue" href="<?php echo $web_url; ?>admin/AddSalaryDetails.php?token=<?php echo $rowfilter['salarymasterId']; ?>" title="ADD Salary Details"><i class="fa fa-plus iconshowFirst"></i></i></a>
                                 
-                                <?php if (!preg_match('/office\s*\/\s*staff/i', $comp['companyname'])) { ?>
+                                <?php if (preg_match('/\b(?:office|staff)\b/i', $comp['companyname'])) { ?>
                                     <a  class="btn blue" href="<?php echo $web_url; ?>admin/AddPermanentEmployeeSalaryDetails.php?token=<?php echo $rowfilter['salarymasterId']; ?>" title="ADD Permanent Employee Salary Details"><i class="fa fa-user-plus iconshowFirst"></i></i></a>
                                 <?php } ?>
-                                <!-- <a  class="btn blue" href="<?php echo $web_url; ?>admin/AddPermanentEmployeeSalaryDetails.php?token=<?php echo $rowfilter['salarymasterId']; ?>" title="ADD Permanent Employee Salary Details"><i class="fa fa-user-plus iconshowFirst"></i></i></a> -->
                             </div>
                         </td>
                         <?php
