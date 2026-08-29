@@ -133,6 +133,19 @@ $advancedPeriod = mysqli_fetch_assoc($advancedResult);
             }
         });
 
+        function updateMultiRowSubmitButton() {
+            var enteredAmountCount = $('#employeeResults .employee-row')
+                .not('.advanced-detail-saved')
+                .find('.advanced-amount')
+                .filter(function() {
+                    return $.trim($(this).val()) !== '';
+                }).length;
+
+            $('#employeeResults .multi-row-submit-button').prop('disabled', enteredAmountCount < 2);
+        }
+
+        $('#employeeResults').on('input change', '.advanced-amount', updateMultiRowSubmitButton);
+
         function submitAdvancedDetails(button, rowElement) {
             var companyId = $('#companyId').val();
             var advancedDate = $('#advancedDate').val();
@@ -187,6 +200,7 @@ $advancedPeriod = mysqli_fetch_assoc($advancedResult);
                         savedRow.addClass('advanced-detail-saved');
                         savedRow.find('input, .row-submit-button').prop('disabled', true);
                     });
+                    updateMultiRowSubmitButton();
                     if (!rowElement) {
                         $(button).prop('disabled', true);
                     }

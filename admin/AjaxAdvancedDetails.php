@@ -76,7 +76,7 @@ if ($action === 'SearchEmployees') {
                 </tr><?php } ?></tbody>
     </table>
      </div>
-    <button type="button" class="btn blue pull-right" onclick="submitAdvancedDetails(this)"><i class="fa fa-save"></i> Submit</button>
+    <button type="button" class="btn blue pull-right multi-row-submit-button" onclick="submitAdvancedDetails(this)" disabled><i class="fa fa-save"></i> Submit</button>
     <div class="clearfix"></div>
 <?php exit;
 }
