@@ -354,8 +354,7 @@ if (mysqli_num_rows($query1) > 0) {
         . "\t" . ''
         . "\t" . ''
         . "\t" . ''
-        . "\t" . 'Deducation'
-        . "\t" . ''
+        . "\t" . 'Deduction'
         . "\t" . ''
         . "\t" . ''
         . "\t" . ''
@@ -367,36 +366,40 @@ if (mysqli_num_rows($query1) > 0) {
         . "\t" . ''
         . "\t" . ''
         . "\n";
-    $lineOne .= 'Sr. No'
+    $lineOne .= 'Sr. No.'
         . "\t" . 'Sr. No. in Emp. Reg.'
         . "\t" . 'Name of Workmen'
-        . "\t" . 'Designation/Nature of Work Done'
+        . "\t" . 'Designation / Nature of Work Done'
         . "\t" . 'No. of Days worked'
-        . "\t" . 'Daily rate of wages/ piece Rate'
-        . "\t" . 'OT hours  worked'
+        . "\t" . 'Daily rate of wages / piece Rate'
+        . "\t" . 'OT hours worked'
         . "\t" . 'Total Basic wages'
-        . "\t" . 'DA'
-        . "\t" . 'HRA'
-        . "\t" . 'Payments Overtime'
+        . "\t" . 'Dearness Allowances'
+        . "\t" . 'Overtime'
         . "\t" . 'Bonus'
         . "\t" . 'Leave'
-        . "\t" . 'National Holidays'
+        . "\t" . 'National Holiday Payment'
+        . "\t" . 'Other cash payments (nature of payments to be indicated)'
         . "\t" . 'Gross Total'
         . "\t" . 'PF'
         . "\t" . 'ESIC'
         . "\t" . 'Advance'
         . "\t" . 'Professional Tax'
-        . "\t" . 'Society'
-        . "\t" . 'Income Tax'
         . "\t" . 'Insurance'
         . "\t" . 'Recoveries'
         . "\t" . 'Total Deduction'
         . "\t" . 'Net Payment'
-        . "\t" . 'Employer Share/ PF Welfare Fund'
-        . "\t" . 'Signature /thumb impresssion of workman/Transaction ID'
+        . "\t" . 'Signature / thumb impression of workman'
+        . "\t" . 'Initials of contractor or the representative'
         . "\t" . 'Date of Payment'
         . "\n";
-    $Total = array_fill(0, 28, 0);
+    $lineOne .= '1' . "\t" . '1A' . "\t" . '2' . "\t" . '3' . "\t" . '4'
+        . "\t" . '5' . "\t" . '6' . "\t" . '7' . "\t" . '8' . "\t" . '9'
+        . "\t" . '10' . "\t" . '11' . "\t" . '12' . "\t" . '13' . "\t" . '14'
+        . "\t" . '15' . "\t" . '16' . "\t" . '17' . "\t" . '18' . "\t" . '19'
+        . "\t" . '20' . "\t" . '21' . "\t" . '22' . "\t" . '23' . "\t" . '24'
+        . "\t" . '24' . "\n";
+    $Total = array_fill(0, 26, 0);
     $Total[0] = "Total";
     $deductiontotal = array(0, 0, 0, 0);
     $comskill = mysqli_fetch_array(mysqli_query($dbconn, "SELECT unskill,semiskill,skil FROM companymaster where companymasterId = '" . $_REQUEST['Company'] . "'"));
@@ -440,16 +443,16 @@ if (mysqli_num_rows($query1) > 0) {
             . "\t" . $emp_name
             . "\t" . $designation
             . "\t" . $row['workingdays']
-            . "\t" . formatCompanyReportExcelAmount($row['skillrate']) // . "\t" . $row['skillrate']
+            . "\t" . formatCompanyReportExcelAmount($row['skillrate'])
             . "\t" . $othours
-            . "\t" . formatCompanyReportExcelAmount($row['basicwages']) // . "\t" . $row['basicwages']
-            // '',
+            . "\t" . formatCompanyReportExcelAmount($row['basicwages'])
             . "\t" . $da
-            . "\t" . $hra
+
             . "\t" . round($row['totalovertime'])
             . "\t" . $iBonusAmt
             . "\t" . $iLeaveAmt
             . "\t" . $national_holiday_payment
+            . "\t" . ''
             . "\t" . number_format(round($row['total']), 2, '.', '')
             . "\t" . number_format($row['pf'], 2, '.', '')
             . "\t" . number_format($row['esi'], 2, '.', '')
@@ -457,52 +460,49 @@ if (mysqli_num_rows($query1) > 0) {
             . "\t" . $pt
             . "\t" . ''
             . "\t" . ''
-            . "\t" . ''
-            . "\t" . ''
             . "\t" . $Deduction_total
             . "\t" . $netAmountPaid
-            . "\t" . number_format($row['pf'], 2, '.', '')
             . "\t" . ''
-            //. "\t" . ''
+            . "\t" . ''
             . "\t" . $row['strPaymentDate']
             . "\n";
         $Total[4] += $row['workingdays'];
         $Total[5] += $row['skillrate'];
         $Total[6] += (float)$row['othours']; // $Total[6] += (int)$row['othours'];
         $Total[7] += $row['basicwages'];
-        $Total[10] += (int)$row['totalovertime'];
+        $Total[9] += (int)$row['totalovertime'];
         $Total[14] += $row['total'];
         $Total[16] += $row['esi'];
         $Total[15] += $row['pf'];
         $Total[17] += $advanceAmount;
         $Total[18] += (int)$row['pt'];
-        $Total[23] += $Deduction_total;
+        $Total[21] += $Deduction_total;
         //$Total[16] += $row['deductionifany'];
-        $Total[24] += $netAmountPaid;
-        $Total[25] += ceil($row['iBonusAmt']);
-        $Total[12] += ceil($row['iLeaveAmt']);
-        $Total[9] += $row['da'];
-        $Total[11] += $row['hra'];
-        $Total[13] += $row['national_holiday_payment'];
+        $Total[22] += $netAmountPaid;
+        $Total[10] += ceil($row['iBonusAmt']);
+        $Total[11] += ceil($row['iLeaveAmt']);
+        $Total[8] += $row['da'];
+
+        $Total[12] += $row['national_holiday_payment'];
 
         $iCounter++;
     }
     $Total[14] = number_format(round($Total[14]), 2, '.', '');
-    $Total[24] = number_format($Total[24], 2, '.', '');
-    $lastLine = ""
+    $Total[22] = number_format($Total[22], 2, '.', '');
+    $lastLine = "Total"
         . "\t" . ""
-        . "\t" . "Total"
+        . "\t" . ""
         . "\t" . ""
         . "\t" . $Total[4]
         . "\t" . ""
-        . "\t" . formatCompanyReportExcelAmount($Total[6]) // . "\t" . ""
-        . "\t" . formatCompanyReportExcelAmount($Total[7]) // . "\t" . $Total[7]
-        . "\t" . $Total[9]
+        . "\t" . formatCompanyReportExcelAmount($Total[6])
+        . "\t" . formatCompanyReportExcelAmount($Total[7])
+        . "\t" . $Total[8]
+        . "\t" . round($Total[9])
+        . "\t" . $Total[10]
         . "\t" . $Total[11]
-        . "\t" . round($Total[10])
-        . "\t" . $Total[25]
         . "\t" . $Total[12]
-        . "\t" . $Total[13]
+        . "\t" . ""
         . "\t" . number_format(round($Total[14]), 2, '.', '')
         . "\t" . number_format($Total[15], 2, '.', '')
         . "\t" . number_format($Total[16], 2, '.', '')
@@ -510,11 +510,10 @@ if (mysqli_num_rows($query1) > 0) {
         . "\t" . $Total[18]
         . "\t" . ""
         . "\t" . ""
+        . "\t" . $Total[21]
+        . "\t" . number_format($Total[22], 2, '.', '')
+
         . "\t" . ""
-        . "\t" . ""
-        . "\t" . $Total[23]
-        . "\t" . number_format($Total[24], 2, '.', '')
-        . "\t" . number_format($Total[15], 2, '.', '')
         . "\t" . ""
         . "\t" . ""
         . "\n";
@@ -532,11 +531,11 @@ if (mysqli_num_rows($query1) > 0) {
     $sheet->getParent()->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
 
     $lastRow = count($reportRows);
-    $lastColumnNumber = 28;
+    $lastColumnNumber = 26;
     $lastColumn = Coordinate::stringFromColumnIndex($lastColumnNumber);
     $headerRow = 1;
     foreach ($reportRows as $rowIndex => $reportRow) {
-        if (isset($reportRow[0]) && trim($reportRow[0]) === 'Sr. No') {
+        if (isset($reportRow[0]) && rtrim(trim($reportRow[0]), '.') === 'Sr. No') {
             $headerRow = $rowIndex + 1;
             break;
         }
@@ -616,10 +615,17 @@ if (mysqli_num_rows($query1) > 0) {
 
     // Draw a clear, printable table instead of relying on Excel's worksheet gridlines.
     $groupHeaderRow = $headerRow - 1;
-    $sheet->mergeCells('H' . $groupHeaderRow . ':O' . $groupHeaderRow);
-    $sheet->setCellValue('H' . $groupHeaderRow, 'Amount of Wages Earned');
-    $sheet->mergeCells('P' . $groupHeaderRow . ':X' . $groupHeaderRow);
+    $numberRow = $headerRow + 1;
+    $sheet->mergeCells('I' . $groupHeaderRow . ':N' . $groupHeaderRow);
+    $sheet->setCellValue('I' . $groupHeaderRow, 'Amount of wages earned');
+    $sheet->mergeCells('P' . $groupHeaderRow . ':V' . $groupHeaderRow);
     $sheet->setCellValue('P' . $groupHeaderRow, 'Deductions');
+    // All non-grouped headings span both header rows, matching the statutory
+    // register layout rather than appearing beneath an unnecessary blank cell.
+    foreach (array_merge(range('A', 'H'), array('O', 'W', 'X', 'Y', 'Z')) as $column) {
+        $sheet->setCellValue($column . $groupHeaderRow, $sheet->getCell($column . $headerRow)->getValue());
+        $sheet->mergeCells($column . $groupHeaderRow . ':' . $column . $headerRow);
+    }
     $tableRange = 'A' . ($headerRow - 1) . ':' . $lastColumn . $lastRow;
     $sheet->getStyle($tableRange)->applyFromArray(array(
         'borders' => array(
@@ -639,7 +645,7 @@ if (mysqli_num_rows($query1) > 0) {
             'vertical' => Alignment::VERTICAL_CENTER,
         ),
     ));
-    $sheet->getStyle('A' . $headerRow . ':' . $lastColumn . $headerRow)->applyFromArray(array(
+    $sheet->getStyle('A' . $headerRow . ':' . $lastColumn . $numberRow)->applyFromArray(array(
         'font' => array('bold' => true),
         'alignment' => array(
             'horizontal' => Alignment::HORIZONTAL_CENTER,
@@ -652,33 +658,55 @@ if (mysqli_num_rows($query1) > 0) {
 
     // Preserve payroll values as numbers and display them consistently. This also
     // keeps totals usable for filtering and calculations in the downloaded file.
-    $sheet->getStyle('F' . ($headerRow + 1) . ':Z' . $lastRow)
+    $sheet->getStyle('F' . ($numberRow + 1) . ':W' . $lastRow)
         ->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
-    $sheet->getStyle('A' . ($headerRow + 1) . ':' . $lastColumn . $lastRow)
+    $sheet->getStyle('A' . ($numberRow + 1) . ':' . $lastColumn . $lastRow)
         ->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 
     // Keep identifier and normally-empty deduction columns compact so the useful
     // employee and wage details remain readable without excessive horizontal space.
     $columnWidths = array(
-        'A' => 6, 'B' => 8, 'C' => 23, 'D' => 18, 'E' => 9, 'F' => 11,
-        'G' => 9, 'H' => 12, 'I' => 8, 'J' => 8, 'K' => 11, 'L' => 9,
-        'M' => 9, 'N' => 9, 'O' => 12, 'P' => 10, 'Q' => 10, 'R' => 10,
-        'S' => 10, 'T' => 8, 'U' => 8, 'V' => 8, 'W' => 8, 'X' => 11,
-        'Y' => 12, 'Z' => 13, 'AA' => 22, 'AB' => 12,
+        'A' => 6,
+        'B' => 8,
+        'C' => 23,
+        'D' => 18,
+        'E' => 9,
+        'F' => 11,
+        'G' => 9,
+        'H' => 12,
+        'I' => 8,
+        'J' => 8,
+        'K' => 11,
+        'L' => 9,
+        'M' => 9,
+        'N' => 9,
+        'O' => 12,
+        'P' => 10,
+        'Q' => 10,
+        'R' => 10,
+        'S' => 11,
+        'T' => 10,
+        'U' => 10,
+        'V' => 12,
+        'W' => 12,
+        'X' => 22,
+        'Y' => 20,
+        'Z' => 12,
     );
     foreach ($columnWidths as $columnLetter => $columnWidth) {
         $sheet->getColumnDimension($columnLetter)->setWidth($columnWidth);
     }
     $sheet->getRowDimension($headerRow)->setRowHeight(62);
+    $sheet->getRowDimension($numberRow)->setRowHeight(18);
     $sheet->getRowDimension($groupHeaderRow)->setRowHeight(22);
-    $sheet->freezePane('A' . ($headerRow + 1));
+    $sheet->freezePane('A' . ($numberRow + 1));
 
     $sheet->setShowGridlines(false);
     $sheet->getSheetView()->setZoomScale(85);
     $sheet->getPageSetup()->setOrientation(PageSetup::ORIENTATION_LANDSCAPE);
     $sheet->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_A3);
     $sheet->getPageSetup()->setFitToWidth(1)->setFitToHeight(0);
-    $sheet->getPageSetup()->setRowsToRepeatAtTopByStartAndEnd($groupHeaderRow, $headerRow);
+    $sheet->getPageSetup()->setRowsToRepeatAtTopByStartAndEnd($groupHeaderRow, $numberRow);
     $sheet->getPageMargins()->setTop(0.3)->setRight(0.3)->setBottom(0.3)->setLeft(0.3);
     $sheet->getPageSetup()->setHorizontalCentered(true);
     $sheet->getPageSetup()->setPrintArea('A1:' . $lastColumn . $lastRow);

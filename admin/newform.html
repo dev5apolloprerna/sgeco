@@ -117,13 +117,8 @@
                         </td>
                     </tr>
                 </table>
-                <!--
-                    Keep this as one 28-column table.  TCPDF calculates a colspan by
-                    splitting its declared width across the covered columns, so both
-                    grouped sections deliberately use equal-width leaf columns.  The
-                    98% table width also leaves room for TCPDF's cell padding and the
-                    enclosing page cell instead of clipping the final border.
-                -->
+                <!-- Keep the statutory 26-column wage-register header in one table so
+                    its grouped headings repeat correctly on TCPDF page breaks. -->
                 <table width="98%" align="center" cellspacing="0" cellpadding="1" border="1"
                     style="table-layout: fixed; font-size: 9px; text-align: center; color: #000;">
                     <thead>
@@ -134,12 +129,12 @@
                             <th rowspan="2" width="11%" style="text-align: center;"><strong>Name of Workmen</strong>
                             </th>
                             <!--<td rowspan="2" style="width: 60px;text-align: center;"><strong>Category</strong></td>-->
-                            <th rowspan="2" width="4%" style="text-align: center;"><strong>Designation/<br />Nature
+                            <th rowspan="2" width="5%" style="text-align: center;"><strong>Designation/<br />Nature
                                     of<br /> Work Done</strong></th>
 
                             <th rowspan="2" width="3%" style="text-align: center;"><strong>No
                                     of<br />Days<br />Worked</strong></th>
-                            <th rowspan="2" width="3%" style="text-align: center;"><strong>Daily rate <br />of
+                            <th rowspan="2" width="4%" style="text-align: center;"><strong>Daily rate <br />of
                                     wages<br />Piece Rate</strong></th>
                             <th rowspan="2" width="3%" style="text-align: center;"><strong>OT <br />Hours <br />
                                     Worked</strong></th>
@@ -155,20 +150,17 @@
                             <td rowspan="2" style="text-align: center;"><strong>Leave</strong></td>
 
                             <td rowspan="2" style="text-align: center;"><strong>*Others</strong></td> -->
-                            <th colspan="6" width="21%" style="text-align: center;"><strong>Amount of Wages Earned</strong></th>
+                            <th colspan="6" width="22%" style="text-align: center;"><strong>Amount of wages earned</strong></th>
                             <!-- <td rowspan="2" style="width: 70px;text-align: center;"><strong>Total</strong></td> -->
                             <th rowspan="2" width="4%" style="text-align: center;"><strong>Total <br /> Gross <br />
                                     Amount</strong></th>
-                            <th colspan="9" width="27%" style="text-align: center;"><strong>Deduction</strong></th>
+                            <th colspan="7" width="23%" style="text-align: center;"><strong>Deduction</strong></th>
                             <th rowspan="2" width="4%" style="text-align: center;"><strong>Net<br />Payment</strong>
                             </th>
-                            <th rowspan="2" width="4%" style="text-align: center;"><strong>Employer <br />Share<br />PF
-                                    Welfare<br /> Fund</strong></th>
-
-                            <th rowspan="2" width="4%" style="text-align: center;">
-                                <strong>Signature<br />/thumb<br />impresssion of<br />workman/<br />Transaction
-                                    ID</strong></th>
-                            <th rowspan="2" width="4%" style="text-align: center;"><strong>Date of<br />
+                            <th rowspan="2" width="6%" style="text-align: center;">
+                                <strong>Signature<br />/thumb impression of<br />workman</strong></th>
+                            <th rowspan="2" width="6%" style="text-align: center;"><strong>Initials of contractor<br />or the<br />representative</strong></th>
+                            <th rowspan="2" width="5%" style="text-align: center;"><strong>Date of<br />
                                     Payment</strong></th>
                             <!--<td rowspan="2" style="width: 40px;text-align: center;"><strong>Receipt by <br />Employee/Bank<br /> Transaction ID</strong></td>-->
                             <!--<td rowspan="2" style="text-align: center;"><strong>Date of<br /> Payment</strong></td>-->
@@ -176,26 +168,32 @@
                         </tr>
                         <tr>
                             <!--<td style="text-align: center;"><strong>Special<br />Basic</strong></td>-->
-                            <th width="3.5%" style="text-align: center;"><strong>DA</strong></th>
-                            <th width="3.5%" style="text-align: center;"><strong>HRA</strong></th>
-                            <th width="3.5%" style="text-align: center;"><strong>Payments<br /> OT</strong></th>
-                            <th width="3.5%" style="text-align: center;"><strong>Bonus</strong></th>
-                            <th width="3.5%" style="text-align: center;"><strong>Leave</strong></th>
-                            <th width="3.5%" style="text-align: center;"><strong>National <br /> Holiday
+                            <th width="4%" style="text-align: center;"><strong>Dearness<br />Allowances</strong></th>
+                            <th width="4%" style="text-align: center;"><strong>Overtime</strong></th>
+                            <th width="3%" style="text-align: center;"><strong>Bonus</strong></th>
+                            <th width="3%" style="text-align: center;"><strong>Leave</strong></th>
+                            <th width="4%" style="text-align: center;"><strong>National <br /> Holiday
                                     <br />Payment</strong></th>
-                            <!--<td style="text-align: center;"><strong>*Others</strong></td>-->
+                            <th width="4%" style="text-align: center;"><strong>Other cash payments<br />(nature of payments to be indicated)</strong></th>
 
                             <th width="3%" style="text-align: center;"><strong>PF</strong></th>
                             <th width="3%" style="text-align: center;"><strong>ESIC</strong></th>
                             <th width="3%" style="text-align: center;"><strong>Advance</strong></th>
-                            <th width="3%" style="text-align: center;"><strong>Professional<br /> Tax</strong></th>
-                            <th width="3%" style="text-align: center;"><strong>Society</strong></th>
-
-                            <th width="3%" style="text-align: center;"><strong>Income <br />Tax</strong></th>
-
-                            <th width="3%" style="text-align: center;"><strong>Insurance</strong></th>                            <!--<td style="text-align: center;"><strong>Others</strong></td>-->
+                            <th width="4%" style="text-align: center;"><strong>Professional<br /> Tax</strong></th>
+                            <th width="3%" style="text-align: center;"><strong>Insurance</strong></th>
                             <th width="3%" style="text-align: center;"><strong>Recoveries</strong></th>
-                            <th width="3%" style="text-align: center;"><strong>Total <br />Deduction</strong></th>
+                            <th width="4%" style="text-align: center;"><strong>Total <br />Deduction</strong></th>
+                        </tr>
+                        <tr style="font-weight: bold;">
+                            <th width="2%">1</th><th width="2%">1A</th><th width="11%">2</th>
+                            <th width="5%">3</th><th width="3%">4</th><th width="4%">5</th>
+                            <th width="3%">6</th><th width="4%">7</th><th width="4%">8</th>
+                            <th width="4%">9</th><th width="3%">10</th><th width="3%">11</th>
+                            <th width="4%">12</th><th width="4%">13</th><th width="4%">14</th>
+                            <th width="3%">15</th><th width="3%">16</th><th width="3%">17</th>
+                            <th width="4%">18</th><th width="3%">19</th><th width="3%">20</th>
+                            <th width="4%">21</th><th width="4%">22</th><th width="6%">23</th>
+                            <th width="6%">24</th><th width="5%">24</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -204,37 +202,35 @@
                             <td width="2%">Total</td>
                             <td width="2%"></td>
                             <td width="11%"></td>
-                            <td width="4%"></td>
+                            <td width="5%"></td>
                             <!--<td></td>-->
                             <td width="3%" style="text-align: right;">#totalDay#</td>
-                            <td width="3%"></td>
+                            <td width="4%"></td>
                             <td width="3%" style="text-align: right;">#TotalOTHours#</td>
                             <td width="4%" style="text-align: right;">#basic#</td>
                             <!--<td></td>-->
-                            <td width="3.5%" style="text-align: right;">#TotalDA#</td>
-                            <td width="3.5%" style="text-align: right;">#TotalHRA#</td>
-                            <td width="3.5%" style="text-align: right;">#OTPay#</td>
-                            <td width="3.5%" style="text-align: right;">#TotalBonusAmt#</td>
-                            <td width="3.5%" style="text-align: right;">#TotalLeaveAmt#</td>
-                            <td width="3.5%" style="text-align: right;">#TotalNationalHolidayPayment#</td>
+                            <td width="4%" style="text-align: right;">#TotalDA#</td>
+                            <td width="4%" style="text-align: right;">#OTPay#</td>
+                            <td width="3%" style="text-align: right;">#TotalBonusAmt#</td>
+                            <td width="3%" style="text-align: right;">#TotalLeaveAmt#</td>
+                            <td width="4%" style="text-align: right;">#TotalNationalHolidayPayment#</td>
+                            <td width="4%"></td>
                             <!--<td></td>-->
                             <td width="4%" style="text-align: right;">#total#</td>
 
                             <td width="3%" style="text-align: right;">#pf#</td>
                             <td width="3%" style="text-align: right;">#esi#</td>
                             <td width="3%" style="text-align: right;">#advance#</td>
-                            <td width="3%" style="text-align: right;">#pt#</td>
-                            <td width="3%"></td>
-                            <td width="3%"></td>
+                            <td width="4%" style="text-align: right;">#pt#</td>
 
                             <td width="3%"></td>
                             <td width="3%"></td>
                             <!--<td></td>-->
-                            <td width="3%" style="text-align: right;">#deductiontotal#</td>
+                            <td width="4%" style="text-align: right;">#deductiontotal#</td>
                             <td width="4%" style="text-align: right;">#netamountpaid#</td>
-                            <td width="4%" style="text-align: right;">#pf#</td>
-                            <td width="4%"></td>
-                            <td width="4%"></td>
+                            <td width="6%"></td>
+                            <td width="6%"></td>
+                            <td width="5%"></td>
                             <!--<td></td>-->
 
                         </tr>
