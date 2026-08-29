@@ -1,4 +1,8 @@
 <?php
+// A spreadsheet must not contain any PHP notice, warning, or buffered HTML
+// before the XLSX (ZIP) payload, otherwise Excel reports that it is corrupt.
+ob_start();
+ini_set('display_errors', '0');
 include '../common.php';
 include 'IsLogin.php';
 require_once 'employeePaymentHistoryData.php';

@@ -20,8 +20,10 @@ function employeePaymentHistoryFind($dbconn, $employeeId)
         return null;
     }
 
-    // salarymaster.month is stored as MM/YYYY. STR_TO_DATE makes the result
-    // independent of insertion order when an older salary is entered later.
+    // Date of Exit is the salary month in which PF was deducted for this
+    // employee for the last time. salarymaster.month is stored as MM/YYYY;
+    // sorting its parsed value avoids treating a later-entered old salary as
+    // the employee's exit month.
     $lastPfSql = "SELECT sm.month FROM salarydetails sd
                   INNER JOIN salarymaster sm ON sm.salarymasterId=sd.salaryId
                   WHERE sd.emp_id=" . $employeeId . " AND sd.pf>0
