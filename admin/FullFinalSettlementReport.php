@@ -175,9 +175,9 @@ function renderFullFinalSettlement(array $data)
         '</style></head><body><div class="page"><div class="title">ફુલ એન્ડ ફાયનલ સેટલમેન્ટ</div>' .
         '<table class="info"><tr><td class="label">કોન્ટ્રકટરનું નામ :</td><td class="value">SHREE GANESH ENGINEERING CO.</td></tr>' .
         '<tr><td>કોન્ટ્રકટરનું સરનામું :</td><td class="value">FF-8 Devshruti Complex, Mithakhali, Ahmedabad – 380006.</td></tr>' .
-        '<tr><td>કામદારનું નામ :</td><td class="value">' . $e($data['employee_name']) . ' (' . $e($data['employee_code']) . ')</td></tr>' .
+        '<tr><td>કામદારનું નામ :</td><td class="value">' . $e($data['employee_name']) . '</td></tr>' .
         '<tr><td>કામદારનું સરનામું :</td><td class="value">' . $e($data['employee_address']) . '</td></tr></table>' .
-        '<table class="dates"><tr><td>દાખલ થયાની તારીખ : <span class="date-value">&nbsp;</span></td><td>છુટા થયાની તારીખ : <span class="date-value">&nbsp;</span></td></tr></table>' .
+        '<table class="dates"><tr><td>દાખલ થયાની તારીખ : ___________________________ <span class="date-value">&nbsp;</span></td><td>છુટા થયાની તારીખ : ___________________________<span class="date-value">&nbsp;</span></td></tr></table>' .
         '<div class="salary">પગાર નો માસ <span class="box">' . $e($data['period']) . '</span> દિવસો <span class="box">' . $e($data['working_days']) . '</span></div>' .
         '<table class="main"><tr><td class="header" width="32%">ચુકવણાનો પ્રકાર</td><td class="header" width="18%">રકમ રૂ.</td><td class="header" width="31%">કપાત રૂ.</td><td class="header" width="19%">રકમ રૂ.</td></tr>' .
         '<tr><td>બેઝીક</td><td class="amount">' . $a($data['basic']) . '</td><td>PF –</td><td class="amount">' . $a($data['pf']) . '</td></tr>' .
@@ -188,7 +188,7 @@ function renderFullFinalSettlement(array $data)
         '<tr class="bold"><td>કુલ ચુકવણું</td><td class="amount">' . $a($data['total_earnings']) . '</td><td>કુલ કપાતો</td><td class="amount">' . $a($data['total_deductions']) . '</td></tr>' .
         '<tr class="bold"><td></td><td></td><td>R/O</td><td class="amount">' . ($data['rounding'] >= 0 ? '+' : '') . $a($data['rounding']) . '</td></tr>' .
         '<tr class="net"><td>ચોખ્ખી રકમ</td><td></td><td></td><td class="amount">' . $a($data['net']) . '</td></tr></table>' .
-        '<div class="other-wrap">અન્ય ચુકવણા :-<table class="other"><tr><td class="header">નોટીસ પે</td><td class="header">બોનસ</td><td></td><td></td><td class="header">કુલ રકમ</td></tr><tr><td class="amount">' . $a($data['notice_pay']) . '</td><td class="amount">' . $a($data['other_bonus']) . '</td><td></td><td></td><td class="amount">' . $a($data['other_total']) . '</td></tr></table></div>' .
+        '<div class="other-wrap">અન્ય ચુકવણા :-<table class="other"><tr><td class="header" width="14%">નોટીસ પે</td><td class="header" width="18%">બોનસ</td><td width="24%"></td><td width="24%"></td><td class="header" width="20%">કુલ રકમ</td></tr><tr><td class="amount">' . $a($data['notice_pay']) . '</td><td class="amount">' . $a($data['other_bonus']) . '</td><td></td><td></td><td class="amount">' . $a($data['other_total']) . '</td></tr></table></div>' .
         '<div class="words">શબ્દોમાં રકમ રૂ. : ' . $e(fullFinalAmountInWords($data['net'])) . '</div><div class="words">કામદાર નું મુખત્યાર નામ :</div>' .
         '<div class="ack">ફુલ એન્ડ ફાયનલ સેટલમેન્ટ તરીકે મને રૂ. <u>' . $a($data['net']) . '</u> મળેલ છે. મારા નીકળતા લેણાની રકમની ગણતરી સાચી અને ખરી છે. હવે મારે પગાર તેમજ અન્ય કાયદેસરના હક્ક-હિસ્સાની કોઈ રકમ લેવાની નીકળતી નથી. મને ચૂકવવામાં આવેલ રકમથી મને સંપૂર્ણ સંતોષ છે, અને આ અંગે હું કોઈ જ વિવાદ ઉભો કરીશ નહીં.</div>' .
         '<table class="signs"><tr><td><span class="witness-title">સાક્ષીની સહી :</span> ' . $signatureHtml . '<br><b>સાક્ષીનું નામ :</b> Kishor V Raval<br><b>સરનામું :</b> 4, Pavansut Society,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IOC Tragad Road, Tragad, Ahmedabad.</td><td class="worker">કામદારની સહી</td></tr></table>' .
