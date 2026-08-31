@@ -57,8 +57,8 @@ try {
             4 => array('કોન્ટ્રકટરનું સરનામું :', 'FF-8 Devshruti Complex, Mithakhali, Ahmedabad - 380006.'),
             5 => array('કામદારનું નામ :', $data['employee_name'] . ' (' . $data['employee_code'] . ')'),
             6 => array('કામદારનું સરનામું :', $data['employee_address']),
-            7 => array('દાખલ થયાની તારીખ :', $data['joining_date']),
-            8 => array('છુટા થયાની તારીખ :', $data['exit_date']),
+            7 => array('દાખલ થયાની તારીખ :', ''),
+            8 => array('છુટા થયાની તારીખ :', ''),
             9 => array('પગાર નો માસ :', $data['period'] . '     દિવસો: ' . $data['working_days'])
         );
         foreach ($details as $row => $values) {
