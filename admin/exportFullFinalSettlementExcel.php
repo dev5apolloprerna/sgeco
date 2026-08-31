@@ -8,6 +8,7 @@ require_once('../vendor/autoload.php');
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
@@ -80,11 +81,26 @@ try {
         $sheet->fromArray(array('નોટીસ પે', 'બોનસ', '', 'કુલ અન્ય રકમ'), null, 'A22');
         $sheet->fromArray(array($data['notice_pay'], $data['other_bonus'], '', $data['other_total']), null, 'A23');
         $sheet->mergeCells('A25:D25')->setCellValue('A25', 'શબ્દોમાં રકમ રૂ. : ' . fullFinalAmountInWords($data['net']));
-        $sheet->mergeCells('A27:B27')->setCellValue('A27', 'સાક્ષીની સહી : __________________');
+        $sheet->mergeCells('A27:B27')->setCellValue('A27', 'સાક્ષીની સહી :');
         $sheet->mergeCells('A28:B28')->setCellValue('A28', 'સાક્ષીનું નામ : Kishor V Raval');
         $sheet->mergeCells('A29:B30')->setCellValue('A29', "સરનામું : 4, Pavansut Society,\nIOC Tragad Road, Tragad, Ahmedabad.");
         $sheet->mergeCells('C27:D30')->setCellValue('C27', 'કામદારની સહી');
 
+        $signaturePath = __DIR__ . '/SGECO-forms/image1.png';
+        if (is_readable($signaturePath)) {
+            $signature = new Drawing();
+            $signature->setName('Witness signature');
+            $signature->setDescription('Witness signature');
+            $signature->setPath($signaturePath);
+            $signature->setCoordinates('B27');
+            $signature->setOffsetX(8);
+            $signature->setOffsetY(2);
+            $signature->setWidth(105);
+            $signature->setHeight(42);
+            $signature->setWorksheet($sheet);
+            $sheet->getRowDimension(27)->setRowHeight(34);
+        }
+        
         // Shruti is Excel's Gujarati theme font and preserves Gujarati glyphs
         // when the workbook is opened on supported Microsoft Office systems.
         $sheet->getStyle('A1:D30')->getFont()->setName('Shruti')->setSize(10);
