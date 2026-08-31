@@ -7,13 +7,13 @@ require_once('tcpdf/config/tcpdf_config.php');
 require_once('tcpdf/tcpdf.php');
 
 try {
-    $data = getFullFinalSettlement(
+    $settlements = getFullFinalSettlements(
         $dbconn,
         isset($_GET['employeeId']) ? $_GET['employeeId'] : 0,
         isset($_GET['Company']) ? $_GET['Company'] : 0,
         isset($_GET['salarymasterId']) ? trim($_GET['salarymasterId']) : ''
     );
-    $html = renderFullFinalSettlement($data);
+    $html = renderFullFinalSettlements($settlements);
 } catch (Throwable $exception) {
     ob_clean();
     http_response_code(400);
@@ -22,12 +22,13 @@ try {
 ob_clean();
 $pdf = new TCPDF('P', PDF_UNIT, 'A4', true, 'UTF-8', false);
 $pdf->SetCreator('SGECO');
-$pdf->SetTitle('Full and Final Settlement - ' . $data['employee_name']);
+$pdf->SetTitle('Full and Final Settlement');
 $pdf->setPrintHeader(false);
 $pdf->setPrintFooter(false);
 $pdf->SetMargins(10, 8, 10);
 $pdf->SetAutoPageBreak(true, 8);
-$pdf->SetFont('dejavusans', '', 9);
+$pdf->SetFont('freeserif', '', 9);
 $pdf->AddPage();
 $pdf->writeHTML($html, true, false, true, false, '');
-$pdf->Output('Full-Final-Settlement-' . preg_replace('/[^A-Za-z0-9_-]+/', '-', $data['employee_name']) . '.pdf', 'I');
+$fileSuffix = count($settlements) === 1 ? '-' . preg_replace('/[^A-Za-z0-9_-]+/', '-', $settlements[0]['employee_name']) : '-All-Employees';
+$pdf->Output('Full-Final-Settlement' . $fileSuffix . '.pdf', 'I');

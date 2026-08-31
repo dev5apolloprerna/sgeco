@@ -6,6 +6,15 @@ $connect = new connect();
 include('IsLogin.php');
 $employees = mysqli_query($dbconn, "SELECT employeeId, employeecode, emp_name FROM employee WHERE isDelete='0' AND istatus='1' ORDER BY emp_name");
 $companies = mysqli_query($dbconn, "SELECT companymasterId, companyname FROM companymaster WHERE isDelete='0' AND istatus='1' ORDER BY companyname");
+$defaultCompany = mysqli_fetch_assoc(mysqli_query($dbconn, "SELECT companymasterId FROM companymaster WHERE isDelete='0' AND istatus='1' AND LOWER(companyname) LIKE '%tata%chemical%' ORDER BY companymasterId LIMIT 1"));
+$defaultCompanyId = $defaultCompany ? (int) $defaultCompany['companymasterId'] : 0;
+$defaultSalaryMonth = '';
+if ($defaultCompanyId > 0) {
+    $lastSalary = mysqli_fetch_assoc(mysqli_query($dbconn, "SELECT sm.month FROM salarydetails sd INNER JOIN salarymaster sm ON sm.salarymasterId=sd.salaryId AND sm.isDelete='0' AND sm.istatus='1' WHERE sd.companyId=" . $defaultCompanyId . " AND sd.isDelete='0' AND sd.istatus='1' AND sm.month REGEXP '^(0[1-9]|1[0-2])/[0-9]{4}$' ORDER BY STR_TO_DATE(CONCAT('01/', sm.month), '%d/%m/%Y') DESC LIMIT 1"));
+    $defaultSalaryMonth = $lastSalary ? $lastSalary['month'] : '';
+}
+$defaultMonth = $defaultSalaryMonth !== '' ? (int) substr($defaultSalaryMonth, 0, 2) : (int) date('m');
+$defaultYear = $defaultSalaryMonth !== '' ? (int) substr($defaultSalaryMonth, 3, 4) : (int) date('Y');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -115,11 +124,11 @@ $companies = mysqli_query($dbconn, "SELECT companymasterId, companyname FROM com
                         <div class="portlet-body form">
                             <form id="settlementSearch">
                                 <div class="row">
-                                    <div class="form-group col-md-4"><label for="employeeSearch">Search Employee</label>
+                                    <div class="form-group col-md-4"><label for="employeeSearch">Search Employee <span class="text-muted">(Optional)</span></label>
                                         <div class="employee-search-wrap"><input type="text" id="employeeSearch" class="form-control" placeholder="Type a name or employee code" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="employeeResults" aria-expanded="false"><input type="hidden" id="employeeId" value="">
                                             <ul id="employeeResults" class="employee-search-results" role="listbox"></ul>
                                         </div>
-                                        <p id="selectedEmployee" class="selected-employee" aria-live="polite">No employee selected</p>
+                                        <p id="selectedEmployee" class="selected-employee" aria-live="polite">No employee selected — all matching employees will be included</p>
                                         <script type="application/json" id="employeeData">
                                             <?php
                                             $employeeData = array();
@@ -131,12 +140,12 @@ $companies = mysqli_query($dbconn, "SELECT companymasterId, companyname FROM com
                                         </script>
                                     </div>
                                     <div class="form-group col-md-3"><label>Company</label><select id="Company" class="form-control" required>
-                                            <option value="">Select Company</option><?php while ($company = mysqli_fetch_assoc($companies)) { ?><option value="<?php echo (int) $company['companymasterId']; ?>"><?php echo htmlspecialchars($company['companyname'], ENT_QUOTES, 'UTF-8'); ?></option><?php } ?>
+                                            <option value="">Select Company</option><?php while ($company = mysqli_fetch_assoc($companies)) { ?><option value="<?php echo (int) $company['companymasterId']; ?>" <?php echo (int) $company['companymasterId'] === $defaultCompanyId ? 'selected' : ''; ?>><?php echo htmlspecialchars($company['companyname'], ENT_QUOTES, 'UTF-8'); ?></option><?php } ?>
                                         </select></div>
                                     <div class="form-group col-md-2"><label>Month</label><select id="month" class="form-control" required>
-                                            <option value="">Month</option><?php for ($month = 1; $month <= 12; $month++) { ?><option value="<?php echo sprintf('%02d', $month); ?>" <?php echo $month === (int) date('m') ? ' selected' : ''; ?>><?php echo date('F', mktime(0, 0, 0, $month, 1)); ?></option><?php } ?>
+                                            <option value="">Month</option><?php for ($month = 1; $month <= 12; $month++) { ?><option value="<?php echo sprintf('%02d', $month); ?>" <?php echo $month === $defaultMonth ? ' selected' : ''; ?>><?php echo date('F', mktime(0, 0, 0, $month, 1)); ?></option><?php } ?>
                                         </select></div>
-                                    <div class="form-group col-md-2"><label>Year</label><select id="Year" class="form-control" required><?php for ($year = (int) date('Y') - 2; $year <= (int) date('Y') + 1; $year++) { ?><option value="<?php echo $year; ?>" <?php echo $year === (int) date('Y') ? ' selected' : ''; ?>><?php echo $year; ?></option><?php } ?></select></div>
+                                    <div class="form-group col-md-2"><label>Year</label><select id="Year" class="form-control" required><?php for ($year = min((int) date('Y') - 2, $defaultYear); $year <= max((int) date('Y') + 1, $defaultYear); $year++) { ?><option value="<?php echo $year; ?>" <?php echo $year === $defaultYear ? ' selected' : ''; ?>><?php echo $year; ?></option><?php } ?></select></div>
                                 </div>
                                 <div class="settlement-actions"><button class="btn blue" type="submit"><i class="fa fa-search"></i> Preview Report</button><button class="btn red" type="button" id="pdfButton"><i class="fa fa-file-pdf-o"></i> Download PDF</button><button class="btn green" type="button" id="excelButton"><i class="fa fa-file-excel-o"></i> Download Excel</button></div>
                                 <p class="help-block demo-note">Demo: select an employee with payroll data for the chosen company and salary month.</p>
@@ -210,7 +219,7 @@ $companies = mysqli_query($dbconn, "SELECT companymasterId, companyname FROM com
             $search.on('focus input', function(event) {
                 if (event.type === 'input') {
                     $('#employeeId').val('');
-                    $('#selectedEmployee').text('No employee selected');
+                    $('#selectedEmployee').text('No employee selected — all matching employees will be included');
                 }
                 renderResults();
             }).on('keydown', function(event) {
@@ -237,8 +246,8 @@ $companies = mysqli_query($dbconn, "SELECT companymasterId, companyname FROM com
 
             function valid() {
                 var p = params();
-                if (!p.employeeId || !p.Company) {
-                    alert('Please select an employee and company.');
+                if (!p.Company) {
+                    alert('Please select a company.');
                     return false;
                 }
                 return true;
