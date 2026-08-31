@@ -147,7 +147,7 @@ $defaultYear = $defaultSalaryMonth !== '' ? (int) substr($defaultSalaryMonth, 3,
                                         </select></div>
                                     <div class="form-group col-md-2"><label>Year</label><select id="Year" class="form-control" required><?php for ($year = min((int) date('Y') - 2, $defaultYear); $year <= max((int) date('Y') + 1, $defaultYear); $year++) { ?><option value="<?php echo $year; ?>" <?php echo $year === $defaultYear ? ' selected' : ''; ?>><?php echo $year; ?></option><?php } ?></select></div>
                                 </div>
-                                <div class="settlement-actions"><button class="btn blue" type="submit"><i class="fa fa-search"></i> Preview Report</button><button class="btn red" type="button" id="pdfButton"><i class="fa fa-file-pdf-o"></i> Download PDF</button><button class="btn green" type="button" id="excelButton"><i class="fa fa-file-excel-o"></i> Download Excel</button></div>
+                                <div class="settlement-actions"><button class="btn blue" type="submit"><i class="fa fa-search"></i> Preview Report</button><button class="btn red" type="button" id="pdfButton"><i class="fa fa-file-pdf-o"></i> Download PDF</button><button class="btn green" type="button" id="excelButton"><i class="fa fa-file-excel-o"></i> Download Excel</button><button class="btn blue" type="button" id="wordButton"><i class="fa fa-file-word-o"></i> Download Word</button></div>
                                 <p class="help-block demo-note">Demo: select an employee with payroll data for the chosen company and salary month.</p>
                             </form>
                             <hr>
@@ -280,6 +280,9 @@ $defaultYear = $defaultSalaryMonth !== '' ? (int) substr($defaultSalaryMonth, 3,
             });
             $('#excelButton').click(function() {
                 download('exportFullFinalSettlementExcel.php');
+            });
+            $('#wordButton').click(function() {
+                download('exportFullFinalSettlementWord.php');
             });
         })();
     </script>
