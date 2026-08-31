@@ -27,11 +27,10 @@ $pdf->setPrintHeader(false);
 $pdf->setPrintFooter(false);
 $pdf->SetMargins(10, 8, 10);
 $pdf->SetAutoPageBreak(true, 8);
-// FreeSerif is bundled with TCPDF and contains the complete Gujarati block.
-// Keeping the PHP font and the HTML font identical prevents TCPDF from
-// silently falling back to Helvetica, which renders Gujarati inconsistently.
+// FreeSans is bundled with TCPDF, contains Gujarati glyphs, and most closely
+// matches the sans-serif Gujarati font used in the source document.
 $pdf->setFontSubsetting(true);
-$pdf->SetFont('freeserif', '', 9);
+$pdf->SetFont('freesans', '', 9);
 $pdf->AddPage();
 $pdf->writeHTML($html, true, false, true, false, '');
 $fileSuffix = count($settlements) === 1 ? '-' . preg_replace('/[^A-Za-z0-9_-]+/', '-', $settlements[0]['employee_name']) : '-All-Employees';

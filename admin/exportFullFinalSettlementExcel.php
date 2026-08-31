@@ -79,10 +79,15 @@ try {
         $sheet->fromArray($rows, null, 'A12');
         $sheet->fromArray(array('નોટીસ પે', 'બોનસ', '', 'કુલ અન્ય રકમ'), null, 'A22');
         $sheet->fromArray(array($data['notice_pay'], $data['other_bonus'], '', $data['other_total']), null, 'A23');
-        $sheet->mergeCells('A25:D25')->setCellValue('A25', 'શબ્દોમાં રકમ રૂ. : ' . number_format((float) $data['net'], 2) . ' only');
-        $sheet->mergeCells('A27:D29')->setCellValue('A27', 'Employee acknowledgement / કામદારની સહી: __________________________');
+        $sheet->mergeCells('A25:D25')->setCellValue('A25', 'શબ્દોમાં રકમ રૂ. : ' . fullFinalAmountInWords($data['net']));
+        $sheet->mergeCells('A27:B27')->setCellValue('A27', 'સાક્ષીની સહી : __________________');
+        $sheet->mergeCells('A28:B28')->setCellValue('A28', 'સાક્ષીનું નામ : Kishor V Raval');
+        $sheet->mergeCells('A29:B30')->setCellValue('A29', "સરનામું : 4, Pavansut Society,\nIOC Tragad Road, Tragad, Ahmedabad.");
+        $sheet->mergeCells('C27:D30')->setCellValue('C27', 'કામદારની સહી');
 
-        $sheet->getStyle('A1:D29')->getFont()->setName('Nirmala UI')->setSize(10);
+        // Shruti is Excel's Gujarati theme font and preserves Gujarati glyphs
+        // when the workbook is opened on supported Microsoft Office systems.
+        $sheet->getStyle('A1:D30')->getFont()->setName('Shruti')->setSize(10);
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(18);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $sheet->getStyle('A11:D11')->getFont()->setBold(true);
@@ -92,12 +97,16 @@ try {
         $sheet->getStyle('A22:D23')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
         $sheet->getStyle('B12:B19')->getNumberFormat()->setFormatCode('0.00');
         $sheet->getStyle('D12:D23')->getNumberFormat()->setFormatCode('0.00');
-        $sheet->getStyle('A1:D29')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setWrapText(true);
+        $sheet->getStyle('A1:D30')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setWrapText(true);
+        $sheet->getStyle('A27:A29')->getFont()->setBold(true);
+        $sheet->getStyle('C27:D30')->getFont()->setBold(true);
+        $sheet->getStyle('C27:D30')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)
+            ->setVertical(Alignment::VERTICAL_BOTTOM);
         foreach (array('A' => 30, 'B' => 22, 'C' => 25, 'D' => 20) as $column => $width) {
             $sheet->getColumnDimension($column)->setWidth($width);
         }
         $sheet->getPageSetup()->setOrientation(PageSetup::ORIENTATION_PORTRAIT)
-            ->setPaperSize(PageSetup::PAPERSIZE_A4)->setFitToWidth(1)->setFitToHeight(1)->setPrintArea('A1:D29');
+            ->setPaperSize(PageSetup::PAPERSIZE_A4)->setFitToWidth(1)->setFitToHeight(1)->setPrintArea('A1:D30');
     }
     $spreadsheet->setActiveSheetIndex(0);
     $outputFile = tempnam(sys_get_temp_dir(), 'full-final-');
