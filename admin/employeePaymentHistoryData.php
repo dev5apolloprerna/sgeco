@@ -40,11 +40,31 @@ function employeePaymentHistoryFind($dbconn, $employeeId)
 
 function employeePaymentHistoryDate($value)
 {
-    if (!$value || $value === '0000-00-00') {
+    $value = trim((string) $value);
+    if ($value === '' || $value === '0000-00-00') {
         return '';
     }
-    $time = strtotime($value);
-    return $time ? date('d-m-Y', $time) : $value;
+    // Joining dates in older employee records may contain only a month and
+    // year (for example, "Sep-20"). strtotime() reads that value as the 20th
+    // day of September in the current year, so parse month/year values before
+    // considering complete dates and do not invent a day that was not stored.
+    foreach (array('!M-y', '!M-Y', '!M/y', '!M/Y', '!m-y', '!m-Y', '!m/y', '!m/Y') as $format) {
+        $date = DateTime::createFromFormat($format, $value);
+        $errors = DateTime::getLastErrors();
+        if ($date && ($errors === false || ($errors['warning_count'] === 0 && $errors['error_count'] === 0))) {
+            return $date->format('M-y');
+        }
+    }
+
+    foreach (array('!d-m-Y', '!d/m/Y', '!Y-m-d', '!Y/m/d') as $format) {
+        $date = DateTime::createFromFormat($format, $value);
+        $errors = DateTime::getLastErrors();
+        if ($date && ($errors === false || ($errors['warning_count'] === 0 && $errors['error_count'] === 0))) {
+            return $date->format('d-m-Y');
+        }
+    }
+
+    return $value;
 }
 
 function employeePaymentHistoryMonth($value)
