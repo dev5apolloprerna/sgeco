@@ -525,20 +525,20 @@ echo "\xEF\xBB\xBF";
         .month-title {
             font-weight: bold;
             text-align: left;
-            background: #e7e6e6;
+            /* background: #e7e6e6; */
         }
 
         .column-heading {
             font-weight: bold;
             text-align: center;
-            background: #d9eaf7;
+            /* background: #d9eaf7; */
             white-space: nowrap;
         }
 
         .section-heading {
             font-weight: bold;
             text-align: center;
-            background: #fff2cc;
+            /* background: #fff2cc; */
         }
 
         .text-value {

@@ -6,6 +6,28 @@ require_once('FullFinalSettlementReport.php');
 require_once('tcpdf/config/tcpdf_config.php');
 require_once('tcpdf/tcpdf.php');
 
+function registerGujaratiPdfFont()
+{
+    $fontDirectory = __DIR__ . '/assets/fonts';
+    $regularFont = $fontDirectory . '/NotoSansGujarati-Regular.ttf';
+    $boldFont = $fontDirectory . '/NotoSansGujarati-Bold.ttf';
+
+    if (!is_readable($regularFont) || !is_readable($boldFont)) {
+        throw new RuntimeException(
+            'Gujarati PDF fonts are not installed. Add NotoSansGujarati-Regular.ttf and ' .
+            'NotoSansGujarati-Bold.ttf to admin/assets/fonts (see admin/assets/fonts/README.md).'
+        );
+    }
+
+    $regularFamily = TCPDF_FONTS::addTTFfont($regularFont, 'TrueTypeUnicode', '', 32);
+    $boldFamily = TCPDF_FONTS::addTTFfont($boldFont, 'TrueTypeUnicode', '', 32);
+    if ($regularFamily === false || $boldFamily === false) {
+        throw new RuntimeException('TCPDF could not register the Gujarati PDF fonts.');
+    }
+
+    return $regularFamily;
+}
+
 try {
     $settlements = getFullFinalSettlements(
         $dbconn,
@@ -13,7 +35,9 @@ try {
         isset($_GET['Company']) ? $_GET['Company'] : 0,
         isset($_GET['salarymasterId']) ? trim($_GET['salarymasterId']) : ''
     );
+    $fontFamily = registerGujaratiPdfFont();
     $html = renderFullFinalSettlements($settlements);
+    $html = str_replace('font-family:freesans', 'font-family:' . $fontFamily, $html);
 } catch (Throwable $exception) {
     ob_clean();
     http_response_code(400);
@@ -27,10 +51,10 @@ $pdf->setPrintHeader(false);
 $pdf->setPrintFooter(false);
 $pdf->SetMargins(10, 8, 10);
 $pdf->SetAutoPageBreak(true, 8);
-// FreeSans is bundled with TCPDF, contains Gujarati glyphs, and most closely
-// matches the sans-serif Gujarati font used in the source document.
+// The registered Unicode font is embedded in the PDF, so the PDF viewer does
+// not need the font installed and Gujarati is not replaced with missing glyphs.
 $pdf->setFontSubsetting(true);
-$pdf->SetFont('freesans', '', 9);
+$pdf->SetFont($fontFamily, '', 9);
 $pdf->AddPage();
 $pdf->writeHTML($html, true, false, true, false, '');
 $fileSuffix = count($settlements) === 1 ? '-' . preg_replace('/[^A-Za-z0-9_-]+/', '-', $settlements[0]['employee_name']) : '-All-Employees';
