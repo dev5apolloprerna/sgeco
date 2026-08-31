@@ -103,8 +103,8 @@ try {
         
         // Shruti is Excel's Gujarati theme font and preserves Gujarati glyphs
         // when the workbook is opened on supported Microsoft Office systems.
-        $sheet->getStyle('A1:D30')->getFont()->setName('Shruti')->setSize(10);
-        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(18);
+        $sheet->getStyle('A1:D30')->getFont()->setName('Shruti')->setSize(12);
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(20);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $sheet->getStyle('A11:D11')->getFont()->setBold(true);
         $sheet->getStyle('A11:D11')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);

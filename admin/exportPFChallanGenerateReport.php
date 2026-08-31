@@ -3,6 +3,7 @@
 ob_start();
 ob_clean();
 include('../config.php');
+require_once('../vendor/autoload.php');
 
 $i = 1;
 $delimiter = ",";
@@ -476,12 +477,7 @@ while ($row = mysqli_fetch_assoc($tempEmpolyeeMasterResult)) {
     $jCounter++;
 }
 
-
-/*
-     * Export an HTML table instead of a CSV file.  Apart from looking like the
-     * printed report, this also keeps long UAN, ESIC and Aadhaar numbers from
-     * being displayed in scientific notation by Excel.
-     */
+/* Build a real XLSX workbook so Excel does not report a file-format mismatch. */
 fseek($f, 0);
 $reportRows = array();
 while (($reportRow = fgetcsv($f, 0, $delimiter)) !== false) {
@@ -489,107 +485,83 @@ while (($reportRow = fgetcsv($f, 0, $delimiter)) !== false) {
 }
 fclose($f);
 
-$filename = 'PF_Challan_Generate_Report_' . date('Y-m-d_H-i-s') . '.xls';
-header('Content-Type: application/vnd.ms-excel; charset=UTF-8');
+$spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+$sheet = $spreadsheet->getActiveSheet();
+$sheet->setTitle('PF Challan Report');
+$excelRow = 1;
+$thinBorder = array(
+    'borders' => array(
+        'allBorders' => array(
+            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+            'color' => array('argb' => 'FF000000')
+        )
+    )
+);
+
+foreach ($reportRows as $rowIndex => $reportRow) {
+    $nonEmptyValues = array_values(array_filter($reportRow, function ($value) {
+        return trim($value) !== '';
+    }));
+    if (count($nonEmptyValues) === 0) {
+        continue;
+    }
+
+    $firstValue = trim($nonEmptyValues[0]);
+    $isColumnHeading = isset($reportRow[0]) && trim($reportRow[0]) === 'SR. No.';
+    $isMonthTitle = strpos($firstValue, 'Employee List of PF and ESIC') === 0;
+    $isSectionHeading = $firstValue === 'NEW NAME';
+    $isReportTitle = !$isColumnHeading && !$isMonthTitle && !$isSectionHeading
+        && count($nonEmptyValues) === 1 && $rowIndex < 5;
+
+    if ($isReportTitle || $isMonthTitle || $isSectionHeading) {
+        $sheet->mergeCells('A' . $excelRow . ':J' . $excelRow);
+        $sheet->setCellValue('A' . $excelRow, $firstValue);
+        $sheet->getStyle('A' . $excelRow . ':J' . $excelRow)->getFont()->setBold(true);
+        $alignment = $isMonthTitle
+            ? \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT
+            : \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER;
+        $sheet->getStyle('A' . $excelRow)->getAlignment()->setHorizontal($alignment);
+        if (!$isReportTitle) {
+            $sheet->getStyle('A' . $excelRow . ':J' . $excelRow)->applyFromArray($thinBorder);
+        }
+    } else {
+        foreach (array_slice(array_pad($reportRow, 10, ''), 0, 10) as $columnIndex => $value) {
+            $coordinate = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($columnIndex + 1) . $excelRow;
+            if ($columnIndex >= 1 && $columnIndex <= 5) {
+                $sheet->setCellValueExplicit($coordinate, $value, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            } else {
+                $sheet->setCellValue($coordinate, is_numeric($value) && $value !== '' ? (float) $value : $value);
+            }
+        }
+
+        $sheet->getStyle('A' . $excelRow . ':J' . $excelRow)->applyFromArray($thinBorder);
+        if ($isColumnHeading) {
+            $sheet->getStyle('A' . $excelRow . ':J' . $excelRow)->getFont()->setBold(true);
+            $sheet->getStyle('A' . $excelRow . ':J' . $excelRow)->getAlignment()
+                ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        }
+    }
+    $excelRow++;
+}
+
+$sheet->getStyle('A1:J' . max(1, $excelRow - 1))->getFont()->setName('Arial')->setSize(11);
+$sheet->getStyle('A1:J' . max(1, $excelRow - 1))->getAlignment()
+    ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+$columnWidths = array('A' => 9, 'B' => 32, 'C' => 14, 'D' => 17, 'E' => 15, 'F' => 14, 'G' => 14, 'H' => 12, 'I' => 19, 'J' => 20);
+foreach ($columnWidths as $column => $width) {
+    $sheet->getColumnDimension($column)->setWidth($width);
+}
+$sheet->freezePane('A6');
+
+while (ob_get_level() > 0) {
+    ob_end_clean();
+}
+$filename = 'PF_Challan_Generate_Report_' . date('Y-m-d_H-i-s') . '.xlsx';
+header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 header('Content-Disposition: attachment; filename="' . $filename . '"');
 header('Cache-Control: max-age=0');
-
-echo "\xEF\xBB\xBF";
-?>
-<!DOCTYPE html>
-<html>
-
-<head>
-    <meta charset="UTF-8">
-    <style>
-        table {
-            border-collapse: collapse;
-            font-family: Arial, sans-serif;
-            font-size: 11pt;
-        }
-
-        td,
-        th {
-            border: 1px solid #000;
-            padding: 5px 7px;
-            vertical-align: middle;
-        }
-
-        .report-title {
-            border: 0;
-            font-weight: bold;
-            text-align: center;
-            font-size: 12pt;
-        }
-
-        .month-title {
-            font-weight: bold;
-            text-align: left;
-            /* background: #e7e6e6; */
-        }
-
-        .column-heading {
-            font-weight: bold;
-            text-align: center;
-            /* background: #d9eaf7; */
-            white-space: nowrap;
-        }
-
-        .section-heading {
-            font-weight: bold;
-            text-align: center;
-            /* background: #fff2cc; */
-        }
-
-        .text-value {
-            mso-number-format: "\@";
-        }
-
-        .number-value {
-            text-align: right;
-        }
-    </style>
-</head>
-
-<body>
-    <table>
-        <?php
-        foreach ($reportRows as $rowIndex => $reportRow) {
-            $nonEmptyValues = array_values(array_filter($reportRow, function ($value) {
-                return trim($value) !== '';
-            }));
-
-            if (count($nonEmptyValues) === 0) {
-                continue;
-            }
-
-            $firstValue = trim($nonEmptyValues[0]);
-            $isColumnHeading = isset($reportRow[0]) && trim($reportRow[0]) === 'SR. No.';
-            $isMonthTitle = strpos($firstValue, 'Employee List of PF and ESIC') === 0;
-            $isSectionHeading = $firstValue === 'NEW NAME';
-            $isReportTitle = !$isColumnHeading && !$isMonthTitle && !$isSectionHeading && count($nonEmptyValues) === 1 && $rowIndex < 5;
-        ?>
-            <tr>
-                <?php if ($isReportTitle || $isMonthTitle || $isSectionHeading) { ?>
-                    <td colspan="10" class="<?php echo $isMonthTitle ? 'month-title' : ($isSectionHeading ? 'section-heading' : 'report-title'); ?>">
-                        <?php echo htmlspecialchars($firstValue, ENT_QUOTES, 'UTF-8'); ?>
-                    </td>
-                <?php } else { ?>
-                    <?php foreach ($reportRow as $columnIndex => $value) {
-                        $isTextValue = $columnIndex >= 1 && $columnIndex <= 5;
-                        $cellClass = $isColumnHeading ? 'column-heading' : ($isTextValue ? 'text-value' : 'number-value');
-                        $tag = $isColumnHeading ? 'th' : 'td';
-                    ?>
-                        <<?php echo $tag; ?> class="<?php echo $cellClass; ?>"><?php echo htmlspecialchars($value, ENT_QUOTES, 'UTF-8'); ?></<?php echo $tag; ?>>
-                    <?php } ?>
-                <?php } ?>
-            </tr>
-        <?php } ?>
-    </table>
-</body>
-
-</html>
-<?php
+(new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save('php://output');
+$spreadsheet->disconnectWorksheets();
 //$filename = 'PF_Challan_Generate_Report_'.date('dmyHis') . '.xls';
 // header("Content-Type: application/vnd.ms-excel; charset=utf-8");
 // header("Content-disposition: attachment; filename=" . $filename);
@@ -606,4 +578,3 @@ echo "\xEF\xBB\xBF";
 // echo chr(255) . chr(254) .mb_convert_encoding($dataNew, 'UTF-16LE', 'UTF-8');
 
 exit;
-?>
