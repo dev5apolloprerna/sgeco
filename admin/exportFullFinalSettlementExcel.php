@@ -63,11 +63,10 @@ try {
             9 => array('પગાર નો માસ :', $data['period'] . '     દિવસો: ' . $data['working_days'])
         );
         foreach ($details as $row => $values) {
-            $sheet->setCellValue('A' . $row, $values[0])->mergeCells('B' . $row . ':E' . $row)
+            $sheet->setCellValue('A' . $row, $values[0])->mergeCells('B' . $row . ':D' . $row)
                 ->setCellValue('B' . $row, $values[1]);
         }
-        $sheet->setCellValue('A11', 'ચુકવણાનો પ્રકાર')->setCellValue('B11', 'રકમ રૂ.')
-            ->mergeCells('C11:D11')->setCellValue('C11', 'કપાત રૂ.')->setCellValue('E11', 'રકમ રૂ.');
+        $sheet->fromArray(array('ચુકવણાનો પ્રકાર', 'રકમ રૂ.', 'કપાત રૂ.', 'રકમ રૂ.'), null, 'A11');
         $rows = array(
             array('બેઝીક', $data['basic'], 'PF', $data['pf']),
             array('સ્પે. એલાઉન્સ (OT)', $data['overtime'], 'PT', $data['pt']),
@@ -78,19 +77,14 @@ try {
             array('', '', 'R/O', $data['rounding']),
             array('ચોખ્ખી રકમ', '', '', $data['net'])
         );
-        foreach ($rows as $offset => $rowValues) {
-            $row = 12 + $offset;
-            $sheet->setCellValue('A' . $row, $rowValues[0])->setCellValue('B' . $row, $rowValues[1])
-                ->mergeCells('C' . $row . ':D' . $row)->setCellValue('C' . $row, $rowValues[2])
-                ->setCellValue('E' . $row, $rowValues[3]);
-        }
-        $sheet->fromArray(array('નોટીસ પે', 'બોનસ', '', '', 'કુલ અન્ય રકમ'), null, 'A22');
-        $sheet->fromArray(array($data['notice_pay'], $data['other_bonus'], '', '', $data['other_total']), null, 'A23');
-        $sheet->mergeCells('A25:E25')->setCellValue('A25', 'શબ્દોમાં રકમ રૂ. : ' . fullFinalAmountInWords($data['net']));
+        $sheet->fromArray($rows, null, 'A12');
+        $sheet->fromArray(array('નોટીસ પે', 'બોનસ', '', 'કુલ અન્ય રકમ'), null, 'A22');
+        $sheet->fromArray(array($data['notice_pay'], $data['other_bonus'], '', $data['other_total']), null, 'A23');
+        $sheet->mergeCells('A25:D25')->setCellValue('A25', 'શબ્દોમાં રકમ રૂ. : ' . fullFinalAmountInWords($data['net']));
         $sheet->mergeCells('A27:B27')->setCellValue('A27', 'સાક્ષીની સહી :');
         $sheet->mergeCells('A28:B28')->setCellValue('A28', 'સાક્ષીનું નામ : Kishor V Raval');
         $sheet->mergeCells('A29:B30')->setCellValue('A29', "સરનામું : 4, Pavansut Society,\nIOC Tragad Road, Tragad, Ahmedabad.");
-        $sheet->mergeCells('C27:E30')->setCellValue('C27', 'કામદારની સહી');
+        $sheet->mergeCells('C27:D30')->setCellValue('C27', 'કામદારની સહી');
 
         $signaturePath = __DIR__ . '/SGECO-forms/image1.png';
         if (is_readable($signaturePath)) {
@@ -109,31 +103,26 @@ try {
         
         // Shruti is Excel's Gujarati theme font and preserves Gujarati glyphs
         // when the workbook is opened on supported Microsoft Office systems.
-        $sheet->getStyle('A1:E30')->getFont()->setName('Shruti')->setSize(12);
+        $sheet->getStyle('A1:D30')->getFont()->setName('Shruti')->setSize(12);
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(20);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A11:E11')->getFont()->setBold(true);
-        $sheet->getStyle('A11:E11')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A16:E19')->getFont()->setBold(true);
-        $sheet->getStyle('A11:E19')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-        $sheet->getStyle('A22:E23')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-        $sheet->getStyle('B7:E8')->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
+        $sheet->getStyle('A11:D11')->getFont()->setBold(true);
+        $sheet->getStyle('A11:D11')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A16:D19')->getFont()->setBold(true);
+        $sheet->getStyle('A11:D19')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $sheet->getStyle('A22:D23')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
         $sheet->getStyle('B12:B19')->getNumberFormat()->setFormatCode('0.00');
-        $sheet->getStyle('E12:E19')->getNumberFormat()->setFormatCode('0.00');
-        $sheet->getStyle('A23:B23')->getNumberFormat()->setFormatCode('0.00');
-        $sheet->getStyle('E23')->getNumberFormat()->setFormatCode('0.00');
-        $sheet->getStyle('A1:E30')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setWrapText(true);
+        $sheet->getStyle('D12:D23')->getNumberFormat()->setFormatCode('0.00');
+        $sheet->getStyle('A1:D30')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setWrapText(true);
         $sheet->getStyle('A27:A29')->getFont()->setBold(true);
-        $sheet->getStyle('C27:E30')->getFont()->setBold(true);
-        $sheet->getStyle('C27:E30')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)
+        $sheet->getStyle('C27:D30')->getFont()->setBold(true);
+        $sheet->getStyle('C27:D30')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)
             ->setVertical(Alignment::VERTICAL_BOTTOM);
-        // Keep Notice Pay compact while giving the two intentionally blank
-        // settlement fields enough room for handwritten values.
-        foreach (array('A' => 16, 'B' => 18, 'C' => 24, 'D' => 24, 'E' => 20) as $column => $width) {
+        foreach (array('A' => 30, 'B' => 22, 'C' => 25, 'D' => 20) as $column => $width) {
             $sheet->getColumnDimension($column)->setWidth($width);
         }
         $sheet->getPageSetup()->setOrientation(PageSetup::ORIENTATION_PORTRAIT)
-            ->setPaperSize(PageSetup::PAPERSIZE_A4)->setFitToWidth(1)->setFitToHeight(1)->setPrintArea('A1:E30');
+            ->setPaperSize(PageSetup::PAPERSIZE_A4)->setFitToWidth(1)->setFitToHeight(1)->setPrintArea('A1:D30');
     }
     $spreadsheet->setActiveSheetIndex(0);
     $outputFile = tempnam(sys_get_temp_dir(), 'full-final-');
