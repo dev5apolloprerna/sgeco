@@ -224,7 +224,7 @@ $advanced = array("advancedmaster.php", "AddAdvancedDetails.php", 'viewAdvancedD
                         <?php } 
                             if((isset($row['isReportMenu']) && $row['isReportMenu'] == 1) || $_SESSION['AdminType'] == 1){
                         ?>
-                            <li class="menu-dropdown classic-menu-dropdown  <?php if (in_array(basename(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH)), array('Report.php', 'OtherReport.php'))) { echo 'active'; } ?>">
+                            <li class="menu-dropdown classic-menu-dropdown  <?php if (in_array(basename(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH)), array('Report.php', 'OtherReport.php', 'FullFinalSettlement.php'))) { echo 'active'; } ?>">
                                 <a href="#"> Report</a>
                                  <ul class="dropdown-menu pull-left">
                                     <!-- <li>
@@ -287,6 +287,11 @@ $advanced = array("advancedmaster.php", "AddAdvancedDetails.php", 'viewAdvancedD
                                     <li>
                                         <a href="<?php echo $web_url; ?>admin/OtherReport.php" class="nav-link">
                                             Other Report
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="<?php echo $web_url; ?>admin/FullFinalSettlement.php" class="nav-link">
+                                            Full &amp; Final Settlement
                                         </a>
                                     </li>
                                 </ul>
