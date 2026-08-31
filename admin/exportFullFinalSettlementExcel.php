@@ -11,6 +11,32 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
+$outputFile = null;
+
+function fullFinalExcelSheetTitle($employeeCode, $employeeName, $index, array &$usedTitles)
+{
+    $title = preg_replace('/[\\\\\/\?\*\[\]:]+/u', '', trim($employeeCode . '-' . $employeeName));
+    $characters = preg_split('//u', $title, -1, PREG_SPLIT_NO_EMPTY);
+    if ($characters === false) {
+        $characters = str_split(preg_replace('/[^A-Za-z0-9 _-]/', '', $title));
+    }
+    $title = implode('', array_slice($characters, 0, 31));
+    if ($title === '' || $title === '-') {
+        $title = 'Employee ' . ($index + 1);
+    }
+    $baseTitle = $title;
+    $suffix = 2;
+    while (isset($usedTitles[strtolower($title)])) {
+        $append = ' (' . $suffix++ . ')';
+        $title = implode('', array_slice($characters, 0, 31 - strlen($append))) . $append;
+        if ($baseTitle !== '' && !$characters) {
+            $title = substr($baseTitle, 0, 31 - strlen($append)) . $append;
+        }
+    }
+    $usedTitles[strtolower($title)] = true;
+    return $title;
+}
+
 try {
     $settlements = getFullFinalSettlements(
         $dbconn,
@@ -19,10 +45,10 @@ try {
         isset($_GET['salarymasterId']) ? trim($_GET['salarymasterId']) : ''
     );
     $spreadsheet = new Spreadsheet();
+    $usedTitles = array();
     foreach ($settlements as $index => $data) {
         $sheet = $index === 0 ? $spreadsheet->getActiveSheet() : $spreadsheet->createSheet();
-        $sheetName = preg_replace('/[\\\/\?\*\[\]:]+/', '', $data['employee_code'] . '-' . $data['employee_name']);
-        $sheet->setTitle(substr($sheetName !== '-' ? $sheetName : 'Employee ' . ($index + 1), 0, 31));
+        $sheet->setTitle(fullFinalExcelSheetTitle($data['employee_code'], $data['employee_name'], $index, $usedTitles));
         $sheet->mergeCells('A1:D1')->setCellValue('A1', 'ફુલ એન્ડ ફાયનલ સેટલમેન્ટ');
         $details = array(
             3 => array('કોન્ટ્રકટરનું નામ :', 'SHREE GANESH ENGINEERING CO.'),
@@ -72,7 +98,15 @@ try {
             ->setPaperSize(PageSetup::PAPERSIZE_A4)->setFitToWidth(1)->setFitToHeight(1)->setPrintArea('A1:D29');
     }
     $spreadsheet->setActiveSheetIndex(0);
+    $outputFile = tempnam(sys_get_temp_dir(), 'full-final-');
+    if ($outputFile === false) {
+        throw new RuntimeException('Unable to create the Excel download.');
+    }
+    (new Xlsx($spreadsheet))->save($outputFile);
 } catch (Throwable $exception) {
+    if ($outputFile !== null && is_file($outputFile)) {
+        unlink($outputFile);
+    }
     while (ob_get_level() > 0) {
         ob_end_clean();
     }
@@ -86,5 +120,7 @@ while (ob_get_level() > 0) {
 header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 header('Content-Disposition: attachment; filename="Full-Final-Settlement.xlsx"');
 header('Cache-Control: max-age=0');
-(new Xlsx($spreadsheet))->save('php://output');
+header('Content-Length: ' . filesize($outputFile));
+readfile($outputFile);
+unlink($outputFile);
 exit;
