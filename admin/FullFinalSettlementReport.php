@@ -178,7 +178,7 @@ function renderFullFinalSettlement(array $data)
         '<div class="words">શબ્દોમાં રકમ રૂ. : ' . $e(fullFinalAmountInWords($data['net'])) . '</div><div class="words">કામદાર નું મુખત્યાર નામ :</div>' .
         '<div class="ack">ફુલ એન્ડ ફાયનલ સેટલમેન્ટ તરીકે મને રૂ. <u>' . $a($data['net']) . '</u> મળેલ છે. મારા નીકળતા લેણાની રકમની ગણતરી સાચી અને ખરી છે. હવે મારે પગાર તેમજ અન્ય કાયદેસરના હક્ક-હિસ્સાની કોઈ રકમ લેવાની નીકળતી નથી. મને ચૂકવવામાં આવેલ રકમથી મને સંપૂર્ણ સંતોષ છે, અને આ અંગે હું કોઈ જ વિવાદ ઉભો કરીશ નહીં.</div>' .
         '<table class="signs"><tr><td><span class="witness-title">સાક્ષીની સહી :</span> __________________<br><b>સાક્ષીનું નામ :</b> Kishor V Raval<br><b>સરનામું :</b> 4, Pavansut Society,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IOC Tragad Road, Tragad, Ahmedabad.</td><td class="worker">કામદારની સહી</td></tr></table>' .
-        '<div class="bottom">તારીખ : ___________________________ <span class="month">' . $e($data['period']) . '</span><br>સ્થળ : <u>Ahmedabad</u></div></div></body></html>';
+        '<div class="bottom">તારીખ : ___________________________ <span class="month"></span><br>સ્થળ : <u>Ahmedabad</u></div></div></body></html>';
 }
 
 function renderFullFinalSettlements(array $settlements)
