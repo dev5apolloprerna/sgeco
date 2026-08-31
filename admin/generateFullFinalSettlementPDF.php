@@ -27,6 +27,10 @@ $pdf->setPrintHeader(false);
 $pdf->setPrintFooter(false);
 $pdf->SetMargins(10, 8, 10);
 $pdf->SetAutoPageBreak(true, 8);
+// FreeSerif is bundled with TCPDF and contains the complete Gujarati block.
+// Keeping the PHP font and the HTML font identical prevents TCPDF from
+// silently falling back to Helvetica, which renders Gujarati inconsistently.
+$pdf->setFontSubsetting(true);
 $pdf->SetFont('freeserif', '', 9);
 $pdf->AddPage();
 $pdf->writeHTML($html, true, false, true, false, '');

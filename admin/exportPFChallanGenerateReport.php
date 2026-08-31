@@ -459,13 +459,78 @@ if (mysqli_num_rows($result1) > 0) {
     }
     
     
-    
+    /*
+     * Export an HTML table instead of a CSV file.  Apart from looking like the
+     * printed report, this also keeps long UAN, ESIC and Aadhaar numbers from
+     * being displayed in scientific notation by Excel.
+     */    
     fseek($f, 0);
-    header('Content-Type: text/csv');
-    $filename = "companyBankReport" . date('Y-m-d H:i:s') . ".csv";
-    header('Content-Disposition: attachment; filename="' . $filename . '";');
+    $reportRows = array();
+    while (($reportRow = fgetcsv($f, 0, $delimiter)) !== false) {
+        $reportRows[] = $reportRow;
+    }
+    fclose($f);
 
-    fpassthru($f);
+    $filename = 'PF_Challan_Generate_Report_' . date('Y-m-d_H-i-s') . '.xls';
+    header('Content-Type: application/vnd.ms-excel; charset=UTF-8');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+    header('Cache-Control: max-age=0');
+
+    echo "\xEF\xBB\xBF";
+    ?>
+    <!DOCTYPE html>
+    <html>
+        <head>
+            <meta charset="UTF-8">
+            <style>
+                table { border-collapse: collapse; font-family: Arial, sans-serif; font-size: 11pt; }
+                td, th { border: 1px solid #000; padding: 5px 7px; vertical-align: middle; }
+                .report-title { border: 0; font-weight: bold; text-align: center; font-size: 12pt; }
+                .month-title { font-weight: bold; text-align: left; background: #e7e6e6; }
+                .column-heading { font-weight: bold; text-align: center; background: #d9eaf7; white-space: nowrap; }
+                .section-heading { font-weight: bold; text-align: center; background: #fff2cc; }
+                .text-value { mso-number-format: "\@"; }
+                .number-value { text-align: right; }
+            </style>
+        </head>
+        <body>
+            <table>
+                <?php
+                foreach ($reportRows as $rowIndex => $reportRow) {
+                    $nonEmptyValues = array_values(array_filter($reportRow, function ($value) {
+                        return trim($value) !== '';
+                    }));
+
+                    if (count($nonEmptyValues) === 0) {
+                        continue;
+                    }
+
+                    $firstValue = trim($nonEmptyValues[0]);
+                    $isColumnHeading = isset($reportRow[0]) && trim($reportRow[0]) === 'SR. No.';
+                    $isMonthTitle = strpos($firstValue, 'Employee List of PF and ESIC') === 0;
+                    $isSectionHeading = $firstValue === 'NEW NAME';
+                    $isReportTitle = !$isColumnHeading && !$isMonthTitle && !$isSectionHeading && count($nonEmptyValues) === 1 && $rowIndex < 5;
+ ?>
+                    <tr>
+                        <?php if ($isReportTitle || $isMonthTitle || $isSectionHeading) { ?>
+                            <td colspan="10" class="<?php echo $isMonthTitle ? 'month-title' : ($isSectionHeading ? 'section-heading' : 'report-title'); ?>">
+                                <?php echo htmlspecialchars($firstValue, ENT_QUOTES, 'UTF-8'); ?>
+                            </td>
+                        <?php } else { ?>
+                            <?php foreach ($reportRow as $columnIndex => $value) {
+                                $isTextValue = $columnIndex >= 1 && $columnIndex <= 5;
+                                $cellClass = $isColumnHeading ? 'column-heading' : ($isTextValue ? 'text-value' : 'number-value');
+                                $tag = $isColumnHeading ? 'th' : 'td';
+                                ?>
+                                <<?php echo $tag; ?> class="<?php echo $cellClass; ?>"><?php echo htmlspecialchars($value, ENT_QUOTES, 'UTF-8'); ?></<?php echo $tag; ?>>
+                            <?php } ?>
+                        <?php } ?>
+                    </tr>
+                <?php } ?>
+            </table>
+        </body>
+    </html>
+    <?php
     //$filename = 'PF_Challan_Generate_Report_'.date('dmyHis') . '.xls';
     // header("Content-Type: application/vnd.ms-excel; charset=utf-8");
     // header("Content-disposition: attachment; filename=" . $filename);

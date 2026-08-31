@@ -26,14 +26,16 @@ function fullFinalExcelSheetTitle($employeeCode, $employeeName, $index, array &$
     }
     $baseTitle = $title;
     $suffix = 2;
-    while (isset($usedTitles[strtolower($title)])) {
+    $titleKey = function_exists('mb_strtolower') ? mb_strtolower($title, 'UTF-8') : strtolower($title);
+    while (isset($usedTitles[$titleKey])) {
         $append = ' (' . $suffix++ . ')';
         $title = implode('', array_slice($characters, 0, 31 - strlen($append))) . $append;
         if ($baseTitle !== '' && !$characters) {
             $title = substr($baseTitle, 0, 31 - strlen($append)) . $append;
         }
+        $titleKey = function_exists('mb_strtolower') ? mb_strtolower($title, 'UTF-8') : strtolower($title);
     }
-    $usedTitles[strtolower($title)] = true;
+    $usedTitles[$titleKey] = true;
     return $title;
 }
 
