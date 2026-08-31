@@ -21,6 +21,27 @@ try {
         $html
     );
 
+    // Keep each employee's settlement on one A4 sheet. Word's HTML importer
+    // applies slightly taller Gujarati line metrics than browsers do, so the
+    // shared preview spacing can otherwise push the date/place onto page two.
+    // These overrides only affect the Word download; the browser/PDF preview
+    // retains its roomier layout.
+    $wordPageStyles = '<style>' .
+        '@page{size:A4;margin:7mm 9mm}' .
+        'body{font-size:16px;line-height:1.2}' .
+        '.page{width:100%;max-width:none;min-height:0;padding:0;margin:0;page-break-inside:avoid}' .
+        '.title{font-size:30px;margin-bottom:4px}' .
+        '.info{margin-bottom:2px}.info td{padding:1px 2px}' .
+        '.dates{margin:2px 0 4px}.dates td{padding-top:1px;padding-bottom:1px}' .
+        '.salary{margin:3px 0 5px}.box{padding:2px 14px}' .
+        '.main td,.other td{height:20px;padding:2px 4px}' .
+        '.other-wrap{margin-top:5px}.words{margin-top:5px;padding-bottom:2px}' .
+        '.ack{margin-top:5px;font-size:16px;line-height:1.3}' .
+        '.signs{margin-top:6px}.signature-image{height:35px}' .
+        '.worker{padding-top:34px}.bottom{margin-top:5px}' .
+        '</style>';
+    $html = str_replace('</head>', $wordPageStyles . '</head>', $html);
+
     // Word does not reliably import data-URI images from an HTML .doc file.
     // Package the HTML and signature as related MIME parts so it is embedded in
     // the downloaded document rather than fetched from a relative web address.
