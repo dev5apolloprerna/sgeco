@@ -10,6 +10,17 @@ if ($_REQUEST['action'] == 'ListUser') {
 
     if (mysqli_num_rows($result) > 0) {
         $row = mysqli_fetch_array($result);
+        $savedOvertimeRate = '0';
+        if ((float) $row['rate'] > 0 && (float) $row['othours'] > 0) {
+            foreach (array('1|8', '1|12', '1.5|8', '1.5|12', '2|8', '2|12') as $option) {
+                list($multiplier, $hours) = explode('|', $option);
+                $calculatedAmount = (((float) $row['rate'] / (float) $hours) * (float) $multiplier) * (float) $row['othours'];
+                if (abs((float) $row['otamt'] - $calculatedAmount) < 0.01) {
+                    $savedOvertimeRate = $option;
+                    break;
+                }
+            }
+        }
     } else {
         echo 'somthig going worng! try again';
         exit();
@@ -38,11 +49,11 @@ if ($_REQUEST['action'] == 'ListUser') {
             <input type="text"  id="othours"  name="othours" class="form-control"  value="<?php echo $row['othours'] ?>" placeholder="Enter the OT Hours" required>
 
             <label for="form_control_1"> Over Time Rate</label>
-            <select name="otamt" id="otamt"  class="form-control" required>
+            <select name="otrate" id="otrate" class="form-control" required>
                 <option value="0">Select Employee Over Time Rate</option>
-                <option value="1">1</option>
-                <option value="1.5">1.5</option>
-                <option value="2">2</option>                            
+                <?php foreach (array('1|8' => '1 for 8 hours', '1|12' => '1 for 12 hours', '1.5|8' => '1.5 for 8 hours', '1.5|12' => '1.5 for 12 hours', '2|8' => '2 for 8 hours', '2|12' => '2 for 12 hours') as $value => $label) { ?>
+                    <option value="<?php echo $value; ?>" <?php echo $savedOvertimeRate === $value ? 'selected' : ''; ?>><?php echo $label; ?></option>
+                <?php } ?>                       
             </select>
 
             <label for="form_control_1">ADV ONE</label>
@@ -57,6 +68,15 @@ if ($_REQUEST['action'] == 'ListUser') {
             <label for="form_control_1">ADV TWO PAY</label>
             <input type="text"  id="adv_two_paid"  name="adv_two_paid" class="form-control"  value="<?php echo $row['adv_two_paid'] ?>" placeholder="Enter the ADV TWO" required>
 
+            <label for="advance_paid_by_bank">ADVANCE PAID BY BANK</label>
+            <input type="number" min="0" step="0.01" id="advance_paid_by_bank" name="advance_paid_by_bank" class="form-control" value="<?php echo htmlspecialchars($row['advance_paid_by_bank'], ENT_QUOTES, 'UTF-8'); ?>" required>
+
+            <label for="pf_amount">PF AMOUNT</label>
+            <input type="number" min="0" step="0.01" id="pf_amount" name="pf_amount" class="form-control" value="<?php echo htmlspecialchars($row['pf_amount'], ENT_QUOTES, 'UTF-8'); ?>" readonly required>
+
+            <label for="esic_amount">ESIC AMOUNT</label>
+            <input type="number" min="0" step="0.01" id="esic_amount" name="esic_amount" class="form-control" value="<?php echo htmlspecialchars($row['esic_amount'], ENT_QUOTES, 'UTF-8'); ?>" readonly required>
+            
             <label for="form_control_1">F.A</label>
             <input type="text"  id="Fa"  name="Fa" class="form-control"  value="<?php echo $row['Fa'] ?>" placeholder="Enter the F.A" required>
 

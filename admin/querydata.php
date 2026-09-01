@@ -1245,7 +1245,10 @@ switch ($action) {
     case "Editmulticompany":
 
         if ($_POST['workingdays'] != '') {
-            $otamt = (($_POST['rate'] / 8) * $_POST['otamt']) * $_POST['othours'];
+            $overtimeSelection = explode('|', $_POST['otrate']);
+            $overtimeMultiplier = isset($overtimeSelection[0]) ? (float) $overtimeSelection[0] : 0;
+            $overtimeHours = isset($overtimeSelection[1]) && (float) $overtimeSelection[1] > 0 ? (float) $overtimeSelection[1] : 8;
+            $otamt = (($_POST['rate'] / $overtimeHours) * $overtimeMultiplier) * $_POST['othours'];
             $PresentAmount = $_POST['workingdays'] * $_POST['rate'];
             $totalamt = $otamt + $PresentAmount;
             if (!isset($_POST['adv'])) {
@@ -1262,7 +1265,10 @@ switch ($action) {
                 $otamt = '0';
             }
             $totalAdv = $adv + $adv_two;
-            $total = $totalamt - $totalAdv;
+            $advancePaidByBank = max(0, (float) $_POST['advance_paid_by_bank']);
+            $pfAmount = max(0, (float) $_POST['pf_amount']);
+            $esicAmount = max(0, (float) $_POST['esic_amount']);
+            $total = $totalamt - $totalAdv - $advancePaidByBank - $pfAmount - $esicAmount;
             // $total = $totalamt - $_POST['adv'];
             $balance1 = $total + $_POST['Fa'] + $_POST['Ta'];
             if ($_POST['pay_cash'] == 0) {
@@ -1285,6 +1291,9 @@ switch ($action) {
                 "adv_two" => $_POST['adv_two'],
                 "adv_two_paid" => $_POST['adv_two_paid'],
                 "total" => $total,
+                "advance_paid_by_bank" => $advancePaidByBank,
+                "pf_amount" => $pfAmount,
+                "esic_amount" => $esicAmount,
                 "Fa" => $_POST['Fa'],
                 "Ta" => $_POST['Ta'],
                 "pay_cash" => $pay_cash,
