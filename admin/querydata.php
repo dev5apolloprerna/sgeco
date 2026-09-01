@@ -1082,9 +1082,12 @@ switch ($action) {
             $national_holiday = $_POST['national_holiday_payment_' . $inc];
             $deductionifany = isset($_POST['deductionifany_' . $inc]) ? max(0, (float) $_POST['deductionifany_' . $inc]) : 0;
             $storedAdvance = getEmployeeCompanyReportAdvance($salaryAdvances, $_POST['emp_id_' . $inc]);
+            $requestedAdvance = isset($_POST['advance_' . $inc]) ? max(0, (float) $_POST['advance_' . $inc]) : 0;
             $advance = $storedAdvance > 0
-                ? $storedAdvance
-                : (isset($_POST['advance_' . $inc]) ? max(0, (float) $_POST['advance_' . $inc]) : 0);
+                // ? $storedAdvance
+                // : (isset($_POST['advance_' . $inc]) ? max(0, (float) $_POST['advance_' . $inc]) : 0);
+                ? min($requestedAdvance, $storedAdvance)
+                : $requestedAdvance;
 
             if ($_POST['workingdays_' . $inc] != '' || $_POST['workingdays_' . $inc] != null) {
                 $Sql123 = mysqli_query($dbconn, "delete from salarydetails where salarydetails.salaryId = '" . $_POST['salaryId'] . "' and salarydetails.companyId = '" . $_POST['companyId'] . "' and salarydetails.emp_id = '" . $_POST['emp_id_' . $inc] . "'");
@@ -1685,9 +1688,14 @@ switch ($action) {
             $salaryMaster = mysqli_fetch_assoc(mysqli_query($dbconn, "SELECT month, DeductESIC, DeductPF FROM companysalarymaster WHERE companysalarymasterId='" . (int) $_POST['companysalarymasterId'] . "'"));
             $salaryAdvances = $salaryMaster ? getMultiCompanyReportAdvances($dbconn, $_POST['companysalarymasterId'], $salaryMaster['month']) : array();
             $storedAdvance = getEmployeeCompanyReportAdvance($salaryAdvances, $inc);
+            $requestedAdvance = isset($_POST['advance_paid_by_bank_' . $inc])
+                ? max(0, (float) $_POST['advance_paid_by_bank_' . $inc])
+                : 0;
             $advancePaidByBank = $storedAdvance > 0
-                ? $storedAdvance
-                : max(0, (float) $_POST['advance_paid_by_bank_' . $inc]);
+                // ? $storedAdvance
+                // : max(0, (float) $_POST['advance_paid_by_bank_' . $inc]);
+                ? min($requestedAdvance, $storedAdvance)
+                : $requestedAdvance;
             // Keep the entry and saved totals aligned with the Excel/PDF reports,
             // which roll up deductions already calculated for the selected companies.
             $salaryDeductions = getMultiCompanyReportDeductions($dbconn, $_POST['companysalarymasterId']);

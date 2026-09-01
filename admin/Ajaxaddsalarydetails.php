@@ -148,7 +148,8 @@ if ($_POST['action'] == 'ListUser') {
                         <input class="form-control" name="national_holiday_payment_<?php echo $i ?>" <?= $rowfilter['isExitEmployee']==1 ? 'readonly' : ""; ?> id="national_holiday_payment_<?php echo $i ?>" onkeypress="return isNumberKey(event)">
                     </td>
                     <td>
-                        <input type="number" min="0" step="0.01" class="form-control" value="<?php echo htmlspecialchars(number_format($advanceAmount, 2, '.', ''), ENT_QUOTES, 'UTF-8'); ?>" name="advance_<?php echo $i ?>" id="advance_<?php echo $i ?>" <?php echo ($advanceAmount > 0 || $rowfilter['isExitEmployee'] == 1) ? 'readonly' : ''; ?>>
+                        <!-- <input type="number" min="0" step="0.01" class="form-control" value="<?php echo htmlspecialchars(number_format($advanceAmount, 2, '.', ''), ENT_QUOTES, 'UTF-8'); ?>" name="advance_<?php echo $i ?>" id="advance_<?php echo $i ?>" <?php echo ($advanceAmount > 0 || $rowfilter['isExitEmployee'] == 1) ? 'readonly' : ''; ?>> -->
+                        <input type="number" min="0" <?php echo $advanceAmount > 0 ? 'max="' . htmlspecialchars(number_format($advanceAmount, 2, '.', ''), ENT_QUOTES, 'UTF-8') . '"' : ''; ?> step="0.01" class="form-control" value="<?php echo htmlspecialchars(number_format($advanceAmount, 2, '.', ''), ENT_QUOTES, 'UTF-8'); ?>" name="advance_<?php echo $i ?>" id="advance_<?php echo $i ?>" <?php echo $rowfilter['isExitEmployee'] == 1 ? 'readonly' : ''; ?>>
                     </td>
                     <!-- <td>
                         <input class="form-control" name="pt_<?php echo $i ?>" id="pt_<?php echo $i ?>" onkeypress="return isNumberKey(event)">
