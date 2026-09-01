@@ -149,10 +149,10 @@ while ($rowapplication = mysqli_fetch_array($result)) {
     $mailFormat = str_replace("#advPaidByBank#", ucfirst(urldecode($advPaidByBank)), $mailFormat);
     $mailFormat = str_replace("#pfAmount#", ucfirst(urldecode($pfAmount)), $mailFormat);
     $mailFormat = str_replace("#esicAmount#", ucfirst(urldecode($esicAmount)), $mailFormat);
-    $mailFormat = str_replace("#total#", ucfirst(urldecode($rowTotal)), $mailFormat);
+    $mailFormat = str_replace("#total#", number_format($rowTotal, 2, '.', ''), $mailFormat);
     $mailFormat = str_replace("#Fa#", ucfirst(urldecode($rowapplication['Fa'])), $mailFormat);
     $mailFormat = str_replace("#Ta#", ucfirst(urldecode($rowapplication['Ta'])), $mailFormat);
-        $mailFormat = str_replace("#balance1#", ucfirst(urldecode($rowBalance)), $mailFormat);
+    $mailFormat = str_replace("#balance1#", number_format($rowBalance, 2, '.', ''), $mailFormat);
     $mailFormat = str_replace("#Bank Name#", ucfirst(urldecode($bankname)), $mailFormat);
 
     $HeaderCompany = "";

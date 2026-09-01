@@ -168,7 +168,7 @@ $countRow = $countResult ? mysqli_fetch_assoc($countResult) : array('TotalRow' =
 $totalRecords = (int) $countRow['TotalRow'];
 $totalPages = (int) ceil($totalRecords / $perPage);
 $offset = ($page - 1) * $perPage;
-$details = mysqli_query($dbconn, "SELECT ad.*, ad.`" . $primaryKey . "` AS detailId, am.strMonthYear, am.fromdate AS periodFromDate, am.todate AS periodToDate, e.emp_name, e.employeecode, c.companyname, b.bankname" . $fromSql . " ORDER BY ad.strDate DESC, e.emp_name ASC LIMIT " . $offset . ', ' . $perPage);
+$details = mysqli_query($dbconn, "SELECT ad.*, ad.`" . $primaryKey . "` AS detailId, am.strMonthYear, am.fromdate AS periodFromDate, am.todate AS periodToDate, e.emp_name, e.strFatherName, e.employeecode, c.companyname, b.bankname" . $fromSql . " ORDER BY ad.strDate DESC, e.emp_name ASC LIMIT " . $offset . ', ' . $perPage);
 
 if (!$details || mysqli_num_rows($details) === 0) {
     echo '<div class="alert alert-info"><h4 class="text-center">No Data Found!</h4></div>';
@@ -181,12 +181,12 @@ if (!$details || mysqli_num_rows($details) === 0) {
             <tr>
                 <th>Advanced Period</th>
                 <th>Employee Name</th>
+                <th>Father Name</th>
                 <th>Employee Code</th>
                 <th>Company</th>
                 <th>Date</th>
                 <th>Amount</th>
                 <th>Bank</th>
-                <th>Remarks</th>
                 <th>Action</th>
             </tr>
         </thead>
@@ -195,12 +195,12 @@ if (!$details || mysqli_num_rows($details) === 0) {
                 <tr>
                     <td><?php echo htmlspecialchars($detail['strMonthYear'], ENT_QUOTES, 'UTF-8'); ?></td>
                     <td><?php echo htmlspecialchars(ucwords(strtolower($detail['emp_name'])), ENT_QUOTES, 'UTF-8'); ?></td>
+                    <td><?php echo htmlspecialchars(ucwords(strtolower($detail['strFatherName'])), ENT_QUOTES, 'UTF-8'); ?></td>
                     <td><?php echo htmlspecialchars($detail['employeecode'], ENT_QUOTES, 'UTF-8'); ?></td>
                     <td><?php echo htmlspecialchars($detail['companyname'], ENT_QUOTES, 'UTF-8'); ?></td>
                     <td><?php echo htmlspecialchars(date('d-m-Y', strtotime($detail['strDate'])), ENT_QUOTES, 'UTF-8'); ?></td>
                     <td><?php echo htmlspecialchars(number_format((float) $detail['iAmount'], 2), ENT_QUOTES, 'UTF-8'); ?></td>
                     <td><?php echo htmlspecialchars(isset($detail['bankname']) ? $detail['bankname'] : '', ENT_QUOTES, 'UTF-8'); ?></td>
-                    <td><?php echo htmlspecialchars($detail['strRemarks'], ENT_QUOTES, 'UTF-8'); ?></td>
                     <td class="text-nowrap">
                         <button type="button" class="btn blue edit-advanced-detail" title="Edit" data-id="<?php echo (int) $detail['detailId']; ?>" data-employee-id="<?php echo (int) $detail['iEmployeeId']; ?>" data-employee-name="<?php echo htmlspecialchars(ucwords(strtolower($detail['emp_name'])) . ' (' . $detail['employeecode'] . ')', ENT_QUOTES, 'UTF-8'); ?>" data-date="<?php echo htmlspecialchars($detail['strDate'], ENT_QUOTES, 'UTF-8'); ?>" data-min-date="<?php echo htmlspecialchars($detail['periodFromDate'], ENT_QUOTES, 'UTF-8'); ?>" data-max-date="<?php echo htmlspecialchars($detail['periodToDate'], ENT_QUOTES, 'UTF-8'); ?>" data-period="<?php echo htmlspecialchars($detail['strMonthYear'], ENT_QUOTES, 'UTF-8'); ?>" data-amount="<?php echo htmlspecialchars(number_format((float) $detail['iAmount'], 2, '.', ''), ENT_QUOTES, 'UTF-8'); ?>" data-remarks="<?php echo htmlspecialchars($detail['strRemarks'], ENT_QUOTES, 'UTF-8'); ?>"><i class="fa fa-edit"></i></button>
                         <button type="button" class="btn blue delete-advanced-detail" title="Delete" data-id="<?php echo (int) $detail['detailId']; ?>"><i class="fa fa-trash-o"></i></button>

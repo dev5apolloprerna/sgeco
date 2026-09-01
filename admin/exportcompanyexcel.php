@@ -508,7 +508,8 @@ $summaryHeaderRow = $summaryTitleRow + 1;
 $summaryLastRow = $summaryHeaderRow + 5;
 $lastColumnNumber = count($reportRows[$headerRow - 1]);
 $lastColumn = Coordinate::stringFromColumnIndex($lastColumnNumber);
-
+$totalColumn = Coordinate::stringFromColumnIndex(16);
+$balanceColumn = Coordinate::stringFromColumnIndex(19);
 // Present the report heading as full-width sections, matching the formatted
 // statutory company report rather than the old comma-separated download.
 $sheet->mergeCells('B1:' . $lastColumn . '1');
@@ -562,6 +563,13 @@ if ($employeeCount > 0) {
     $sheet->getStyle('E' . $dataStartRow . ':' . Coordinate::stringFromColumnIndex($lastColumnNumber - 3) . $totalRow)
         ->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
 }
+// Total and Balance are rounded upward above, but remain numeric cells. Apply
+// an explicit two-decimal format to both highlighted columns, including the
+// report totals row (for example, 9160 is displayed as 9160.00).
+$sheet->getStyle($totalColumn . $dataStartRow . ':' . $totalColumn . $totalRow)
+    ->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
+$sheet->getStyle($balanceColumn . $dataStartRow . ':' . $balanceColumn . $totalRow)
+    ->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
 $sheet->getStyle('B' . ($summaryHeaderRow + 1) . ':F' . $summaryLastRow)
     ->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
 
