@@ -69,9 +69,9 @@ $TotalPfAmount = 0;
 $TotalEsicAmount = 0;
 $TotalBalance2 = 0;
 $companyWiseTotal = array();
-$companySalary = mysqli_fetch_assoc(mysqli_query($dbconn, "SELECT month FROM companysalarymaster WHERE companysalarymasterId='" . (int) $_REQUEST['token'] . "'"));
-$reportMonth = $companySalary ? $companySalary['month'] : '';
-$reportAdvances = getMultiCompanyReportAdvances($dbconn, $_REQUEST['token'], $reportMonth);
+// $companySalary = mysqli_fetch_assoc(mysqli_query($dbconn, "SELECT month FROM companysalarymaster WHERE companysalarymasterId='" . (int) $_REQUEST['token'] . "'"));
+// $reportMonth = $companySalary ? $companySalary['month'] : '';
+// $reportAdvances = getMultiCompanyReportAdvances($dbconn, $_REQUEST['token'], $reportMonth);
 $reportDeductions = getMultiCompanyReportDeductions($dbconn, $_REQUEST['token']);
 while ($rowapplication = mysqli_fetch_array($result)) {
 
@@ -89,7 +89,9 @@ while ($rowapplication = mysqli_fetch_array($result)) {
     $Totaladv += (float) $rowapplication['adv'];
     $TotaladvTwo += (float) $rowapplication['adv_two'];
     // $advPaidByBank = (float) $rowapplication['advance_paid_by_bank'];
-    $advPaidByBank = getEmployeeCompanyReportAdvance($reportAdvances, $rowapplication['emp_id']);
+    // $advPaidByBank = getEmployeeCompanyReportAdvance($reportAdvances, $rowapplication['emp_id']);
+    // Use the value saved on this report so the PDF matches the reviewed list.
+    $advPaidByBank = (float) $rowapplication['advance_paid_by_bank'];
     $TotalAdvPaidByBank += $advPaidByBank;
 
     $desg = mysqli_fetch_array(mysqli_query($dbconn, "SELECT * FROM `employee`  where isDelete='0' and employeeId='" . $rowapplication['emp_id'] . "'"));

@@ -161,7 +161,7 @@ $array[5][4] = 0;
 $array[5][5] = 0;
 
 $query = "SELECT * FROM `multicompany` where  companysalarymasterId='" . $_REQUEST['token'] . "' order by multicompanyid desc";
-$reportAdvances = getMultiCompanyReportAdvances($dbconn, $_REQUEST['token'], $month);
+// $reportAdvances = getMultiCompanyReportAdvances($dbconn, $_REQUEST['token'], $month);
 $reportDeductions = getMultiCompanyReportDeductions($dbconn, $_REQUEST['token']);
 $Total = array("Total", "", "", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0");
 $Total[0] = "Total";
@@ -189,7 +189,9 @@ while ($row = mysqli_fetch_assoc($result)) {
     // $advPaidByBank = (float) $row['advance_paid_by_bank'];
     // $pfAmount = (float) $row['pf_amount'];
     // $esicAmount = (float) $row['esic_amount'];
-    $advPaidByBank = getEmployeeCompanyReportAdvance($reportAdvances, $row['emp_id']);
+    // $advPaidByBank = getEmployeeCompanyReportAdvance($reportAdvances, $row['emp_id']);
+    // Use the value saved on this report so Excel matches the reviewed list.
+    $advPaidByBank = (float) $row['advance_paid_by_bank'];
     $employeeDeductions = getEmployeeMultiCompanyReportDeductions($reportDeductions, $row['emp_id']);
     $pfAmount = $employeeDeductions['pf'];
     $esicAmount = $employeeDeductions['esic'];
