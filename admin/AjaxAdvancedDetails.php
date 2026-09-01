@@ -39,8 +39,8 @@ if (!$advanced) {
 
 if ($action === 'SearchEmployees') {
     $search = mysqli_real_escape_string($dbconn, isset($_POST['employeeSearch']) ? trim($_POST['employeeSearch']) : '');
-    $where = $search === '' ? '' : " AND (e.emp_name LIKE '%" . $search . "%' OR e.employeecode LIKE '%" . $search . "%')";
-    $employees = mysqli_query($dbconn, "SELECT e.employeeId, e.emp_name, e.employeecode, e.uan, e.bankid, b.bankname, b.bankmasterId AS activeBankId FROM employee e LEFT JOIN bankmaster b ON b.bankmasterId=e.bankid AND b.isDelete=0 AND b.istatus=1 WHERE e.isDelete=0 AND e.istatus=1 AND e.isExitEmployee=0" . $where . " ORDER BY e.emp_name LIMIT 100");
+    $where = $search === '' ? '' : " AND (e.emp_name LIKE '%" . $search . "%' OR e.employeecode LIKE '%" . $search . "%' OR e.strFatherName LIKE '%" . $search . "%')";
+    $employees = mysqli_query($dbconn, "SELECT e.employeeId, e.emp_name, e.strFatherName, e.employeecode, e.uan, e.bankid, b.bankname, b.bankmasterId AS activeBankId FROM employee e LEFT JOIN bankmaster b ON b.bankmasterId=e.bankid AND b.isDelete=0 AND b.istatus=1 WHERE e.isDelete=0 AND e.istatus=1 AND e.isExitEmployee=0" . $where . " ORDER BY e.emp_name LIMIT 100");
     if (!$employees || mysqli_num_rows($employees) === 0) {
         echo '<div class="alert alert-info"><h4 class="text-center">No Data Found!</h4></div>';
         exit;
@@ -53,6 +53,7 @@ if ($action === 'SearchEmployees') {
         <thead class="tbg">
             <tr>
                 <th>Employee Name</th>
+                <th>Father Name</th>
                 <th>Employee Code</th>
                 <th>UAN</th>
                 <th>Bank</th>
@@ -68,6 +69,7 @@ if ($action === 'SearchEmployees') {
             <tr class="employee-row" data-employee-id="<?php echo (int) $employee['employeeId']; ?>">
 
                     <td><?php echo htmlspecialchars(ucwords(strtolower($employee['emp_name'])), ENT_QUOTES, 'UTF-8'); ?></td>
+                    <td><?php echo htmlspecialchars(ucwords(strtolower($employee['strFatherName'])), ENT_QUOTES, 'UTF-8'); ?></td>
                     <td><?php echo htmlspecialchars($employee['employeecode'], ENT_QUOTES, 'UTF-8'); ?></td>
                     <td><?php echo htmlspecialchars($employee['uan'], ENT_QUOTES, 'UTF-8'); ?></td>
                     <td>

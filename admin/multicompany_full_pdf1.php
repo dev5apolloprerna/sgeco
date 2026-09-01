@@ -75,10 +75,10 @@ $companyWiseTotal = array();
 $reportDeductions = getMultiCompanyReportDeductions($dbconn, $_REQUEST['token']);
 while ($rowapplication = mysqli_fetch_array($result)) {
 
-    $totalofTotal += $rowapplication['total'];
-    $TotalFa += (float) $rowapplication['Fa'];
-    $TotalTa += (float) $rowapplication['Ta'];
-    $Totalbalance1 += (float) $rowapplication['balance1'];
+    // $totalofTotal += $rowapplication['total'];
+    // $TotalFa += (float) $rowapplication['Fa'];
+    // $TotalTa += (float) $rowapplication['Ta'];
+    // $Totalbalance1 += (float) $rowapplication['balance1'];
     $Totalrate += (float) $rowapplication['rate'];
     $Totalworkingdays += (float) $rowapplication['workingdays'];
     $Totalothours += (float) $rowapplication['othours'];
@@ -113,6 +113,14 @@ while ($rowapplication = mysqli_fetch_array($result)) {
     $employeeDeductions = getEmployeeMultiCompanyReportDeductions($reportDeductions, $rowapplication['emp_id']);
     $pfAmount = $employeeDeductions['pf'];
     $esicAmount = $employeeDeductions['esic'];
+    $calculation = calculateMultiCompanySalary($rowapplication['PresentAmount'], $rowapplication['otamt'], $rowapplication['adv'], $rowapplication['adv_two'], $advPaidByBank, $pfAmount, $esicAmount, $rowapplication['Fa'], $rowapplication['Ta']);
+    $rowTotal = $calculation['total'];
+    $rowBalance = $calculation['balance1'];
+    $totalofTotal += $rowTotal;
+    $TotalFa += (float) $rowapplication['Fa'];
+    $TotalTa += (float) $rowapplication['Ta'];
+    $Totalbalance1 += $rowBalance;
+
     $TotalPfAmount += $pfAmount;
     $TotalEsicAmount += $esicAmount;
     $mailFormat_main = str_replace("#hedar#", ucfirst(urldecode($HeaderCompany)), $mailFormat_main);
@@ -139,10 +147,10 @@ while ($rowapplication = mysqli_fetch_array($result)) {
     $mailFormat = str_replace("#advPaidByBank#", ucfirst(urldecode($advPaidByBank)), $mailFormat);
     $mailFormat = str_replace("#pfAmount#", ucfirst(urldecode($pfAmount)), $mailFormat);
     $mailFormat = str_replace("#esicAmount#", ucfirst(urldecode($esicAmount)), $mailFormat);
-    $mailFormat = str_replace("#total#", ucfirst(urldecode($rowapplication['total'])), $mailFormat);
+    $mailFormat = str_replace("#total#", ucfirst(urldecode($rowTotal)), $mailFormat);
     $mailFormat = str_replace("#Fa#", ucfirst(urldecode($rowapplication['Fa'])), $mailFormat);
     $mailFormat = str_replace("#Ta#", ucfirst(urldecode($rowapplication['Ta'])), $mailFormat);
-    $mailFormat = str_replace("#balance1#", ucfirst(urldecode($rowapplication['balance1'])), $mailFormat);
+        $mailFormat = str_replace("#balance1#", ucfirst(urldecode($rowBalance)), $mailFormat);
     $mailFormat = str_replace("#Bank Name#", ucfirst(urldecode($bankname)), $mailFormat);
 
     $HeaderCompany = "";
@@ -231,7 +239,7 @@ while ($rowapplication = mysqli_fetch_array($result)) {
 
     $mailFormat = str_replace("#bank#", ucfirst(urldecode($HeaderCompany)), $mailFormat);
     $netamts = $netamt;
-    $bal2 = $rowapplication['balance1'] - $AllCompanyTotal;
+    $bal2 = $rowBalance - $AllCompanyTotal;
 
     if ($bal2 > 0) {
 

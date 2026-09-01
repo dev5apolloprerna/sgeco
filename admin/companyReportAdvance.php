@@ -134,6 +134,29 @@ function getEmployeeMultiCompanyReportDeductions($deductions, $employeeId)
         : array('pf' => 0, 'esic' => 0);
 }
 
+/**
+ * Calculate the monetary columns shared by multi-company add, edit and exports.
+ *
+ * Keeping this in one place prevents a saved row (or an older row saved with a
+ * previous formula) from showing a Total that does not match its deductions.
+ */
+function calculateMultiCompanySalary($presentAmount, $otAmount, $advanceOne, $advanceTwo, $advancePaidByBank, $pfAmount, $esicAmount, $fa, $ta)
+{
+    $totalAmount = (float) $presentAmount + (float) $otAmount;
+    $total = $totalAmount
+        - (float) $advanceOne
+        - (float) $advanceTwo
+        - (float) $advancePaidByBank
+        - (float) $pfAmount
+        - (float) $esicAmount;
+
+    return array(
+        'totalamt' => $totalAmount,
+        'total' => $total,
+        'balance1' => $total + (float) $fa + (float) $ta
+    );
+}
+
 function getEmployeeCompanyReportAdvance($advances, $employeeId)
 {
     $employeeId = (int) $employeeId;

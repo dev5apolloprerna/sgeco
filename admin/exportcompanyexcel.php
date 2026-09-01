@@ -195,6 +195,9 @@ while ($row = mysqli_fetch_assoc($result)) {
     $employeeDeductions = getEmployeeMultiCompanyReportDeductions($reportDeductions, $row['emp_id']);
     $pfAmount = $employeeDeductions['pf'];
     $esicAmount = $employeeDeductions['esic'];
+    $calculation = calculateMultiCompanySalary($row['PresentAmount'], $row['otamt'], $row['adv'], $row['adv_two'], $advPaidByBank, $pfAmount, $esicAmount, $row['Fa'], $row['Ta']);
+    $rowTotal = $calculation['total'];
+    $rowBalance = $calculation['balance1'];
     $lineData = array(
         $desg['pfcode'],
         $desg['ecsno'],
@@ -210,10 +213,10 @@ while ($row = mysqli_fetch_assoc($result)) {
         $advPaidByBank,
         $pfAmount,
         $esicAmount,
-        $row['total'],
+        $rowTotal,
         $row['Fa'],
         $row['Ta'],
-        $row['balance1']
+        $rowBalance
     );
     $Total[3] += $row['rate'];
     $Total[4] += $row['workingdays'];
@@ -226,10 +229,10 @@ while ($row = mysqli_fetch_assoc($result)) {
     $Total[11] += $advPaidByBank;
     $Total[12] += $pfAmount;
     $Total[13] += $esicAmount;
-    $Total[14] += $row['total'];
+    $Total[14] += $rowTotal;
     $Total[15] += $row['Fa'];
     $Total[16] += $row['Ta'];
-    $Total[17] += $row['balance1'];
+    $Total[17] += $rowBalance;
     //    $Total=array_merge($Total, $PaidcompanyWiseTotal);
 
     $strPaymentDate = "";
@@ -298,7 +301,7 @@ while ($row = mysqli_fetch_assoc($result)) {
         }
     }
 
-    $bal2 = $row['balance1'] - $AllCompanyTotal;
+    $bal2 = $rowBalance - $AllCompanyTotal;
     $bal2 = round($bal2);
 
     if ($bal2 > 0) {

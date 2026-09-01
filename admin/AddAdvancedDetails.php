@@ -85,7 +85,7 @@ $advancedPeriod = mysqli_fetch_assoc($advancedResult);
                                             <div class="row">
                                                 <div class="form-group col-md-4">
                                                     <label for="employeeSearch"><strong>Search Employee</strong></label>
-                                                    <input class="form-control" type="text" id="employeeSearch" name="employeeSearch" placeholder="Enter employee name or code" autocomplete="off">
+                                                    <input class="form-control" type="text" id="employeeSearch" name="employeeSearch" placeholder="Enter employee name, father name or code" autocomplete="off">
                                                 </div>
                                                 <div class="form-group col-md-4 margin-top-20">
                                                     <button class="btn blue" type="submit" id="searchEmployeeButton"><i class="fa fa-search"></i> Search Employee</button>

@@ -1250,7 +1250,7 @@ switch ($action) {
             $overtimeHours = isset($overtimeSelection[1]) && (float) $overtimeSelection[1] > 0 ? (float) $overtimeSelection[1] : 8;
             $otamt = (($_POST['rate'] / $overtimeHours) * $overtimeMultiplier) * $_POST['othours'];
             $PresentAmount = $_POST['workingdays'] * $_POST['rate'];
-            $totalamt = $otamt + $PresentAmount;
+            // $totalamt = $otamt + $PresentAmount;
             if (!isset($_POST['adv'])) {
                 $adv = 0;
             } else {
@@ -1264,13 +1264,17 @@ switch ($action) {
             if ($otamt == 0) {
                 $otamt = '0';
             }
-            $totalAdv = $adv + $adv_two;
+            // $totalAdv = $adv + $adv_two;
             $advancePaidByBank = max(0, (float) $_POST['advance_paid_by_bank']);
             $pfAmount = max(0, (float) $_POST['pf_amount']);
             $esicAmount = max(0, (float) $_POST['esic_amount']);
-            $total = $totalamt - $totalAdv - $advancePaidByBank - $pfAmount - $esicAmount;
-            // $total = $totalamt - $_POST['adv'];
-            $balance1 = $total + $_POST['Fa'] + $_POST['Ta'];
+            // $total = $totalamt - $totalAdv - $advancePaidByBank - $pfAmount - $esicAmount;
+            // // $total = $totalamt - $_POST['adv'];
+            // $balance1 = $total + $_POST['Fa'] + $_POST['Ta'];
+            $calculation = calculateMultiCompanySalary($PresentAmount, $otamt, $adv, $adv_two, $advancePaidByBank, $pfAmount, $esicAmount, $_POST['Fa'], $_POST['Ta']);
+            $totalamt = $calculation['totalamt'];
+            $total = $calculation['total'];
+            $balance1 = $calculation['balance1'];
             if ($_POST['pay_cash'] == 0) {
                 $pay_cash = '0';
             } else {
@@ -1692,8 +1696,8 @@ switch ($action) {
             $overtimeHours = isset($overtimeSelection[1]) && (float) $overtimeSelection[1] > 0 ? (float) $overtimeSelection[1] : 8;
             $otamt = (($_POST['rate_' . $inc] / $overtimeHours) * $overtimeMultiplier) * $_POST['othours_' . $inc];
             $PresentAmount = $_POST['workingdays_' . $inc] * $_POST['rate_' . $inc];
-            $totalamt = $otamt + $PresentAmount;
-            $totalAdv = $_POST['adv_' . $inc] + $_POST['adv_two_' . $inc];
+            // $totalamt = $otamt + $PresentAmount;
+            // $totalAdv = $_POST['adv_' . $inc] + $_POST['adv_two_' . $inc];
             $salaryMaster = mysqli_fetch_assoc(mysqli_query($dbconn, "SELECT month, DeductESIC, DeductPF FROM companysalarymaster WHERE companysalarymasterId='" . (int) $_POST['companysalarymasterId'] . "'"));
             $salaryAdvances = $salaryMaster ? getMultiCompanyReportAdvances($dbconn, $_POST['companysalarymasterId'], $salaryMaster['month']) : array();
             $storedAdvance = getEmployeeCompanyReportAdvance($salaryAdvances, $inc);
@@ -1715,8 +1719,12 @@ switch ($action) {
             $esicAmount = $salaryMaster && $salaryMaster['DeductESIC'] == 'YES'
                 ? $employeeDeductions['esic']
                 : 0;
-            $total = $totalamt - $totalAdv - $advancePaidByBank - $pfAmount - $esicAmount;
-            $balance1 = $total + $_POST['fa_' . $inc] + $_POST['ta_' . $inc];
+            // $total = $totalamt - $totalAdv - $advancePaidByBank - $pfAmount - $esicAmount;
+            // $balance1 = $total + $_POST['fa_' . $inc] + $_POST['ta_' . $inc];
+            $calculation = calculateMultiCompanySalary($PresentAmount, $otamt, $_POST['adv_' . $inc], $_POST['adv_two_' . $inc], $advancePaidByBank, $pfAmount, $esicAmount, $_POST['fa_' . $inc], $_POST['ta_' . $inc]);
+            $totalamt = $calculation['totalamt'];
+            $total = $calculation['total'];
+            $balance1 = $calculation['balance1'];
             $dataarray = array
                 (
                 "emp_id" => $_POST['emp_id'],
