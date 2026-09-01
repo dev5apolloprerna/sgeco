@@ -85,6 +85,7 @@ $fields = array(
 fputcsv($f, $fields, $delimiter);
 
 $fields = array(
+    'Sr. No.',
     'PF.NO.',
     'ESIC No',
     'Name',
@@ -163,8 +164,7 @@ $array[5][5] = 0;
 $query = "SELECT * FROM `multicompany` where  companysalarymasterId='" . $_REQUEST['token'] . "' order by multicompanyid desc";
 // $reportAdvances = getMultiCompanyReportAdvances($dbconn, $_REQUEST['token'], $month);
 $reportDeductions = getMultiCompanyReportDeductions($dbconn, $_REQUEST['token']);
-$Total = array("Total", "", "", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0");
-$Total[0] = "Total";
+$Total = array("", "Total", "", "", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0");
 
 
 
@@ -196,9 +196,13 @@ while ($row = mysqli_fetch_assoc($result)) {
     $pfAmount = $employeeDeductions['pf'];
     $esicAmount = $employeeDeductions['esic'];
     $calculation = calculateMultiCompanySalary($row['PresentAmount'], $row['otamt'], $row['adv'], $row['adv_two'], $advPaidByBank, $pfAmount, $esicAmount, $row['Fa'], $row['Ta']);
-    $rowTotal = $calculation['total'];
-    $rowBalance = $calculation['balance1'];
+    // Payment-sheet Total and Balance values must always be rounded upward.
+    // Use the rounded values for both display and report totals so the footer
+    // agrees with the employee rows.
+    $rowTotal = ceil($calculation['total']);
+    $rowBalance = ceil($calculation['balance1']);
     $lineData = array(
+        $i,
         $desg['pfcode'],
         $desg['ecsno'],
         ucwords(strtolower($desg['emp_name'])),
@@ -218,21 +222,21 @@ while ($row = mysqli_fetch_assoc($result)) {
         $row['Ta'],
         $rowBalance
     );
-    $Total[3] += $row['rate'];
-    $Total[4] += $row['workingdays'];
-    $Total[5] += $row['othours'];
-    $Total[6] += $row['PresentAmount'];
-    $Total[7] += $row['otamt'];
-    $Total[8] += $row['totalamt'];
-    $Total[9] += $row['adv'];
-    $Total[10] += $row['adv_two'];
-    $Total[11] += $advPaidByBank;
-    $Total[12] += $pfAmount;
-    $Total[13] += $esicAmount;
-    $Total[14] += $rowTotal;
-    $Total[15] += $row['Fa'];
-    $Total[16] += $row['Ta'];
-    $Total[17] += $rowBalance;
+    $Total[4] += $row['rate'];
+    $Total[5] += $row['workingdays'];
+    $Total[6] += $row['othours'];
+    $Total[7] += $row['PresentAmount'];
+    $Total[8] += $row['otamt'];
+    $Total[9] += $row['totalamt'];
+    $Total[10] += $row['adv'];
+    $Total[11] += $row['adv_two'];
+    $Total[12] += $advPaidByBank;
+    $Total[13] += $pfAmount;
+    $Total[14] += $esicAmount;
+    $Total[15] += $rowTotal;
+    $Total[16] += $row['Fa'];
+    $Total[17] += $row['Ta'];
+    $Total[18] += $rowBalance;
     //    $Total=array_merge($Total, $PaidcompanyWiseTotal);
 
     $strPaymentDate = "";
@@ -302,7 +306,7 @@ while ($row = mysqli_fetch_assoc($result)) {
     }
 
     $bal2 = $rowBalance - $AllCompanyTotal;
-    $bal2 = round($bal2);
+    $bal2 = ceil($bal2);
 
     if ($bal2 > 0) {
 
@@ -555,7 +559,7 @@ $sheet->getStyle('A' . $summaryHeaderRow . ':F' . $summaryHeaderRow)->getFont()-
 
 // Keep amounts numeric and consistently readable in Excel.
 if ($employeeCount > 0) {
-    $sheet->getStyle('D' . $dataStartRow . ':' . Coordinate::stringFromColumnIndex($lastColumnNumber - 3) . $totalRow)
+    $sheet->getStyle('E' . $dataStartRow . ':' . Coordinate::stringFromColumnIndex($lastColumnNumber - 3) . $totalRow)
         ->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
 }
 $sheet->getStyle('B' . ($summaryHeaderRow + 1) . ':F' . $summaryLastRow)

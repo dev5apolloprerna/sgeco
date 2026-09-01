@@ -114,8 +114,10 @@ while ($rowapplication = mysqli_fetch_array($result)) {
     $pfAmount = $employeeDeductions['pf'];
     $esicAmount = $employeeDeductions['esic'];
     $calculation = calculateMultiCompanySalary($rowapplication['PresentAmount'], $rowapplication['otamt'], $rowapplication['adv'], $rowapplication['adv_two'], $advPaidByBank, $pfAmount, $esicAmount, $rowapplication['Fa'], $rowapplication['Ta']);
-    $rowTotal = $calculation['total'];
-    $rowBalance = $calculation['balance1'];
+    // Round the highlighted Total and Balance columns upward and accumulate
+    // those displayed values so the footer remains consistent with each row.
+    $rowTotal = ceil($calculation['total']);
+    $rowBalance = ceil($calculation['balance1']);
     $totalofTotal += $rowTotal;
     $TotalFa += (float) $rowapplication['Fa'];
     $TotalTa += (float) $rowapplication['Ta'];
@@ -239,7 +241,7 @@ while ($rowapplication = mysqli_fetch_array($result)) {
 
     $mailFormat = str_replace("#bank#", ucfirst(urldecode($HeaderCompany)), $mailFormat);
     $netamts = $netamt;
-    $bal2 = $rowBalance - $AllCompanyTotal;
+    $bal2 = ceil($rowBalance - $AllCompanyTotal);
 
     if ($bal2 > 0) {
 
