@@ -39,8 +39,8 @@ if (!$advanced) {
 
 if ($action === 'SearchEmployees') {
     $search = mysqli_real_escape_string($dbconn, isset($_POST['employeeSearch']) ? trim($_POST['employeeSearch']) : '');
-    $where = $search === '' ? '' : " AND (emp_name LIKE '%" . $search . "%' OR employeecode LIKE '%" . $search . "%')";
-    $employees = mysqli_query($dbconn, "SELECT employeeId, emp_name, employeecode, uan, bankid FROM employee WHERE isDelete=0 AND istatus=1 AND isExitEmployee=0" . $where . " ORDER BY emp_name LIMIT 100");
+    $where = $search === '' ? '' : " AND (e.emp_name LIKE '%" . $search . "%' OR e.employeecode LIKE '%" . $search . "%')";
+    $employees = mysqli_query($dbconn, "SELECT e.employeeId, e.emp_name, e.employeecode, e.uan, e.bankid, b.bankname, b.bankmasterId AS activeBankId FROM employee e LEFT JOIN bankmaster b ON b.bankmasterId=e.bankid AND b.isDelete=0 AND b.istatus=1 WHERE e.isDelete=0 AND e.istatus=1 AND e.isExitEmployee=0" . $where . " ORDER BY e.emp_name LIMIT 100");
     if (!$employees || mysqli_num_rows($employees) === 0) {
         echo '<div class="alert alert-info"><h4 class="text-center">No Data Found!</h4></div>';
         exit;
@@ -55,18 +55,28 @@ if ($action === 'SearchEmployees') {
                 <th>Employee Name</th>
                 <th>Employee Code</th>
                 <th>UAN</th>
+                <th>Bank</th>
                 <th>Amount</th>
                 <th>Remarks</th>
                 <th>Action</th>
             </tr>
         </thead>
         <tbody>
-            <?php while ($employee = mysqli_fetch_assoc($employees)) { ?>
+            <?php while ($employee = mysqli_fetch_assoc($employees)) {
+                $hasActiveBank = !empty($employee['activeBankId']);
+            ?>
             <tr class="employee-row" data-employee-id="<?php echo (int) $employee['employeeId']; ?>">
 
                     <td><?php echo htmlspecialchars(ucwords(strtolower($employee['emp_name'])), ENT_QUOTES, 'UTF-8'); ?></td>
                     <td><?php echo htmlspecialchars($employee['employeecode'], ENT_QUOTES, 'UTF-8'); ?></td>
                     <td><?php echo htmlspecialchars($employee['uan'], ENT_QUOTES, 'UTF-8'); ?></td>
+                    <td>
+                        <?php if ($hasActiveBank) { ?>
+                            <?php echo htmlspecialchars($employee['bankname'], ENT_QUOTES, 'UTF-8'); ?>
+                        <?php } else { ?>
+                            <span class="text-muted">Not assigned</span>
+                        <?php } ?>
+                    </td>
                     <td>
                         <input type="number" min="0.01" step="0.01" class="form-control advanced-amount" placeholder="0.00">
                         <input type="hidden" class="advanced-bank" value="<?php echo (int) $employee['bankid']; ?>">
@@ -92,7 +102,7 @@ if ($action === 'AddAdvancedDetails') {
         exit;
     }
 
-    $employeeStatement = mysqli_prepare($dbconn, "SELECT e.bankid FROM employee e INNER JOIN bankmaster b ON b.bankmasterId=e.bankid AND b.isDelete=0 AND b.istatus=1 WHERE e.employeeId=? AND e.isDelete=0 AND e.istatus=1 AND e.isExitEmployee=0");
+    $employeeStatement = mysqli_prepare($dbconn, "SELECT e.bankid FROM employee e WHERE e.employeeId=? AND e.isDelete=0 AND e.istatus=1 AND e.isExitEmployee=0");
     $insertStatement = mysqli_prepare($dbconn, "INSERT INTO advanced_details (iAdvancedMasterId, iEmployeeId, iCompanyId, iAmount, strDate, strRemarks, iBankId, strEntryDate, iEntryBy, EntryDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
     if (!$employeeStatement || !$insertStatement) {
         echo json_encode(array('success' => false, 'message' => 'Unable to prepare advanced details.'));
@@ -101,24 +111,28 @@ if ($action === 'AddAdvancedDetails') {
     mysqli_begin_transaction($dbconn);
     $employeeIds = array();
     $success = true;
+    $failureMessage = '';   
     foreach ($details as $detail) {
         $employeeId = isset($detail['employeeId']) ? (int) $detail['employeeId'] : 0;
         $amountValue = isset($detail['amount']) ? trim((string) $detail['amount']) : '';
         $remarks = isset($detail['remarks']) ? trim((string) $detail['remarks']) : '';
         if ($employeeId <= 0 || isset($employeeIds[$employeeId]) || !preg_match('/^\d+(\.\d{1,2})?$/', $amountValue) || (float) $amountValue <= 0 || strlen($remarks) > 1000) {
             $success = false;
+            $failureMessage = 'Check that each employee is selected once, the amount is greater than zero with no more than two decimal places, and remarks are within 1000 characters.';
             break;
         }
         $employeeIds[$employeeId] = true;
         mysqli_stmt_bind_param($employeeStatement, 'i', $employeeId);
         if (!mysqli_stmt_execute($employeeStatement)) {
             $success = false;
+            $failureMessage = 'Unable to verify the selected employee.';
             break;
         }
         $employeeResult = mysqli_stmt_get_result($employeeStatement);
         $employee = $employeeResult ? mysqli_fetch_assoc($employeeResult) : null;
         if (!$employee) {
             $success = false;
+            $failureMessage = 'The selected employee is not active or is no longer available.';
             break;
         }
         $bankId = (int) $employee['bankid'];
@@ -129,6 +143,8 @@ if ($action === 'AddAdvancedDetails') {
         mysqli_stmt_bind_param($insertStatement, 'iiidssisis', $advancedId, $employeeId, $companyId, $amount, $date, $remarks, $bankId, $entryDateTime, $entryBy, $entryDate);
         if (!mysqli_stmt_execute($insertStatement)) {
             $success = false;
+            $failureMessage = 'Unable to save the advanced detail. Please contact support if the problem continues.';
+            error_log('AddAdvancedDetails insert failed: ' . mysqli_stmt_error($insertStatement));
             break;
         }
     }
@@ -139,7 +155,7 @@ if ($action === 'AddAdvancedDetails') {
     }
     mysqli_stmt_close($employeeStatement);
     mysqli_stmt_close($insertStatement);
-    echo json_encode(array('success' => $success, 'message' => $success ? count($details) . ' advanced detail(s) added successfully.' : 'No details were added. Check each selected employee, bank, amount, and remarks.'));
+    echo json_encode(array('success' => $success, 'message' => $success ? count($details) . ' advanced detail(s) added successfully.' : 'No details were added. ' . $failureMessage));
     exit;
 }
 echo json_encode(array('success' => false, 'message' => 'Invalid request.'));
