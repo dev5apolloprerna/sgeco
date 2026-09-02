@@ -4,6 +4,7 @@ include('../common.php');
 include('IsLogin.php');
 $connect = new connect();
 include ('User_Paging.php');
+include_once 'companyReportAdvance.php';
 
 if ($_POST['action'] == 'ListUser') {
 
@@ -22,7 +23,7 @@ if ($_POST['action'] == 'ListUser') {
             }
         }
     }
-    $filterstr = "SELECT multicompany.balance1,companysalarymaster.companysalarymasterId,employee.employeeId,employee.emp_name
+    $filterstr = "SELECT multicompany.*,companysalarymaster.companysalarymasterId,employee.employeeId,employee.emp_name
     ,(select bankmaster.bankname from bankmaster where bankmaster.bankmasterId = 
     employee.bankid) as BankName ,employee.ifsccode, employee.emp_other_info,employee.accountno 
     ,(select companysalarymaster.month from companysalarymaster where 
@@ -45,6 +46,7 @@ $show_page = $page + 1;
 
 $filterstr = $filterstr . " LIMIT $startpage, $per_page";
 $resultfilter = mysqli_query($dbconn, $filterstr);
+$reportDeductions = getMultiCompanyReportDeductions($dbconn, $_POST['companysalarymasterId']);
 
 if (mysqli_num_rows($resultfilter) > 0) {
     $i = 1;
@@ -72,12 +74,27 @@ if (mysqli_num_rows($resultfilter) > 0) {
             while ($rowfilter = mysqli_fetch_array($resultfilter)) {
                 $employee = "select sum(salarydetails.netamountpaid) as PaidAmount from salarymaster,salarydetails
                where salarymaster.salarymasterId = salarydetails.salaryId
+                and salarydetails.companyId = salarymaster.companymasterId
                and salarymaster.month = '" . $_POST['salarymonthId'] . "'  
                and salarymaster.companymasterId in (select multiycompanysalarymaster.companymasterId from 
                multiycompanysalarymaster where multiycompanysalarymaster.companysalarymasterId =  " . $_POST['companysalarymasterId'] . ")
-               and salarydetails.emp_id = " . $rowfilter['employeeId'] . "  and salarymaster.isDelete=0 ";
+               and salarydetails.emp_id = " . $rowfilter['employeeId'] . "
+               and salarymaster.isDelete=0 and salarymaster.istatus=1
+               and salarydetails.isDelete=0 ";
                 $empdata = mysqli_fetch_array(mysqli_query($dbconn, $employee));
-                $Balance = $rowfilter['balance1'] - $empdata['PaidAmount'];
+                $employeeDeductions = getEmployeeMultiCompanyReportDeductions($reportDeductions, $rowfilter['employeeId']);
+                $calculation = calculateMultiCompanySalary(
+                    $rowfilter['PresentAmount'],
+                    $rowfilter['otamt'],
+                    $rowfilter['adv'],
+                    $rowfilter['adv_two'],
+                    $rowfilter['advance_paid_by_bank'],
+                    $employeeDeductions['pf'],
+                    $employeeDeductions['esic'],
+                    $rowfilter['Fa'],
+                    $rowfilter['Ta']
+                );
+                $Balance = ceil(ceil($calculation['balance1']) - (float) $empdata['PaidAmount']);
                 if ($Balance > 0) {
                     ?>
                     <tr>

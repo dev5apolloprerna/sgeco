@@ -12,6 +12,7 @@ use PhpOffice\PhpSpreadsheet\Worksheet\HeaderFooter;
 $spreadsheet = new Spreadsheet();
 
 include('../config.php');
+include_once 'companyReportAdvance.php';
 
 if ($_REQUEST['companysalarymasterId'] != NULL && $_REQUEST['salarymonthId'] != NULL) {
     $where = " and multicompany.companysalarymasterId = " . $_REQUEST['companysalarymasterId'] . " " and "  
@@ -28,7 +29,7 @@ if ($_REQUEST['bank'] != NULL) {
         $where1 .= " and multicompany.pay_cash='1'";
     }
 }
-$filterstr = "SELECT multicompany.balance1,companysalarymaster.companysalarymasterId,employee.employeeId,employee.emp_name
+$filterstr = "SELECT multicompany.*,companysalarymaster.companysalarymasterId,employee.employeeId,employee.emp_name
     ,(select bankmaster.bankname from bankmaster where bankmaster.bankmasterId = 
     employee.bankid) as BankName ,employee.ifsccode ,employee.accountno 
     ,(select companysalarymaster.month from companysalarymaster where 
@@ -38,6 +39,7 @@ $filterstr = "SELECT multicompany.balance1,companysalarymaster.companysalarymast
     multicompany.emp_id = employee.employeeId  " . $where . "  " . $where1 . "   ORDER BY employee.emp_name asc ";
 
 $result = mysqli_query($dbconn, $filterstr);
+$reportDeductions = getMultiCompanyReportDeductions($dbconn, $_REQUEST['companysalarymasterId']);
 
 $sheet = $spreadsheet->getActiveSheet();
 $pageSetup = $sheet->getPageSetup();
@@ -185,10 +187,13 @@ if (mysqli_num_rows($result) > 0) {
         while ($row = mysqli_fetch_array($result)) {
             $employee = "select sum(salarydetails.netamountpaid) as PaidAmount from salarymaster,salarydetails
                    where salarymaster.salarymasterId = salarydetails.salaryId
+                    and salarydetails.companyId = salarymaster.companymasterId
                    and salarymaster.month = '" . $_REQUEST['salarymonthId'] . "'  
                    and salarymaster.companymasterId in (select multiycompanysalarymaster.companymasterId from 
                    multiycompanysalarymaster where multiycompanysalarymaster.companysalarymasterId =  " . $_REQUEST['companysalarymasterId'] . ")
-                   and salarydetails.emp_id = " . $row['employeeId'] . "  and salarymaster.isDelete=0 ";
+                   and salarydetails.emp_id = " . $row['employeeId'] . "
+                   and salarymaster.isDelete=0 and salarymaster.istatus=1
+                   and salarydetails.isDelete=0 ";
     
             $empdata = mysqli_fetch_array(mysqli_query($dbconn, $employee));
             if ($_REQUEST['bank'] != 0) {
@@ -202,7 +207,19 @@ if (mysqli_num_rows($result) > 0) {
             } else {
                 $BankName = "Cash";
             }
-            $Balance = $row['balance1'] - $empdata['PaidAmount'];
+            $employeeDeductions = getEmployeeMultiCompanyReportDeductions($reportDeductions, $row['employeeId']);
+            $calculation = calculateMultiCompanySalary(
+                $row['PresentAmount'],
+                $row['otamt'],
+                $row['adv'],
+                $row['adv_two'],
+                $row['advance_paid_by_bank'],
+                $employeeDeductions['pf'],
+                $employeeDeductions['esic'],
+                $row['Fa'],
+                $row['Ta']
+            );
+            $Balance = ceil(ceil($calculation['balance1']) - (float) $empdata['PaidAmount']);
             
             if ($Balance > 0) {
                 $Total += $Balance;
@@ -403,10 +420,13 @@ if (mysqli_num_rows($result) > 0) {
         while ($row = mysqli_fetch_array($result)) {
             $employee = "select sum(salarydetails.netamountpaid) as PaidAmount from salarymaster,salarydetails
                    where salarymaster.salarymasterId = salarydetails.salaryId
+                    and salarydetails.companyId = salarymaster.companymasterId
                    and salarymaster.month = '" . $_REQUEST['salarymonthId'] . "'  
                    and salarymaster.companymasterId in (select multiycompanysalarymaster.companymasterId from 
                    multiycompanysalarymaster where multiycompanysalarymaster.companysalarymasterId =  " . $_REQUEST['companysalarymasterId'] . ")
-                   and salarydetails.emp_id = " . $row['employeeId'] . "  and salarymaster.isDelete=0 ";
+                   and salarydetails.emp_id = " . $row['employeeId'] . "
+                   and salarymaster.isDelete=0 and salarymaster.istatus=1
+                   and salarydetails.isDelete=0 ";
     
             $empdata = mysqli_fetch_array(mysqli_query($dbconn, $employee));
             if ($_REQUEST['bank'] != 0) {
@@ -420,7 +440,19 @@ if (mysqli_num_rows($result) > 0) {
             } else {
                 $BankName = "Cash";
             }
-            $Balance = $row['balance1'] - $empdata['PaidAmount'];
+            $employeeDeductions = getEmployeeMultiCompanyReportDeductions($reportDeductions, $row['employeeId']);
+            $calculation = calculateMultiCompanySalary(
+                $row['PresentAmount'],
+                $row['otamt'],
+                $row['adv'],
+                $row['adv_two'],
+                $row['advance_paid_by_bank'],
+                $employeeDeductions['pf'],
+                $employeeDeductions['esic'],
+                $row['Fa'],
+                $row['Ta']
+            );
+            $Balance = ceil(ceil($calculation['balance1']) - (float) $empdata['PaidAmount']);
             
             if ($Balance > 0) {
                 $Total += $Balance;

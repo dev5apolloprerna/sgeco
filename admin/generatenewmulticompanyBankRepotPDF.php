@@ -7,6 +7,7 @@ require_once('tcpdf/tcpdf.php');
 //include('common.php');
 //$connect = new connect();
 include('../config.php');
+include_once 'companyReportAdvance.php';
 $where = "where 1=1";
 
 if ($_REQUEST['companysalarymasterId'] != NULL && $_REQUEST['salarymonthId'] != NULL) {
@@ -31,7 +32,7 @@ if ($_REQUEST['bank'] != NULL) {
         $where1 .= " and multicompany.pay_cash='1'";
     }
 }
-$filterstr = "SELECT multicompany.balance1,companysalarymaster.companysalarymasterId,employee.employeeId,employee.emp_name
+$filterstr = "SELECT multicompany.*,companysalarymaster.companysalarymasterId,employee.employeeId,employee.emp_name
     ,(select bankmaster.bankname from bankmaster where bankmaster.bankmasterId = 
     employee.bankid) as BankName ,employee.ifsccode ,employee.accountno,companysalarymaster.fromdate
     ,(select companysalarymaster.month from companysalarymaster where 
@@ -41,6 +42,7 @@ $filterstr = "SELECT multicompany.balance1,companysalarymaster.companysalarymast
     multicompany.emp_id = employee.employeeId  " . $where . "  " . $where1 . "   ORDER BY employee.emp_name asc ";
 
 $result = mysqli_query($dbconn, $filterstr);
+$reportDeductions = getMultiCompanyReportDeductions($dbconn, $_REQUEST['companysalarymasterId']);
 
 $Total = array(0, 0);
 $mailFormat_main = file_get_contents("newmulticompanybankwisedetaild.html");
@@ -84,10 +86,13 @@ while ($rowapplication = mysqli_fetch_array($result)) {
     }
     $employee = "select sum(salarydetails.netamountpaid) as PaidAmount from salarymaster,salarydetails
                where salarymaster.salarymasterId = salarydetails.salaryId
+                and salarydetails.companyId = salarymaster.companymasterId
                and salarymaster.month = '" . $_REQUEST['salarymonthId'] . "'  
                and salarymaster.companymasterId in (select multiycompanysalarymaster.companymasterId from 
                multiycompanysalarymaster where multiycompanysalarymaster.companysalarymasterId =  " . $_REQUEST['companysalarymasterId'] . ")
-               and salarydetails.emp_id = " . $rowapplication['employeeId'] . "  and salarymaster.isDelete=0 ";
+               and salarydetails.emp_id = " . $rowapplication['employeeId'] . "
+               and salarymaster.isDelete=0 and salarymaster.istatus=1
+               and salarydetails.isDelete=0 ";
 
     $empdata = mysqli_fetch_array(mysqli_query($dbconn, $employee));
 
@@ -99,13 +104,25 @@ while ($rowapplication = mysqli_fetch_array($result)) {
 
     /*  if($Balance > 0)
       { */
-    $Balance = $rowapplication['balance1'] - $empdata['PaidAmount'];
+    $employeeDeductions = getEmployeeMultiCompanyReportDeductions($reportDeductions, $rowapplication['employeeId']);
+    $calculation = calculateMultiCompanySalary(
+        $rowapplication['PresentAmount'],
+        $rowapplication['otamt'],
+        $rowapplication['adv'],
+        $rowapplication['adv_two'],
+        $rowapplication['advance_paid_by_bank'],
+        $employeeDeductions['pf'],
+        $employeeDeductions['esic'],
+        $rowapplication['Fa'],
+        $rowapplication['Ta']
+    );
+    $Balance = ceil(ceil($calculation['balance1']) - (float) $empdata['PaidAmount']);
     if ($Balance > 0) {
         $Total[1] = $Balance + $Total[1];
         $mailFormat = file_get_contents("newmulticompanybank_tr.html");
         $mailFormat = str_replace("#Sr.No#", ucfirst(urldecode($i)), $mailFormat);
         $mailFormat = str_replace("#emp_name#", ucwords(strtolower(urldecode($rowapplication['emp_name']))), $mailFormat);
-        $mailFormat = str_replace("#Balance#", ucfirst(urldecode(number_format(ceil($Balance),2))), $mailFormat);
+        $mailFormat = str_replace("#Balance#", ucfirst(urldecode(number_format($Balance, 2))), $mailFormat);
         if ($_REQUEST['bank'] == 3 || $_REQUEST['bank'] == "") {
             $mailFormat_main = str_replace("#BankName#", ucfirst(urldecode($BankName)), $mailFormat_main);
             $mailFormat = str_replace("#BankName#", ucfirst(urldecode($rowapplication['BankName'])), $mailFormat); 

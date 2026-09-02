@@ -13,6 +13,7 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Conditional;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -508,7 +509,6 @@ $summaryHeaderRow = $summaryTitleRow + 1;
 $summaryLastRow = $summaryHeaderRow + 5;
 $lastColumnNumber = count($reportRows[$headerRow - 1]);
 $lastColumn = Coordinate::stringFromColumnIndex($lastColumnNumber);
-$totalColumn = Coordinate::stringFromColumnIndex(16);
 $balanceColumn = Coordinate::stringFromColumnIndex(19);
 // Present the report heading as full-width sections, matching the formatted
 // statutory company report rather than the old comma-separated download.
@@ -558,18 +558,24 @@ $sheet->getStyle('A' . $summaryHeaderRow . ':F' . $summaryLastRow)->applyFromArr
 ));
 $sheet->getStyle('A' . $summaryHeaderRow . ':F' . $summaryHeaderRow)->getFont()->setBold(true);
 
-// Keep amounts numeric and consistently readable in Excel.
+// Rate, Present Days and O.T Hours always use two decimal places in Excel.
 if ($employeeCount > 0) {
-    $sheet->getStyle('E' . $dataStartRow . ':' . Coordinate::stringFromColumnIndex($lastColumnNumber - 3) . $totalRow)
+    $sheet->getStyle('E' . $dataStartRow . ':G' . $totalRow)
         ->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
 }
-// Total and Balance are rounded upward above, but remain numeric cells. Apply
-// an explicit two-decimal format to both highlighted columns, including the
-// report totals row (for example, 9160 is displayed as 9160.00).
-$sheet->getStyle($totalColumn . $dataStartRow . ':' . $totalColumn . $totalRow)
-    ->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
-$sheet->getStyle($balanceColumn . $dataStartRow . ':' . $balanceColumn . $totalRow)
-    ->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
+// From Present Amount through Balance, whole numbers should not gain a .00
+// suffix. Fractional values retain exactly two decimal places. Conditional
+// formatting lets Excel make that distinction while keeping every cell numeric.
+if ($employeeCount > 0) {
+    $amountRange = 'H' . $dataStartRow . ':' . $balanceColumn . $totalRow;
+    $sheet->getStyle($amountRange)->getNumberFormat()->setFormatCode('0');
+
+    $fractionalAmountFormat = new Conditional();
+    $fractionalAmountFormat->setConditionType(Conditional::CONDITION_EXPRESSION);
+    $fractionalAmountFormat->addCondition('MOD(H' . $dataStartRow . ',1)<>0');
+    $fractionalAmountFormat->getStyle()->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
+    $sheet->getStyle($amountRange)->setConditionalStyles(array($fractionalAmountFormat));
+}
 $sheet->getStyle('B' . ($summaryHeaderRow + 1) . ':F' . $summaryLastRow)
     ->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
 
