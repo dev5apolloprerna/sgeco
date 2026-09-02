@@ -544,6 +544,12 @@ $sheet->getStyle('A' . $headerRow . ':' . $lastColumn . $headerRow)->applyFromAr
 ));
 $sheet->getStyle('A' . $totalRow . ':' . $lastColumn . $totalRow)->getFont()->setBold(true);
 $sheet->getRowDimension($headerRow)->setRowHeight(48);
+// Give employee rows enough printed height to use the Legal sheet effectively.
+// Without an explicit height, fitting this wide report to one page leaves a
+// large unused area below the table and makes the report unnecessarily small.
+for ($reportRow = $dataStartRow; $reportRow <= $totalRow; $reportRow++) {
+    $sheet->getRowDimension($reportRow)->setRowHeight(24);
+}
 
 $sheet->mergeCells('A' . $summaryTitleRow . ':F' . $summaryTitleRow);
 $sheet->setCellValue('A' . $summaryTitleRow, 'SUMMARY');
@@ -557,22 +563,25 @@ $sheet->getStyle('A' . $summaryHeaderRow . ':F' . $summaryLastRow)->applyFromArr
     ),
 ));
 $sheet->getStyle('A' . $summaryHeaderRow . ':F' . $summaryHeaderRow)->getFont()->setBold(true);
+for ($reportRow = $summaryTitleRow; $reportRow <= $summaryLastRow; $reportRow++) {
+    $sheet->getRowDimension($reportRow)->setRowHeight(22);
+}
 
-// Rate, Present Days and O.T Hours always use two decimal places in Excel.
+// Rate always uses two decimal places in Excel.
 if ($employeeCount > 0) {
-    $sheet->getStyle('E' . $dataStartRow . ':G' . $totalRow)
+    $sheet->getStyle('E' . $dataStartRow . ':E' . $totalRow)
         ->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
 }
-// From Present Amount through Balance, whole numbers should not gain a .00
+// From Present Days through Balance, whole numbers should not gain a .00
 // suffix. Fractional values retain exactly two decimal places. Conditional
 // formatting lets Excel make that distinction while keeping every cell numeric.
 if ($employeeCount > 0) {
-    $amountRange = 'H' . $dataStartRow . ':' . $balanceColumn . $totalRow;
+    $amountRange = 'F' . $dataStartRow . ':' . $balanceColumn . $totalRow;
     $sheet->getStyle($amountRange)->getNumberFormat()->setFormatCode('0');
 
     $fractionalAmountFormat = new Conditional();
     $fractionalAmountFormat->setConditionType(Conditional::CONDITION_EXPRESSION);
-    $fractionalAmountFormat->addCondition('MOD(H' . $dataStartRow . ',1)<>0');
+    $fractionalAmountFormat->addCondition('MOD(F' . $dataStartRow . ',1)<>0');
     $fractionalAmountFormat->getStyle()->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
     $sheet->getStyle($amountRange)->setConditionalStyles(array($fractionalAmountFormat));
 }
@@ -592,10 +601,12 @@ $sheet->freezePane('A' . $dataStartRow);
 $sheet->setShowGridlines(false);
 $sheet->getSheetView()->setZoomScale(80);
 $sheet->getPageSetup()->setOrientation(PageSetup::ORIENTATION_LANDSCAPE);
-$sheet->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_A3);
-$sheet->getPageSetup()->setFitToWidth(1)->setFitToHeight(0);
+// $sheet->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_A3);
+// $sheet->getPageSetup()->setFitToWidth(1)->setFitToHeight(0);
+$sheet->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_LEGAL);
+$sheet->getPageSetup()->setFitToWidth(1)->setFitToHeight(1);
 $sheet->getPageSetup()->setRowsToRepeatAtTopByStartAndEnd($headerRow, $headerRow);
-$sheet->getPageMargins()->setTop(0.3)->setRight(0.3)->setBottom(0.3)->setLeft(0.3);
+$sheet->getPageMargins()->setTop(0.2)->setRight(0.2)->setBottom(0.2)->setLeft(0.2);
 $sheet->getPageSetup()->setHorizontalCentered(true);
 $sheet->getPageSetup()->setPrintArea('A1:' . $lastColumn . $summaryLastRow);
 

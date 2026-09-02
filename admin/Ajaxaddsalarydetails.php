@@ -16,13 +16,13 @@ if ($_POST['action'] == 'ListUser') {
             //$filterstr = "SELECT * FROM employee where isDelete=0 and istatus=1 and employee.emp_name  like '%" . $_POST['employeeId'] . "%'";
         }
     }
-    $filterstr = "SELECT * FROM employee where isDelete=0 and istatus=1 and ".$whereA."";
+    $filterstr = "SELECT * FROM employee where isDelete=0 and istatus=1 and ".$whereA." and isExitEmployee=0";
 //      $countstr = "SELECT count(*) as TotalRow,e1.salaryamt as SDisplayAmount from (SELECT * FROM `employee` where   employee.isDelete='0' and employee.istatus='1'
 // and employee.employeeId in (select comskill.empid from comskill where comskill.companyid = '" . $_POST['companyId'] . "' )
 // UNION
 // select * from employee where  employee.isDelete='0' and employee.istatus='1' and employee.employeeId like '%" . $_POST['employeeId'] . "%'
 //  and employee.employeeId not in (select comskill.empid from comskill where comskill.companyid = '" . $_POST['companyId'] . "'  ))as e1 left join (select * from salarydetails where " . $whereA . ") as e2 on e1.employeeId=e2.emp_id";
-    $countstr = "SELECT count(*) as TotalRow FROM employee where isDelete=0 and istatus=1 and ".$whereA."";
+    $countstr = "SELECT count(*) as TotalRow FROM employee where isDelete=0 and istatus=1 and ".$whereA." and isExitEmployee=0";
     
     $resrowcount = mysqli_query($dbconn, $countstr);
     $resrowc = mysqli_fetch_array($resrowcount);

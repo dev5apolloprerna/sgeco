@@ -151,41 +151,41 @@ if (mysqli_num_rows($result) > 0) {
 
         <script type="text/javascript">
 
-                                                        function checkclose() {
-                                                            window.location.href = '<?php echo $web_url; ?>admin/salarydetails.php';
-                                                        }
-                                                        $(document).ready(function () {
+            function checkclose() {
+                window.location.href = '<?php echo $web_url; ?>admin/salarydetails.php';
+            }
+            $(document).ready(function () {
 
-                                                            $("#salarypaiddate").datepicker({
-                                                                format: 'dd-m-yyyy',
-                                                                autoclose: true,
-                                                                todayHighlight: true,
-                                                                defaultDate: "now",
-                                                            });
-                                                        });
+                $("#salarypaiddate").datepicker({
+                    format: 'dd-m-yyyy',
+                    autoclose: true,
+                    todayHighlight: true,
+                    defaultDate: "now",
+                });
+            });
 
-                                                        $("#employeeId").keypress(function (event) {
-                                                            if (event.keyCode === 13) {
-                                                                $("#clickbutton").click();
-                                                                return false;
-                                                            }
-                                                        });
+            $("#employeeId").keypress(function (event) {
+                if (event.keyCode === 13) {
+                    $("#clickbutton").click();
+                    return false;
+                }
+            });
 
-                                                        function PageLoadData(Page) {
-                                                            var employeeId = $('#employeeId').val();
-                                                            var salarymasterId = $('#salarymasterId').val();
-                                                            $('#loading').css("display", "block");
-                                                            $.ajax({
-                                                                type: "POST",
-                                                                url: "<?php echo $web_url; ?>admin/Ajaxaddsalarydetails.php",
-                                                                data: {action: 'ListUser', Page: Page, employeeId: employeeId, salarymasterId: salarymasterId},
-                                                                success: function (msg) {
-                                                                    $('#loading').css("display", "none");
-                                                                    $("#PlaceUsersDataHere").html(msg);
-                                                                },
-                                                            });
-                                                        }
-                                                        // PageLoadData(1);
+            function PageLoadData(Page) {
+                var employeeId = $('#employeeId').val();
+                var salarymasterId = $('#salarymasterId').val();
+                $('#loading').css("display", "block");
+                $.ajax({
+                    type: "POST",
+                    url: "<?php echo $web_url; ?>admin/Ajaxaddsalarydetails.php",
+                    data: {action: 'ListUser', Page: Page, employeeId: employeeId, salarymasterId: salarymasterId},
+                    success: function (msg) {
+                        $('#loading').css("display", "none");
+                        $("#PlaceUsersDataHere").html(msg);
+                    },
+                });
+            }
+            // PageLoadData(1);
 
         </script>
     </body>

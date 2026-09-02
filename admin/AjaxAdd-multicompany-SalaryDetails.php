@@ -10,10 +10,10 @@ if ($_POST['action'] == 'ListUser') {
 
     if (isset($_POST['employeeId'])) {
         if ($_POST['employeeId'] != '') {
-            $filterstr = "SELECT * FROM employee where isDelete=0 and istatus=1 and employee.emp_name  like '%" . $_POST['employeeId'] . "%'";
+            $filterstr = "SELECT * FROM employee where isDelete=0 and istatus=1 and employee.emp_name  like '%" . $_POST['employeeId'] . "%' and isExitEmployee=0";
         }
     }
-    $countstr = "SELECT count(*) as `TotalRow` FROM employee where employee.emp_name like '%" . $_POST['employeeId'] . "%'";
+    $countstr = "SELECT count(*) as `TotalRow` FROM employee where employee.emp_name like '%" . $_POST['employeeId'] . "%' and isExitEmployee=0";
 
     $resrowcount = mysqli_query($dbconn, $countstr);
     $resrowc = mysqli_fetch_array($resrowcount);
