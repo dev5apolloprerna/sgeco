@@ -9,13 +9,13 @@ include('IsLogin.php');
 
 
 //$query = mysqli_fetch_array(mysqli_query($dbconn, "SELECT * FROM `salarydetails` where  companyId='" . $_REQUEST['Company'] . "' and salaryId='" . $_REQUEST['salarymasterId'] . "'  and  isDelete='0'  and  istatus='1'and workingdays > 0 order by salarydetailsId asc"));
-$query = mysqli_fetch_array(mysqli_query($dbconn, "SELECT * FROM `salarydetails` where  companyId='" . $_REQUEST['Company'] . "' and salaryId in (select salarymasterId from salarymaster where  month='" . $_REQUEST['salarymasterId'] . "' and isDelete='0' and  istatus='1')  and  isDelete='0'  and  istatus='1'and workingdays > 0 order by salarydetailsId asc"));
+$query = mysqli_fetch_array(mysqli_query($dbconn, "SELECT * FROM `salarydetails` where  companyId='" . $_REQUEST['Company'] . "' and salaryId in (select salarymasterId from salarymaster where  month='" . $_REQUEST['salarymasterId'] . "' and isDelete='0' and  istatus='1')  and  isDelete='0'  and  istatus='1'and workingdays > 0 order by name ASC, salarydetailsId ASC"));
 
 $comid = mysqli_fetch_array(mysqli_query($dbconn, "SELECT companyname FROM companymaster where companymasterId = '" . $_REQUEST['Company'] . "'"));
 $MONTH = mysqli_fetch_array(mysqli_query($dbconn, "SELECT month FROM salarymaster where salarymasterId = '" . $query['salaryId'] . "'"));
 
 //$query1 = mysqli_query($dbconn, "SELECT * FROM `salarydetails` where  companyId='" . $_REQUEST['Company'] . "' and salaryId='" . $_REQUEST['salarymasterId'] . "'  and  isDelete='0'  and  istatus='1'and workingdays > 0 order by salarydetailsId asc");
-$query1 = mysqli_query($dbconn, "SELECT * FROM `salarydetails` where  companyId='" . $_REQUEST['Company'] . "' and salaryId in (select salarymasterId from salarymaster where  month='" . $_REQUEST['salarymasterId'] . "' and isDelete='0' and  istatus='1') and  isDelete='0'  and  istatus='1'and workingdays > 0 order by salarydetailsId asc");
+$query1 = mysqli_query($dbconn, "SELECT * FROM `salarydetails` where  companyId='" . $_REQUEST['Company'] . "' and salaryId in (select salarymasterId from salarymaster where  month='" . $_REQUEST['salarymasterId'] . "' and isDelete='0' and  istatus='1') and  isDelete='0'  and  istatus='1'and workingdays > 0 order by name ASC, salarydetailsId ASC");
 if (mysqli_num_rows($query1) > 0) {
     $delimiter = ",";
     $filename = "companyreport" . date('Y-m-d H:i:s') . ".csv";

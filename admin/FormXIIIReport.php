@@ -31,7 +31,7 @@ function getFormXIIIEmployees($dbconn, $companyId, $salaryMonth)
               AND salarydetails.isDelete = '0'
               AND salarydetails.istatus = '1'
               AND salarydetails.workingdays > 0
-            ORDER BY salarydetails.salarydetailsId ASC";
+            ORDER BY employee.emp_name ASC, salarydetails.salarydetailsId ASC";
 
     $result = mysqli_query($dbconn, $sql);
     if ($result === false) {

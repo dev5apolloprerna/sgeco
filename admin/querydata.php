@@ -1211,14 +1211,14 @@ switch ($action) {
                     //"workinghours" => $_POST['workinghours'],
                     "workingdays" => $_POST['workingdays_' . $inc],
                     "basicwages" => round($basicrate,2),
-                    "skillrate" => round($dailyrate,2),
+                    "skillrate" => number_format($dailyrate,2),
                     "othours" => $othours,
                     //"workrate" => $_POST['workrate'],
                     "otrate" => $otrate,
                     "totalovertime" => round($overtime,2),
                     "da" => round((float)$da,2),
                     "hra" => round((float)$hra,2),
-                    "national_holiday_payment" => round((float)$national_holiday_payment),
+                    "national_holiday_payment" => round((float)$national_holiday_payment, 2),
                     "MedicalAllowanceamt" => round((float)$MedicalAllowance),
                     "total" => round((float)$total,2),
                     "esi" => round((float)$ecs,2),
@@ -1265,9 +1265,9 @@ switch ($action) {
                 $otamt = '0';
             }
             // $totalAdv = $adv + $adv_two;
-            $advancePaidByBank = max(0, (float) $_POST['advance_paid_by_bank']);
-            $pfAmount = max(0, (float) $_POST['pf_amount']);
-            $esicAmount = max(0, (float) $_POST['esic_amount']);
+            $advancePaidByBank = isset($_POST['advance_paid_by_bank']) ? max(0, (float) $_POST['advance_paid_by_bank']) : 0;
+            $pfAmount = isset($_POST['pf_amount']) ? max(0, (float) $_POST['pf_amount']) : 0;
+            $esicAmount = isset($_POST['esic_amount']) ? max(0, (float) $_POST['esic_amount']) : 0;
             // $total = $totalamt - $totalAdv - $advancePaidByBank - $pfAmount - $esicAmount;
             // // $total = $totalamt - $_POST['adv'];
             // $balance1 = $total + $_POST['Fa'] + $_POST['Ta'];
@@ -1503,7 +1503,8 @@ switch ($action) {
             $ecs = "0";
         }
         //$pf = round($total) * 0.12;
-        $deductionifany = $_POST['deductionifany'];
+        $deductionifany = max(0, (float) $_POST['deductionifany']);
+        $advance = isset($_POST['advance']) ? max(0, (float) $_POST['advance']) : 0;
         //$pt = $_POST['pt'];
         $pt = '0';
         if ($Company['pf'] == 'YES') {
@@ -1523,7 +1524,7 @@ switch ($action) {
             $pt = '0';
         }
         // $pf = round($total) * 0.12;
-        $netamt1 = $total - $ecs - $pf - $pt - $deductionifany;
+        $netamt1 = $total - $ecs - $pf - $pt - $deductionifany - $advance;
         $netamt = $netamt1 + $MedicalAllowance;
 
         /*$netamt1 = $total - $ecs - $pf - $pt;
@@ -1539,18 +1540,19 @@ switch ($action) {
             "othours" => $_POST['othours'],
             "otrate" => $_POST['otrate'],
             "basicwages" => round($basicrate),
-            "skillrate" => round($_POST['skillrate']),
+            "skillrate" => numfmt_format((float) $_POST['skillrate'], 2),
             "totalovertime" => round($overtime),
             "MedicalAllowanceamt" => $MedicalAllowance,
             "da" => round($da,2),
             "hra" => round($hra,2),
-            "national_holiday_payment" => $national_holiday_payment,
+            "national_holiday_payment" => round((float) $national_holiday_payment, 2),
             "total" => round($total),
             "esi" => $ecs,
             "iNoOfNatioanHoliday" => $national_holiday,
             "pf" => round($pf),
             "pt" => $pt,
             "deductionifany" => $deductionifany,
+            "advance" => round($advance, 2),
             "netamountpaid" => ceil($netamt),
             "iBonusAmt" => round($iBonusAmt),
             "iLeaveAmt" => round($iLeaveAmt),
@@ -1561,11 +1563,11 @@ switch ($action) {
         $query = "update salarydetails set salaryId='".$_POST['salaryId']."',name='".$_POST['name']."',
             companyId='".$_POST['companyId']."',workingdays='".$_POST['workingdays']."' ,
             othours='".$_POST['othours']."',otrate='".$_POST['otrate']."',
-            basicwages='".round($basicrate)."',skillrate='".round($_POST['skillrate'])."',
+            basicwages='".round($basicrate, 2)."',skillrate='".number_format((float) $_POST['skillrate'], 2)."',
             totalovertime='".round($overtime)."',MedicalAllowanceamt='".$MedicalAllowance."',
-            da='".round($da,2)."',hra='".round($hra,2)."', national_holiday_payment='".$national_holiday_payment."',
+            da='".round($da,2)."',hra='".round($hra,2)."', national_holiday_payment='".round((float) $national_holiday_payment, 2)."',
             total='".round($total)."',esi='".$ecs."', iNoOfNatioanHoliday='".$national_holiday."',
-            pf='".round($pf,2)."', pt='".$pt."',deductionifany='".$deductionifany."', netamountpaid='".ceil($netamt)."',
+            pf='".round($pf,2)."', pt='".$pt."',deductionifany='".$deductionifany."', advance='".round($advance, 2)."', netamountpaid='".ceil($netamt)."',
             strEntryDate='".date('d-m-Y H:i:s')."',strIP='".$_SERVER['REMOTE_ADDR']."', iBonusAmt='".ceil($iBonusAmt)."', iLeaveAmt='".ceil($iLeaveAmt)."' " . $where;
         $result = mysqli_query($dbconn,$query) or die(mysqli_connect_error());
         $id = mysqli_affected_rows($dbconn);

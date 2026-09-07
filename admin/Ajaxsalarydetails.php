@@ -103,6 +103,7 @@ if ($_POST['action'] == 'ListUser') {
                         <th class="desktop">DA</th>
                         <th class="desktop">HRA</th>
                         <th class="desktop">National Holiday Payment</th>
+                        <th class="desktop">Advance</th>
                         <th class="desktop">Net<br />Amount<br />Paid</th>
             <!--                    <th class="all">Salary Amt</th>-->
     
@@ -197,6 +198,10 @@ if ($_POST['action'] == 'ListUser') {
                             </td>
                             <td>
                                 <div class="form-group form-md-line-input "><?php echo $rowfilter['national_holiday_payment']; ?> 
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group form-md-line-input "><?php echo isset($rowfilter['advance']) ? $rowfilter['advance'] : '0.00'; ?>
                                 </div>
                             </td>
                             <td>

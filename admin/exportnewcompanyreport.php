@@ -25,7 +25,7 @@ function formatCompanyReportExcelAmount($amount)
 
 
 //$query = mysqli_fetch_array(mysqli_query($dbconn, "SELECT * FROM `salarydetails` where  companyId='" . $_REQUEST['Company'] . "' and salaryId='" . $_REQUEST['salarymasterId'] . "'  and  isDelete='0'  and  istatus='1'and workingdays > 0 order by salarydetailsId asc"));
-$query = mysqli_fetch_array(mysqli_query($dbconn, "SELECT * FROM `salarydetails` where  companyId='" . $_REQUEST['Company'] . "' and salaryId in (select salarymasterId from salarymaster where  month='" . $_REQUEST['salarymasterId'] . "' and isDelete='0' and  istatus='1')  and  isDelete='0'  and  istatus='1'and workingdays > 0 order by salarydetailsId asc"));
+$query = mysqli_fetch_array(mysqli_query($dbconn, "SELECT * FROM `salarydetails` where  companyId='" . $_REQUEST['Company'] . "' and salaryId in (select salarymasterId from salarymaster where  month='" . $_REQUEST['salarymasterId'] . "' and isDelete='0' and  istatus='1')  and  isDelete='0'  and  istatus='1'and workingdays > 0 order by name ASC, salarydetailsId ASC"));
 
 $comid = mysqli_fetch_array(mysqli_query($dbconn, "SELECT companyname,skil,unskill,semiskill,highlyskilled FROM companymaster where companymasterId = '" . $_REQUEST['Company'] . "'"));
 $MONTH = mysqli_fetch_array(mysqli_query($dbconn, "SELECT month,fromdate,todate FROM salarymaster where salarymasterId = '" . $query['salaryId'] . "'"));
@@ -34,7 +34,7 @@ $month =  str_replace('/', '-', $_REQUEST['salarymasterId']);
 $wageMonth = date('F-y', strtotime("01-" . $month));
 
 //$query1 = mysqli_query($dbconn, "SELECT * FROM `salarydetails` where  companyId='" . $_REQUEST['Company'] . "' and salaryId='" . $_REQUEST['salarymasterId'] . "'  and  isDelete='0'  and  istatus='1'and workingdays > 0 order by salarydetailsId asc");
-$query1 = mysqli_query($dbconn, "SELECT * FROM `salarydetails` where  companyId='" . $_REQUEST['Company'] . "' and salaryId in (select salarymasterId from salarymaster where  month='" . $_REQUEST['salarymasterId'] . "' and isDelete='0' and  istatus='1') and  isDelete='0'  and  istatus='1'and workingdays > 0 order by salarydetailsId asc");
+$query1 = mysqli_query($dbconn, "SELECT * FROM `salarydetails` where  companyId='" . $_REQUEST['Company'] . "' and salaryId in (select salarymasterId from salarymaster where  month='" . $_REQUEST['salarymasterId'] . "' and isDelete='0' and  istatus='1') and  isDelete='0'  and  istatus='1'and workingdays > 0 order by name ASC, salarydetailsId ASC");
 $companyReportAdvances = getCompanyReportAdvances($dbconn, $_REQUEST['Company'], $_REQUEST['salarymasterId']);
 if (mysqli_num_rows($query1) > 0) {
     $lineOne = "";
@@ -418,7 +418,8 @@ if (mysqli_num_rows($query1) > 0) {
         $desg = mysqli_fetch_array(mysqli_query($dbconn, "SELECT * FROM `employee`  where isDelete='0' and employeeId='" . $row['emp_id'] . "'"));
         // $advanceAmount = getEmployeeCompanyReportAdvance($companyReportAdvances, $row['emp_id']);
         $advanceAmount = getSalaryReportAdvance($row, $companyReportAdvances);
-        $Deduction_total = $row['pf'] + $row['esi'] + $advanceAmount + $row['pt'];
+        $Deduction_total = $row['pf'] + $row['esi'] + $advanceAmount
+            + $row['pt'] + $row['deductionifany'];
         // $netAmountPaid = ceil($row['netamountpaid'] - $advanceAmount);
         $netAmountPaid = ceil(getSalaryReportNetAmount($row, $advanceAmount));
         $emp_name = "";
@@ -459,7 +460,7 @@ if (mysqli_num_rows($query1) > 0) {
             . "\t" . number_format($advanceAmount, 2, '.', '')
             . "\t" . $pt
             . "\t" . ''
-            . "\t" . ''
+            . "\t" . $row['deductionifany']
             . "\t" . $Deduction_total
             . "\t" . $netAmountPaid
             . "\t" . ''
@@ -476,8 +477,8 @@ if (mysqli_num_rows($query1) > 0) {
         $Total[15] += $row['pf'];
         $Total[17] += $advanceAmount;
         $Total[18] += (int)$row['pt'];
+        $Total[20] += $row['deductionifany'];
         $Total[21] += $Deduction_total;
-        //$Total[16] += $row['deductionifany'];
         $Total[22] += $netAmountPaid;
         $Total[10] += ceil($row['iBonusAmt']);
         $Total[11] += ceil($row['iLeaveAmt']);
@@ -509,7 +510,7 @@ if (mysqli_num_rows($query1) > 0) {
         . "\t" . number_format($Total[17], 2, '.', '')
         . "\t" . $Total[18]
         . "\t" . ""
-        . "\t" . ""
+        . "\t" . $Total[20]
         . "\t" . $Total[21]
         . "\t" . number_format($Total[22], 2, '.', '')
 

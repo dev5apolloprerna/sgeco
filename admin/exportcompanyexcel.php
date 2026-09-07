@@ -162,7 +162,7 @@ $array[5][3] = 0;
 $array[5][4] = 0;
 $array[5][5] = 0;
 
-$query = "SELECT * FROM `multicompany` where  companysalarymasterId='" . $_REQUEST['token'] . "' order by multicompanyid desc";
+$query = "SELECT * FROM `multicompany` where  companysalarymasterId='" . $_REQUEST['token'] . "' order by name ASC, multicompanyid ASC";
 // $reportAdvances = getMultiCompanyReportAdvances($dbconn, $_REQUEST['token'], $month);
 $reportDeductions = getMultiCompanyReportDeductions($dbconn, $_REQUEST['token']);
 $Total = array("", "Total", "", "", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0");
@@ -173,7 +173,10 @@ $result = mysqli_query($dbconn, $query);
 $PaidcompanyWiseTotal = array();
 $balance2 = 0;
 $TotalBalance2 = array("0");
-$companyWiseTotal = array();
+// Keep one total slot for every dynamic company column. Initializing these
+// positions prevents a company with no payment from being omitted and shifting
+// Total Balance into the preceding company column.
+$companyWiseTotal = array_fill(0, count($comnymasid), 0);
 while ($row = mysqli_fetch_assoc($result)) {
     $desg = mysqli_fetch_array(mysqli_query($dbconn, "SELECT * FROM `employee`  where isDelete='0' and employeeId='" . $row['emp_id'] . "'"));
     $bank = mysqli_fetch_array(mysqli_query($dbconn, "SELECT bankname FROM `bankmaster`  where  bankmasterId='" . $desg['bankid'] . "'"));
@@ -380,13 +383,8 @@ while ($row = mysqli_fetch_assoc($result)) {
     fputcsv($f, $lineData, $delimiter);
     $i++;
 }
-if (empty($companyWiseTotal)) {
-    $companyWiseTotal[0] = 0;
-    array_push($PaidcompanyWiseTotal, $companyWiseTotal[0]);
-} else {
-    for ($i = 0; $i < sizeof($companyWiseTotal); $i++) {
-        array_push($PaidcompanyWiseTotal, $companyWiseTotal[$i]);
-    }
+for ($i = 0; $i < count($comnymasid); $i++) {
+    $PaidcompanyWiseTotal[] = $companyWiseTotal[$i];
 }
 $Total = array_merge($Total, $PaidcompanyWiseTotal);
 $Total = array_merge($Total, $TotalBalance2);

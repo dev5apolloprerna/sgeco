@@ -43,7 +43,8 @@ $salaryMonth = sprintf('%02d/%04d', $month, $year);
 //         and employeecode not in (829,257,815,1063,256,84,2060,259,1131,1444,229,306,1834,1275,1967,1606,2305)  and isPermanent=0
 //         GROUP by employee.employeeId order by employee.employeecode asc";
 $sql1 = "SELECT employee.employeeId,MAX(CONVERT(salarydetails.skillrate,DECIMAL(12,2))) as skillrate,employee.employeecode,
-        SUM(CONVERT(salarydetails.workingdays,DECIMAL(12,2))) as workingdays,employee.emp_name,employee.pfcode,employee.uan,employee.ecsno,employee.dateofbirth,
+        SUM(CONVERT(salarydetails.workingdays,DECIMAL(12,2))) as workingdays,
+        SUM(COALESCE(salarydetails.iNoOfNatioanHoliday,0)) as nationalHolidays,employee.emp_name,employee.pfcode,employee.uan,employee.ecsno,employee.dateofbirth,
         SUM(CASE WHEN UPPER(companymaster.ESI)='YES' THEN COALESCE(salarydetails.iBonusAmt,0) + COALESCE(salarydetails.iLeaveAmt,0) ELSE 0 END) as DifferenceInESIC,
         SUM(COALESCE(salarydetails.totalovertime,0)) as totalovertime
         FROM `salarydetails` inner join employee on salarydetails.emp_id=employee.employeeId
@@ -198,6 +199,7 @@ $fields = array(
     'ESIC NO',
     'D.O.B',
     "PRESENT DAYS",
+    "NATIONAL HOLIDAY",
     "WAGES",
     "Difference  in ESIC",
     "OT AMOUNT FOR ESIC"
@@ -212,6 +214,7 @@ if (mysqli_num_rows($resfilter) > 0) {
     while ($row = mysqli_fetch_array($resfilter)) {
         $filterdetails = mysqli_query($dbconn, "SELECT MAX(CONVERT(salarydetails.skillrate,DECIMAL(12,2))) as skillrate,
                 SUM(CONVERT(salarydetails.workingdays,DECIMAL(12,2))) as workingdays,
+                SUM(COALESCE(salarydetails.iNoOfNatioanHoliday,0)) as nationalHolidays,
                 SUM(CASE WHEN UPPER(companymaster.ESI)='YES' THEN COALESCE(salarydetails.iBonusAmt,0) + COALESCE(salarydetails.iLeaveAmt,0) ELSE 0 END) as DifferenceInESIC,
                 SUM(COALESCE(salarydetails.totalovertime,0)) as totalovertime
                 FROM salarydetails inner join salarymaster on salarydetails.salaryId=salarymaster.salarymasterId
@@ -219,12 +222,14 @@ if (mysqli_num_rows($resfilter) > 0) {
                 where salarymaster.month='" . $salaryMonth . "' and salarymaster.isDelete='0' and salarymaster.istatus='1'
                 and salarydetails.isDelete='0' and salarydetails.istatus='1' and salarydetails.workingdays > 0 and salarydetails.emp_id='" . $row['employeeId'] . "' GROUP BY salarydetails.emp_id");
         $workingdays = 0;
+        $nationalHolidays = 0;
         $skillrate = 0;
         $DifferenceInESIC = 0;
         $totalovertime = 0;
         if (mysqli_num_rows($filterdetails) == 1) {
             $rowDetails = mysqli_fetch_array($filterdetails);
             $workingdays = $rowDetails['workingdays'];
+            $nationalHolidays = $rowDetails['nationalHolidays'];
             $skillrate = $rowDetails['skillrate'];
 
             // if($rowDetails['Diff'] == 0){
@@ -280,6 +285,7 @@ if (mysqli_num_rows($resfilter) > 0) {
             trim($row['ecsno']),
             $dateofbirth,
             $workingdays,
+            $nationalHolidays,
             $skillrate,
             round($DifferenceInESIC),
             ceil($totalovertime)
@@ -343,6 +349,7 @@ while ($rows = mysqli_fetch_assoc($result1)) {
         trim($rows['ecsno']),
         $dateofbirth,
         $workingdays,
+        isset($rows['nationalHolidays']) ? $rows['nationalHolidays'] : 0,
         $skillrate,
         round($DifferenceInESIC),
         ceil($totalovertime)
@@ -356,7 +363,8 @@ while ($rows = mysqli_fetch_assoc($result1)) {
 //     uan,ecsno,dateofbirth,'' as 'basicAmount','' as 'grossAmount', 0 as totalovertime,strFatherName,adharcard,dateofjoining FROM `tempEmpolyeeMaster`  " . $where . " and isDelete='0'  and  istatus='1' 
 //     UNION ALL
 $tempEmpolyeeMastersql = "SELECT employee.employeeId,MAX(CONVERT(salarydetails.skillrate,DECIMAL(12,2))) as skillrate,
-        SUM(CONVERT(salarydetails.workingdays,DECIMAL(12,2))) as workingdays,employee.emp_name,employee.pfcode,employee.uan,employee.ecsno,employee.dateofbirth,
+        SUM(CONVERT(salarydetails.workingdays,DECIMAL(12,2))) as workingdays,
+        SUM(COALESCE(salarydetails.iNoOfNatioanHoliday,0)) as nationalHolidays,employee.emp_name,employee.pfcode,employee.uan,employee.ecsno,employee.dateofbirth,
         SUM(CASE WHEN UPPER(companymaster.ESI)='YES' THEN COALESCE(salarydetails.iBonusAmt,0) + COALESCE(salarydetails.iLeaveAmt,0) ELSE 0 END) as DifferenceInESIC,
         SUM(COALESCE(salarydetails.totalovertime,0)) as totalovertime,employee.dateofjoining,strFatherName,adharcard
         FROM salarydetails inner join employee on salarydetails.emp_id=employee.employeeId
@@ -410,6 +418,7 @@ $fields = array(
     'ESIC No.',
     'DOB',
     "PRESENT DAYS",
+    "NATIONAL HOLIDAY",
     "WAGES",
     "Difference  in ESIC",
     "Joining Date"
@@ -468,6 +477,7 @@ while ($row = mysqli_fetch_assoc($tempEmpolyeeMasterResult)) {
         trim($row['ecsno']),
         $dateofbirth,
         trim($row['workingdays']),
+        isset($row['nationalHolidays']) ? trim($row['nationalHolidays']) : 0,
         trim($row['skillrate']),
         trim(round($DifferenceInESIC)),
         $dateofjoining
@@ -514,18 +524,18 @@ foreach ($reportRows as $rowIndex => $reportRow) {
         && count($nonEmptyValues) === 1 && $rowIndex < 5;
 
     if ($isReportTitle || $isMonthTitle || $isSectionHeading) {
-        $sheet->mergeCells('A' . $excelRow . ':J' . $excelRow);
+        $sheet->mergeCells('A' . $excelRow . ':K' . $excelRow);
         $sheet->setCellValue('A' . $excelRow, $firstValue);
-        $sheet->getStyle('A' . $excelRow . ':J' . $excelRow)->getFont()->setBold(true);
+        $sheet->getStyle('A' . $excelRow . ':K' . $excelRow)->getFont()->setBold(true);
         $alignment = $isMonthTitle
             ? \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT
             : \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER;
         $sheet->getStyle('A' . $excelRow)->getAlignment()->setHorizontal($alignment);
         if (!$isReportTitle) {
-            $sheet->getStyle('A' . $excelRow . ':J' . $excelRow)->applyFromArray($thinBorder);
+            $sheet->getStyle('A' . $excelRow . ':K' . $excelRow)->applyFromArray($thinBorder);
         }
     } else {
-        foreach (array_slice(array_pad($reportRow, 10, ''), 0, 10) as $columnIndex => $value) {
+        foreach (array_slice(array_pad($reportRow, 11, ''), 0, 11) as $columnIndex => $value) {
             $coordinate = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($columnIndex + 1) . $excelRow;
             if ($columnIndex >= 1 && $columnIndex <= 5) {
                 $sheet->setCellValueExplicit($coordinate, $value, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
@@ -534,20 +544,20 @@ foreach ($reportRows as $rowIndex => $reportRow) {
             }
         }
 
-        $sheet->getStyle('A' . $excelRow . ':J' . $excelRow)->applyFromArray($thinBorder);
+        $sheet->getStyle('A' . $excelRow . ':K' . $excelRow)->applyFromArray($thinBorder);
         if ($isColumnHeading) {
-            $sheet->getStyle('A' . $excelRow . ':J' . $excelRow)->getFont()->setBold(true);
-            $sheet->getStyle('A' . $excelRow . ':J' . $excelRow)->getAlignment()
+            $sheet->getStyle('A' . $excelRow . ':K' . $excelRow)->getFont()->setBold(true);
+            $sheet->getStyle('A' . $excelRow . ':K' . $excelRow)->getAlignment()
                 ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         }
     }
     $excelRow++;
 }
 
-$sheet->getStyle('A1:J' . max(1, $excelRow - 1))->getFont()->setName('Arial')->setSize(11);
-$sheet->getStyle('A1:J' . max(1, $excelRow - 1))->getAlignment()
+$sheet->getStyle('A1:K' . max(1, $excelRow - 1))->getFont()->setName('Arial')->setSize(11);
+$sheet->getStyle('A1:K' . max(1, $excelRow - 1))->getAlignment()
     ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
-$columnWidths = array('A' => 9, 'B' => 32, 'C' => 14, 'D' => 17, 'E' => 15, 'F' => 14, 'G' => 14, 'H' => 12, 'I' => 19, 'J' => 20);
+$columnWidths = array('A' => 9, 'B' => 32, 'C' => 14, 'D' => 17, 'E' => 15, 'F' => 14, 'G' => 14, 'H' => 18, 'I' => 12, 'J' => 19, 'K' => 20);
 foreach ($columnWidths as $column => $width) {
     $sheet->getColumnDimension($column)->setWidth($width);
 }

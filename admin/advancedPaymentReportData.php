@@ -117,5 +117,5 @@ function advancedPaymentReportQuery($where)
         "INNER JOIN employee e ON e.employeeId=ad.iEmployeeId " .
         "INNER JOIN companymaster c ON c.companymasterId=ad.iCompanyId " .
         "INNER JOIN bankmaster b ON b.bankmasterId=ad.iBankId " .
-        "WHERE " . $where . " ORDER BY ad.strDate DESC, e.emp_name ASC";
+        "WHERE " . $where . " ORDER BY e.emp_name ASC, ad.strDate DESC";
 }

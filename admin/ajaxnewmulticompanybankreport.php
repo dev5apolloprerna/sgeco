@@ -30,7 +30,7 @@ if ($_POST['action'] == 'ListUser') {
     companysalarymaster.companysalarymasterId = multicompany.companysalarymasterId) as DisplayMonth 
     FROM `multicompany`,employee,companysalarymaster where 
     companysalarymaster.companysalarymasterId = multicompany.companysalarymasterId and  
-    multicompany.emp_id = employee.employeeId  " . $where . "  and multicompany.isDelete='0'  and  multicompany.istatus='1' ORDER BY employee.emp_name asc";
+    multicompany.emp_id = employee.employeeId  " . $where . "  and multicompany.isDelete='0'  and  multicompany.istatus='1' ORDER BY employee.emp_name ASC, employee.employeeId ASC";
 
     $countstr = "SELECT count(*) as TotalRow FROM `multicompany`,employee,companysalarymaster where companysalarymaster.companysalarymasterId = multicompany.companysalarymasterId and multicompany.emp_id = employee.employeeId  " . $where . " and multicompany.isDelete='0'  and  multicompany.istatus='1'";
 }

@@ -27,7 +27,7 @@ if (isset($_REQUEST['Search_UAN'])) {
     }
 }
 
-$sql1 = "SELECT * FROM `employee`  " . $where . " and isDelete='0'  order by employeecode desc";
+$sql1 = "SELECT * FROM `employee`  " . $where . " and isDelete='0'  order by emp_name ASC, employeeId ASC";
 $result1 = mysqli_query($dbconn, $sql1);
 
 /*$filename = 'EmployeeReportDownloadExcel.xls';

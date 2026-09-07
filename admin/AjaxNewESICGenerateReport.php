@@ -23,7 +23,7 @@ if ($_POST['action'] == 'ListUser') {
     }
     $salaryMonth = $_REQUEST['month'] . '/'. $_REQUEST['Year'];
 
-    $filterstr = "SELECT * FROM `tempEmpolyeeMaster`  " . $where . " and isDelete='0'  and  istatus='1' order by employeecode DESC";
+    $filterstr = "SELECT * FROM `tempEmpolyeeMaster`  " . $where . " and isDelete='0'  and  istatus='1' order by emp_name ASC, iTempEmpId ASC";
                 // UNION All
                 // select * from employee where employee.ecsno='' and isDelete='0' and istatus='1'  order by employeecode DESC";
     $countstr = "SELECT count(*) as TotalRow FROM `tempEmpolyeeMaster`  " . $where . " and isDelete='0' and  istatus='1'";

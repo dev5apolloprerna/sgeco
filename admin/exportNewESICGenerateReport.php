@@ -23,7 +23,7 @@ if (isset($_REQUEST['Year'])) {
 }
 $salaryMonth = $_REQUEST['month'] . '/'. $_REQUEST['Year'];
 
-$sql1 = "SELECT * FROM `tempEmpolyeeMaster`  " . $where . " and isDelete='0'  and  istatus='1'";
+$sql1 = "SELECT * FROM `tempEmpolyeeMaster`  " . $where . " and isDelete='0'  and  istatus='1'  order by emp_name ASC, iTempEmpId ASC";
         // UNION All
         // select * from employee where employee.ecsno='' and isDelete='0' and istatus='1'  order by employeecode DESC";
 

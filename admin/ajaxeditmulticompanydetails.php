@@ -77,11 +77,17 @@ if ($_REQUEST['action'] == 'ListUser') {
             <label for="esic_amount">ESIC AMOUNT</label>
             <input type="number" min="0" step="0.01" id="esic_amount" name="esic_amount" class="form-control" value="<?php echo htmlspecialchars($row['esic_amount'], ENT_QUOTES, 'UTF-8'); ?>" readonly required>
             
+            <label for="calculated_total">TOTAL AFTER DEDUCTIONS</label>
+            <input type="number" step="0.01" id="calculated_total" class="form-control" readonly>
+
             <label for="form_control_1">F.A</label>
             <input type="text"  id="Fa"  name="Fa" class="form-control"  value="<?php echo $row['Fa'] ?>" placeholder="Enter the F.A" required>
 
             <label for="form_control_1">T.A</label>
             <input type="text"  id="Ta"  name="Ta" class="form-control"  value="<?php echo $row['Ta'] ?>" placeholder="Enter the T.A" required>
+            
+            <label for="calculated_balance">BALANCE AFTER F.A / T.A</label>
+            <input type="number" step="0.01" id="calculated_balance" class="form-control" readonly>
 
             <label for="form_control_1">Date</label>
             <input type="text"  id="date"  name="date" class="form-control"  value="<?php echo $row['date'] ?>" placeholder="Enter the Date" required>
@@ -112,11 +118,36 @@ if ($_REQUEST['action'] == 'ListUser') {
 <script src="<?php echo $web_url; ?>admin/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.js" type="text/javascript"></script>
 <script type="text/javascript">
     $(document).ready(function () {
+        function numericValue(selector) {
+            var value = parseFloat($(selector).val());
+            return isNaN(value) ? 0 : value;
+        }
+
+        function updateSalaryCalculation() {
+            var overtimeRate = ($('#otrate').val() || '0|8').split('|');
+            var multiplier = parseFloat(overtimeRate[0]) || 0;
+            var hours = parseFloat(overtimeRate[1]) || 8;
+            var presentAmount = numericValue('#workingdays') * numericValue('#rate');
+            var overtimeAmount = (numericValue('#rate') / hours) * multiplier * numericValue('#othours');
+            var total = presentAmount + overtimeAmount
+                - numericValue('#adv')
+                - numericValue('#adv_two')
+                - numericValue('#advance_paid_by_bank')
+                - numericValue('#pf_amount')
+                - numericValue('#esic_amount');
+
+            $('#calculated_total').val(total.toFixed(2));
+            $('#calculated_balance').val((total + numericValue('#Fa') + numericValue('#Ta')).toFixed(2));
+        }
+
         $("#date").datepicker({
             format: 'dd-mm-yyyy',
             autoclose: true,
             todayHighlight: true,
             defaultDate: "now"
         });
+        $('#rate, #workingdays, #othours, #otrate, #adv, #adv_two, #advance_paid_by_bank, #pf_amount, #esic_amount, #Fa, #Ta')
+            .on('input change', updateSalaryCalculation);
+        updateSalaryCalculation();
     });
 </script>

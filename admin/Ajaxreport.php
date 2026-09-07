@@ -9,9 +9,9 @@ include_once 'companyReportAdvance.php';
 if ($_POST['action'] == 'ListUser') {
 
     //$filterstr = "SELECT * FROM `salarydetails` where  companyId='" . $_POST['Company'] . "' and salaryId='" . $_POST['salarymasterId'] . "' and   isDelete='0'  and  istatus='1' and workingdays > 0 order by salarydetailsId asc ";
-    $filterstr = "SELECT * FROM `salarydetails` where  companyId='" . $_POST['Company'] . "' and salaryId in (select salarymasterId from salarymaster where  month='" . $_POST['salarymasterId'] . "' and isDelete='0' and  istatus='1') and   isDelete='0'  and  istatus='1' and workingdays > 0 order by salarydetailsId asc ";
+    $filterstr = "SELECT * FROM `salarydetails` where  companyId='" . $_POST['Company'] . "' and salaryId in (select salarymasterId from salarymaster where  month='" . $_POST['salarymasterId'] . "' and isDelete='0' and  istatus='1') and   isDelete='0'  and  istatus='1' and workingdays > 0 order by name ASC, salarydetailsId ASC ";
     //$countstr = "SELECT count(*) as TotalRow FROM  `salarydetails` where   companyId='" . $_POST['Company'] . "' and salaryId='" . $_POST['salarymasterId'] . "' and  isDelete='0'  and  istatus='1'  and workingdays > 0 order by salarydetailsId asc";
-    $countstr = "SELECT count(*) as TotalRow FROM  `salarydetails` where   companyId='" . $_POST['Company'] . "' and salaryId in (select salarymasterId from salarymaster where  month='" . $_POST['salarymasterId'] . "' and isDelete='0' and  istatus='1') and  isDelete='0'  and  istatus='1'  and workingdays > 0 order by salarydetailsId asc";
+    $countstr = "SELECT count(*) as TotalRow FROM  `salarydetails` where   companyId='" . $_POST['Company'] . "' and salaryId in (select salarymasterId from salarymaster where  month='" . $_POST['salarymasterId'] . "' and isDelete='0' and  istatus='1') and  isDelete='0'  and  istatus='1'  and workingdays > 0";
 
     $resrowcount = mysqli_query($dbconn, $countstr);
     $resrowc = mysqli_fetch_array($resrowcount);

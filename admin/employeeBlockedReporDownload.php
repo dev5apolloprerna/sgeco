@@ -21,7 +21,7 @@ $where = "where 1=1";
 //     }
 // }
 
-$sql1 = "SELECT * FROM `employee`  " . $where . " and isDelete='0' and istatus=0  order by employeecode desc";
+$sql1 = "SELECT * FROM `employee`  " . $where . " and isDelete='0' and istatus=0  order by emp_name ASC, employeeId ASC";
 $result1 = mysqli_query($dbconn, $sql1);
 
 /*$filename = 'EmployeeReportDownloadExcel.xls';

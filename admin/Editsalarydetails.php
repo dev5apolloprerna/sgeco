@@ -190,7 +190,11 @@ if (mysqli_num_rows($result) > 0) {
                                                     <input name="deductionifany" id="deductionifany" value="<?php echo $row['deductionifany']; ?>"  class="form-control" onkeypress="return isNumberKey(event)" placeholder="Enter Your Deduction If Any" type="text" >
                                                 </div>
 
-
+                                                <div class="form-group col-md-3">
+                                                    <label for="advance">Advance</label><div id="errordiv"></div>
+                                                    <input name="advance" id="advance" value="<?php echo isset($row['advance']) ? $row['advance'] : '0.00'; ?>" class="form-control" min="0" step="0.01" placeholder="Enter Advance" type="number">
+                                                </div>
+                                                
                                                 <div class="form-group col-md-3">
                                                     <label for="form_control_1">DA</label><div id="errordiv"></div>
                                                     <input name="da" id="da" value="<?= ($row['da']) ? $row['da'] : '0' ?>"  class="form-control" onkeypress="return isNumberKey(event)" placeholder="Enter DA" type="text" >

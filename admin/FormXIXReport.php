@@ -27,7 +27,7 @@ function getFormXIXEmployees($dbconn, $companyId, $salaryMonth, $employeeId = 0)
               AND sd.salaryId IN (SELECT salarymasterId FROM salarymaster
                   WHERE month='" . $month . "' AND isDelete='0' AND istatus='1')
               AND sd.isDelete='0' AND sd.istatus='1' AND sd.workingdays > 0
-            ORDER BY sd.salarydetailsId ASC";
+            ORDER BY e.emp_name ASC, sd.salarydetailsId ASC";
     $result = mysqli_query($dbconn, $sql);
     if ($result === false) {
         throw new RuntimeException('Unable to retrieve wages-slip employees.');

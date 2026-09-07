@@ -15,7 +15,7 @@ if ($_POST['action'] == 'ListUser') {
         }
     }
 
-    $filterstr = "SELECT * FROM employee INNER JOIN salarydetails ON employee.employeeId=salarydetails.emp_id where   salarydetails.companyId='" . $_POST['Company'] . "' and salarydetails.salaryId in (select salarymasterId from salarymaster where  month='" . $_POST['salaryId'] . "' and isDelete='0' and  istatus='1') and salarydetails.workingdays > 0  " . $where . " and  employee.isDelete = '0' and employee.istatus= '1'  ORDER BY `emp_name` ASC";
+    $filterstr = "SELECT * FROM employee INNER JOIN salarydetails ON employee.employeeId=salarydetails.emp_id where   salarydetails.companyId='" . $_POST['Company'] . "' and salarydetails.salaryId in (select salarymasterId from salarymaster where  month='" . $_POST['salaryId'] . "' and isDelete='0' and  istatus='1') and salarydetails.workingdays > 0  " . $where . " and  employee.isDelete = '0' and employee.istatus= '1'  ORDER BY employee.emp_name ASC, employee.employeeId ASC";
     $countstr = "SELECT count(*) as TotalRow FROM employee INNER JOIN salarydetails ON employee.employeeId=salarydetails.emp_id where  salarydetails.companyId='" . $_POST['Company'] . "' and salarydetails.salaryId in (select salarymasterId from salarymaster where  month='" . $_POST['salaryId'] . "' and isDelete='0' and  istatus='1') " . $where . " and salarydetails.workingdays > 0  and employee.isDelete=0 and employee.istatus=1";
     
     $resrowcount = mysqli_query($dbconn, $countstr);

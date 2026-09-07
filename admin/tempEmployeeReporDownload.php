@@ -34,7 +34,7 @@ if (isset($_REQUEST['strToDate'])) {
         $where.=" and STR_TO_DATE(strEntryDate,'%d-%m-%Y') <= STR_TO_DATE('". $_REQUEST['strToDate'] ."','%d-%m-%Y')";
     }
 }
-$sql1 = "SELECT * FROM `tempEmpolyeeMaster`  " . $where . " and isDelete='0'  and  istatus='1' order by iTempEmpId desc";
+$sql1 = "SELECT * FROM `tempEmpolyeeMaster`  " . $where . " and isDelete='0'  and  istatus='1' order by emp_name ASC, iTempEmpId ASC";
 
 $result1 = mysqli_query($dbconn, $sql1);
 

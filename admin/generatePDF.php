@@ -11,7 +11,7 @@ include('../config.php');
 
 //$sql = "SELECT * FROM `salarydetails` where  companyId='" . $_REQUEST['Company'] . "' and salaryId='" . $_REQUEST['salarymasterId'] . "' and  isDelete='0'  and  istatus='1' and workingdays > 0 order by salarydetailsId asc";
 //echo $_REQUEST['salarymasterId'];
-$sql = "SELECT * FROM `salarydetails` where  companyId='" . $_REQUEST['Company'] . "' and salaryId in (select salarymasterId from salarymaster where  month='" . $_REQUEST['salarymasterId'] . "' and isDelete='0' and  istatus='1') and  isDelete='0'  and  istatus='1' and workingdays > 0 order by salarydetailsId asc";
+$sql = "SELECT * FROM `salarydetails` where  companyId='" . $_REQUEST['Company'] . "' and salaryId in (select salarymasterId from salarymaster where  month='" . $_REQUEST['salarymasterId'] . "' and isDelete='0' and  istatus='1') and  isDelete='0'  and  istatus='1' and workingdays > 0 order by name ASC, salarydetailsId ASC";
 
 $Total = array(0, 0, 0, 0);
 $result = mysqli_query($dbconn, $sql);

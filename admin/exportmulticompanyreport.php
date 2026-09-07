@@ -22,7 +22,7 @@ $companymasterId = rtrim($companymasterId, ", ");
 
 
 
-$query = "SELECT * FROM `multicompany` where  companysalarymasterId='" . $_REQUEST['token']  . "' order by multicompanyid desc";
+$query = "SELECT * FROM `multicompany` where  companysalarymasterId='" . $_REQUEST['token']  . "' order by name ASC, multicompanyid ASC";
 
 $Total = array(0, 0, 0);
 

@@ -16,7 +16,8 @@ if ($_POST['action'] == 'ListUser') {
     //     ,strFatherName,adharcard FROM `salarydetails` inner join employee on salarydetails.emp_id=employee.employeeId where  salaryId in (select salarymasterId from salarymaster where   month='".$salaryMonth."' and isDelete='0' and  istatus='1') and  
     //     salarydetails.isDelete='0'  and salarydetails.istatus='1' and salarydetails.workingdays > 0 and employee.pfcode=0 GROUP by employee.employeeId order by employeeId";
     $filterstr = "SELECT employee.employeeId,MAX(CONVERT(salarydetails.skillrate,DECIMAL(12,2))) as skillrate,employee.employeecode,
-        SUM(CONVERT(salarydetails.workingdays,DECIMAL(12,2))) as workingdays,employee.emp_name,employee.pfcode,employee.uan,employee.ecsno,employee.dateofbirth,
+        SUM(CONVERT(salarydetails.workingdays,DECIMAL(12,2))) as workingdays,
+        SUM(COALESCE(salarydetails.iNoOfNatioanHoliday,0)) as nationalHolidays,employee.emp_name,employee.pfcode,employee.uan,employee.ecsno,employee.dateofbirth,
         SUM(CASE WHEN UPPER(companymaster.ESI)='YES' THEN COALESCE(salarydetails.iBonusAmt,0) + COALESCE(salarydetails.iLeaveAmt,0) ELSE 0 END) as DifferenceInESIC,
         SUM(COALESCE(salarydetails.totalovertime,0)) as totalovertime,employee.dateofjoining,strFatherName,adharcard
         FROM salarydetails inner join employee on salarydetails.emp_id=employee.employeeId
@@ -62,6 +63,7 @@ if ($_POST['action'] == 'ListUser') {
                                 <th class="desktop">ESIC No.</th>
                                 <th class="desktop">DOB</th>
                                 <th class="desktop">PRESENT DAYS</th>
+                                <th class="desktop">NATIONAL HOLIDAY</th>
                                 <th class="desktop">WAGES</th>
                                 <th class="desktop">Difference  in ESIC</th>
                                 <th class="desktop">Joining Date</th>
@@ -115,6 +117,11 @@ if ($_POST['action'] == 'ListUser') {
                                             <?php
                                                 $workingdays = isset($rowfilter['workingdays']) ? $rowfilter['workingdays'] : "0"; ?>
                                             <?=  $workingdays ?> 
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-group form-md-line-input ">
+                                            <?= isset($rowfilter['nationalHolidays']) ? $rowfilter['nationalHolidays'] : 0; ?>
                                         </div>
                                     </td>
                                     <td>

@@ -20,7 +20,7 @@ if ($_POST['action'] == 'ListUser') {
         }
     }
     //and  istatus='1'
-    $filterstr = "SELECT * FROM `employee` " . $where . " and isDelete='0' and isExitEmployee=1  order by employeecode desc";
+    $filterstr = "SELECT * FROM `employee` " . $where . " and isDelete='0' and isExitEmployee=1  order by emp_name ASC, employeeId ASC";
     $countstr = "SELECT count(*) as TotalRow FROM `employee` " . $where . " and isDelete='0' and isExitEmployee=1";
 
     $resrowcount = mysqli_query($dbconn, $countstr);

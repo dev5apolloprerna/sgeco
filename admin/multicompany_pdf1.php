@@ -6,7 +6,7 @@ require_once('tcpdf/config/tcpdf_config.php');
 require_once('tcpdf/tcpdf.php');
 include('../config.php');
 
-$sql = "SELECT * FROM `multicompany` where  companysalarymasterId='" . $_REQUEST['token'] . "' order by multicompanyid desc";
+$sql = "SELECT * FROM `multicompany` where  companysalarymasterId='" . $_REQUEST['token'] . "' order by name ASC, multicompanyid ASC";
 
 //$comp = mysqli_fetch_array(mysqli_query($dbconn, "SELECT * FROM `companymaster`  where isDelete='0'  and  istatus='1' and companymasterId='" . $_REQUEST['Company'] . "'"));
 //$salaryid = mysqli_fetch_array(mysqli_query($dbconn, "SELECT * FROM `salarymaster`  where isDelete='0'  and  istatus='1' and salarymasterId='" . $_REQUEST['salarymasterId'] . "'"));

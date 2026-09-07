@@ -83,7 +83,8 @@ while ($rowapplication = mysqli_fetch_array($result)) {
 
     $mailFormat = str_replace("#F.P.#", ((($rowapplication['pt'] != '0.00') ? (int)$rowapplication['pt'] : '')), $mailFormat);
     $mailFormat = str_replace("#Deductionifany#", (((int)$rowapplication['deductionifany'])), $mailFormat);
-    $Deduction_total = $rowapplication['pf'] + $rowapplication['esi'] + $advanceAmount + $rowapplication['pt'];
+    $Deduction_total = $rowapplication['pf'] + $rowapplication['esi'] + $advanceAmount
+        + $rowapplication['pt'] + $rowapplication['deductionifany'];
     $mailFormat = str_replace("#Deduction_total#", (( number_format($Deduction_total, 2, '.', '') )), $mailFormat);
     // $mailFormat = str_replace("#Net_Amount_Paid#", ((ceil($rowapplication['netamountpaid'] - $advanceAmount))), $mailFormat);
     $mailFormat = str_replace("#Net_Amount_Paid#", ((ceil(getSalaryReportNetAmount($rowapplication, $advanceAmount)))), $mailFormat);
@@ -137,6 +138,7 @@ $mailFormat_main = str_replace("#esi#", ((number_format($Total[1],2,'.',''))), $
 $mailFormat_main = str_replace("#advance#", ((number_format($Total[15],2,'.',''))), $mailFormat_main);
 $mailFormat_main = str_replace("#pf#", ((number_format($Total[2],2,'.',''))), $mailFormat_main);
 $mailFormat_main = str_replace("#pt#", (((int)$Total[4])), $mailFormat_main);
+$mailFormat_main = str_replace("#deductionifany#", ((number_format($Total[5],2,'.',''))), $mailFormat_main);
 $mailFormat_main = str_replace("#deductiontotal#", (( number_format($deductiontotal[0], 2, '.', '') )), $mailFormat_main);
 $mailFormat_main = str_replace("#netamountpaid#", ((number_format((int)$Total[3],2,'.',''))), $mailFormat_main);
 // print_r($mailFormat_main);

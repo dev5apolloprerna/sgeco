@@ -23,7 +23,7 @@ function getFormXXIIEmployees($dbconn, $companyId, $salaryMonth)
               )
               AND sd.isDelete = '0' AND sd.istatus = '1' AND sd.workingdays > 0
             GROUP BY e.employeeId, e.emp_name, e.strFatherName, e.designation
-            ORDER BY MIN(sd.salarydetailsId) ASC";
+            ORDER BY e.emp_name ASC, MIN(sd.salarydetailsId) ASC";
     $result = mysqli_query($dbconn, $sql);
     if ($result === false) {
         throw new RuntimeException('Unable to retrieve Form XXII employees.');

@@ -58,6 +58,9 @@ if ($_POST['action'] == 'ListUser') {
                                 <th class="desktop">ADV PAY</th>
                                 <th class="desktop">ADV TWO</th>
                                 <th class="desktop">ADV TWO PAY</th>
+                                <th class="desktop">ADVANCE<br />PAID BY BANK</th>
+                                <th class="desktop">PF<br />AMT.</th>
+                                <th class="desktop">ESIC<br />AMT.</th>
                                 <th class="desktop">F.A</th>
                                 <th class="desktop">T.A</th>
                                 <th class="desktop">Action</th>
@@ -119,6 +122,18 @@ if ($_POST['action'] == 'ListUser') {
                                     </td>
                                     <td>
                                         <div class="form-group form-md-line-input "><?php echo $rowfilter['adv_two_paid']; ?> 
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-group form-md-line-input "><?php echo number_format((float) $rowfilter['advance_paid_by_bank'], 2, '.', ''); ?>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-group form-md-line-input "><?php echo number_format((float) $rowfilter['pf_amount'], 2, '.', ''); ?>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-group form-md-line-input "><?php echo number_format((float) $rowfilter['esic_amount'], 2, '.', ''); ?>
                                         </div>
                                     </td>
                                     <td>

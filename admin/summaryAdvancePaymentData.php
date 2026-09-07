@@ -80,6 +80,12 @@ function summaryAdvancePaymentData($dbconn, $source)
     foreach ($employees as $employee) {
         $groups[$employee['group']][] = $employee;
     }
+    foreach ($groups as &$employeesInGroup) {
+        usort($employeesInGroup, function ($first, $second) {
+            $nameComparison = strcasecmp($first['name'], $second['name']);
+            return $nameComparison !== 0 ? $nameComparison : $first['id'] - $second['id'];
+        });
+    }
     return array(
         'filters' => $filters,
         'dates' => $dates,

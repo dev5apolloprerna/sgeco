@@ -38,7 +38,7 @@ function getFormXXIIIEntries($dbconn, $companyId, $salaryMonth)
               )
               AND sd.isDelete = '0' AND sd.istatus = '1'
               AND CAST(sd.othours AS DECIMAL(10,2)) > 0
-            ORDER BY sd.salarydetailsId ASC";
+            ORDER BY e.emp_name ASC, sd.salarydetailsId ASC";
     $result = mysqli_query($dbconn, $sql);
     if ($result === false) {
         throw new RuntimeException('Unable to retrieve Form XXIII overtime entries.');
