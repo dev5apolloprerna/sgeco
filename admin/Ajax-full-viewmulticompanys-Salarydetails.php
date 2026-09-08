@@ -62,6 +62,8 @@ if ($_POST['action'] == 'ListUser') {
         $array[5][3] = 0;
         $array[5][4] = 0;
         $array[5][5] = 0;
+        $companyNames = array();
+        $companyWiseSummary = array();
         ?>  
         <link href="<?php echo $web_url; ?>admin/assets/global/plugins/datatables/datatables.css" rel="stylesheet" type="text/css" />
         <div class="table-responsive">
@@ -94,6 +96,7 @@ if ($_POST['action'] == 'ListUser') {
                         $comid = mysqli_query($dbconn, "SELECT *,(SELECT companyname FROM companymaster where companymaster.companymasterId = multiycompanysalarymaster.companymasterId) as companyname ,(SELECT companysalarymaster.month FROM companysalarymaster where companysalarymaster.companysalarymasterId = multiycompanysalarymaster.companysalarymasterId) as month FROM multiycompanysalarymaster  where companysalarymasterId='" . $_POST['companysalarymasterId'] . "'  order by companyname");
                         while ($commaster = mysqli_fetch_array($comid)) {
                             $month = $commaster['month'];
+                            $companyNames[] = $commaster['companyname'];
                             $companymasterId = $companymasterId . ',' . $commaster['companymasterId'];
                             ?>
                             <th class="all"><?php echo ucwords(strtolower($commaster['companyname'])); ?></th>  
@@ -217,6 +220,10 @@ if ($_POST['action'] == 'ListUser') {
                             $AllCompanyTotal = 0;
                             for ($iCounter = 1; $iCounter < count($comnymasid); $iCounter++) {
 
+                                if (!isset($companyWiseSummary[$iCounter])) {
+                                    $companyWiseSummary[$iCounter] = array(0, 0, 0, 0, 0);
+                                }
+
                                 $saleryid = mysqli_fetch_array(mysqli_query($dbconn, "SELECT * FROM `salarymaster`  where isDelete='0'  and  istatus='1' and month='" . $month . "' and companymasterId='" . $comnymasid[$iCounter] . "'"));
                                 $comp = mysqli_query($dbconn, "SELECT salarydetails.netamountpaid,strPaymentDate FROM `salarydetails` WHERE salarydetails.companyId in (" . $comnymasid[$iCounter] . ") and salarydetails.emp_id='" . $rowfilter['emp_id'] . "' and  salarydetails.salaryId = '" . $saleryid['salarymasterId'] . "' AND salarydetails.isDelete=0");
                                 if (mysqli_num_rows($comp) > 0) {
@@ -238,17 +245,21 @@ if ($_POST['action'] == 'ListUser') {
                                         // $array[3][4] = $rowfiltercom['netamountpaid'] + $array[3][4];
                                        if ($rowfilter['pay_cash'] == 0) {
                                             if ($desg['bankid'] == 2) {
+                                                $companyWiseSummary[$iCounter][2] += $rowfiltercom['netamountpaid'];
                                                 $array[1][2] = $rowfiltercom['netamountpaid'] + $array[1][2];
                                                 $array[3][2] = $rowfiltercom['netamountpaid'] + $array[3][2];
                                             } else if ($desg['bankid'] == 1) {
+                                                $companyWiseSummary[$iCounter][3] += $rowfiltercom['netamountpaid'];
                                                 $array[1][3] = $rowfiltercom['netamountpaid'] + $array[1][3];
                                                 $array[3][3] = $rowfiltercom['netamountpaid'] + $array[3][3];
                                             //}
                                             } else if ($desg['bankid'] != 2 && $desg['bankid'] != 1) {
+                                                $companyWiseSummary[$iCounter][4] += $rowfiltercom['netamountpaid'];
                                                 $array[1][4] = $rowfiltercom['netamountpaid'] + $array[1][4];
                                                 $array[3][4] = $rowfiltercom['netamountpaid'] + $array[3][4];
                                             }
                                        } else {
+                                            $companyWiseSummary[$iCounter][1] += $rowfiltercom['netamountpaid'];
                                            $array[1][1] = $rowfiltercom['netamountpaid'] + $array[1][1];
                                            $array[3][1] = $rowfiltercom['netamountpaid'] + $array[3][1];
                                        }
@@ -400,6 +411,20 @@ if ($_POST['action'] == 'ListUser') {
             <?php
             $iCounter = 0;
             while ($iCounter < sizeof($array)) {
+                if ($iCounter == 1 && count($companyNames) > 1) {
+                    foreach ($companyNames as $companyIndex => $companyName) {
+                        // Company ids have a leading zero in $comnymasid, hence +1.
+                        $summaryIndex = $companyIndex + 1;
+                        $cash = isset($companyWiseSummary[$summaryIndex][1]) ? $companyWiseSummary[$summaryIndex][1] : 0;
+                        $sbi = isset($companyWiseSummary[$summaryIndex][2]) ? $companyWiseSummary[$summaryIndex][2] : 0;
+                        $bob = isset($companyWiseSummary[$summaryIndex][3]) ? $companyWiseSummary[$summaryIndex][3] : 0;
+                        $other = isset($companyWiseSummary[$summaryIndex][4]) ? $companyWiseSummary[$summaryIndex][4] : 0;
+                        echo '<tr><td>BANK PAYMENT - ' . htmlspecialchars($companyName, ENT_QUOTES, 'UTF-8') . '</td>';
+                        echo '<td>' . $cash . '</td><td>' . $sbi . '</td><td>' . $bob . '</td><td>' . $other . '</td><td>' . ($cash + $sbi + $bob + $other) . '</td></tr>';
+                    }
+                    $iCounter++;
+                    continue;
+                }
                 if ($iCounter == 0) {
                     echo "<thead class='tbg'><tr>
                         <th  style='width: 100%;text-align: center; border: 1px solid #fff;' colspan='6'>SUMMARY</th>
@@ -427,7 +452,6 @@ if ($_POST['action'] == 'ListUser') {
             ?>
         </table>
         <!--</div>-->
-
         <script src="<?php echo $web_url; ?>admin/assets/global/plugins/datatables/datatables.js" type="text/javascript"></script>
         <script src="<?php echo $web_url; ?>admin/assets/global/plugins/datatables/table-datatables-responsive.js" type="text/javascript"></script>
         <!--  <script>

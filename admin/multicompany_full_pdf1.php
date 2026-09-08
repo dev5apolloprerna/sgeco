@@ -69,6 +69,8 @@ $TotalPfAmount = 0;
 $TotalEsicAmount = 0;
 $TotalBalance2 = 0;
 $companyWiseTotal = array();
+$companyNames = array();
+$companyWiseSummary = array();
 // $companySalary = mysqli_fetch_assoc(mysqli_query($dbconn, "SELECT month FROM companysalarymaster WHERE companysalarymasterId='" . (int) $_REQUEST['token'] . "'"));
 // $reportMonth = $companySalary ? $companySalary['month'] : '';
 // $reportAdvances = getMultiCompanyReportAdvances($dbconn, $_REQUEST['token'], $reportMonth);
@@ -104,6 +106,9 @@ while ($rowapplication = mysqli_fetch_array($result)) {
     $comid = mysqli_query($dbconn, "SELECT *,(SELECT companyname FROM companymaster where companymaster.companymasterId = multiycompanysalarymaster.companymasterId) as companyname ,(SELECT companysalarymaster.month FROM companysalarymaster where companysalarymaster.companysalarymasterId = multiycompanysalarymaster.companysalarymasterId) as month FROM multiycompanysalarymaster  where companysalarymasterId='" . $_REQUEST['token'] . "'  order by companyname");
     while ($commaster = mysqli_fetch_array($comid)) {
         $month = $commaster['month'];
+        if ($i == 1) {
+            $companyNames[] = $commaster['companyname'];
+        }
         $companymasterId .= $commaster['companymasterId'] . ',';
         $HeaderCompany = $HeaderCompany . "<td><strong>" . $commaster['companyname'] . "</strong></td>";
     }
@@ -149,10 +154,10 @@ while ($rowapplication = mysqli_fetch_array($result)) {
     $mailFormat = str_replace("#advPaidByBank#", ucfirst(urldecode($advPaidByBank)), $mailFormat);
     $mailFormat = str_replace("#pfAmount#", ucfirst(urldecode($pfAmount)), $mailFormat);
     $mailFormat = str_replace("#esicAmount#", ucfirst(urldecode($esicAmount)), $mailFormat);
-    $mailFormat = str_replace("#total#", number_format($rowTotal, 2, '.', ''), $mailFormat);
+    $mailFormat = str_replace("#total#", ucfirst(urldecode($rowTotal)), $mailFormat);
     $mailFormat = str_replace("#Fa#", ucfirst(urldecode($rowapplication['Fa'])), $mailFormat);
     $mailFormat = str_replace("#Ta#", ucfirst(urldecode($rowapplication['Ta'])), $mailFormat);
-    $mailFormat = str_replace("#balance1#", number_format($rowBalance, 2, '.', ''), $mailFormat);
+        $mailFormat = str_replace("#balance1#", ucfirst(urldecode($rowBalance)), $mailFormat);
     $mailFormat = str_replace("#Bank Name#", ucfirst(urldecode($bankname)), $mailFormat);
 
     $HeaderCompany = "";
@@ -163,6 +168,9 @@ while ($rowapplication = mysqli_fetch_array($result)) {
 //    echo "<pre>";
     $strPaymentDate = "";
     for ($iCounter = 0; $iCounter < count($comnymasid); $iCounter++) {
+        if (!isset($companyWiseSummary[$iCounter])) {
+            $companyWiseSummary[$iCounter] = array(0, 0, 0, 0, 0);
+        }
         $saleryid = mysqli_fetch_array(mysqli_query($dbconn, "SELECT * FROM `salarymaster`  where isDelete='0'  and  istatus='1' and month='" . $month . "' and companymasterId='" . $comnymasid[$iCounter] . "'"));
         $comp = mysqli_query($dbconn, "SELECT salarydetails.netamountpaid,strPaymentDate FROM `salarydetails` WHERE salarydetails.companyId in (" . $comnymasid[$iCounter] . ") and salarydetails.emp_id='" . $rowapplication['emp_id'] . "' and salarydetails.isDelete=0  and salarydetails.salaryId = '" . $saleryid['salarymasterId'] . "'");
         if (mysqli_num_rows($comp) > 0) {
@@ -206,17 +214,21 @@ while ($rowapplication = mysqli_fetch_array($result)) {
 
                         if ($rowapplication['pay_cash'] == 0) {
                             if ($desg['bankid'] == 2) {
+                                $companyWiseSummary[$iCounter][2] += $rowfiltercom['netamountpaid'];
                                 $array[1][2] = $rowfiltercom['netamountpaid'] + $array[1][2];
                                 $array[3][2] = $rowfiltercom['netamountpaid'] + $array[3][2];
                             } else if ($desg['bankid'] == 1) {
+                                $companyWiseSummary[$iCounter][3] += $rowfiltercom['netamountpaid'];
                                 $array[1][3] = $rowfiltercom['netamountpaid'] + $array[1][3];
                                 $array[3][3] = $rowfiltercom['netamountpaid'] + $array[3][3];
                             //}
                             } else if ($desg['bankid'] != 2 || $desg['bankid'] != 1) {
+                                $companyWiseSummary[$iCounter][4] += $rowfiltercom['netamountpaid'];
                                 $array[1][4] = $rowfiltercom['netamountpaid'] + $array[1][4];
                                 $array[3][4] = $rowfiltercom['netamountpaid'] + $array[3][4];
                             }
                        } else {
+                           $companyWiseSummary[$iCounter][1] += $rowfiltercom['netamountpaid'];
                            $array[1][1] = $rowfiltercom['netamountpaid'] + $array[1][1];
                            $array[3][1] = $rowfiltercom['netamountpaid'] + $array[3][1];
                        }
@@ -376,6 +388,18 @@ $iCounter = 0;
 $SummeryTable .= '<table width="60%" cellspacing="0" cellpadding="6" border="1" style="font-size: 20px;margin: 0 0 0 -50px; text-align : center !important; color: #000;">';
 $SummeryTable .= '<tr style="font-weight: bold; font-size: 20px;text-align: center;background-color:#eee;"> <th colspan="6">SUMMARY</th></tr>';
 while ($iCounter < sizeof($array)) {
+    if ($iCounter == 1 && count($companyNames) > 1) {
+        foreach ($companyNames as $companyIndex => $companyName) {
+            $cash = isset($companyWiseSummary[$companyIndex][1]) ? $companyWiseSummary[$companyIndex][1] : 0;
+            $sbi = isset($companyWiseSummary[$companyIndex][2]) ? $companyWiseSummary[$companyIndex][2] : 0;
+            $bob = isset($companyWiseSummary[$companyIndex][3]) ? $companyWiseSummary[$companyIndex][3] : 0;
+            $other = isset($companyWiseSummary[$companyIndex][4]) ? $companyWiseSummary[$companyIndex][4] : 0;
+            $SummeryTable .= '<tr style="text-align:right;"><td style="text-align:left;">BANK PAYMENT - ' . htmlspecialchars($companyName, ENT_QUOTES, 'UTF-8') . '</td>';
+            $SummeryTable .= '<td>' . $cash . '</td><td>' . $sbi . '</td><td>' . $bob . '</td><td>' . $other . '</td><td>' . ($cash + $sbi + $bob + $other) . '</td></tr>';
+        }
+        $iCounter++;
+        continue;
+    }
     if ($iCounter == 0) {
         $SummeryTable .= '<tr style="font-weight: bold; font-size: 20px;text-align: center;background-color:#eee;">';
     } else if ($iCounter == 3) {

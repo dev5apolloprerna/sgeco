@@ -22,6 +22,7 @@ $HeaderCompany = "";
 $companymasterId = "";
 $month = '';
 $comnymasid = array();
+$companyNames = array();
 
 $i = 1;
 $delimiter = ",";
@@ -112,6 +113,7 @@ $comid1 = mysqli_query($dbconn, "SELECT *,(SELECT companyname FROM companymaster
 
 while ($commaster = mysqli_fetch_array($comid1)) {
     $month = $commaster['month'];
+    $companyNames[] = $commaster['companyname'];
     array_push($fields, $commaster['companyname']);
     array_push($comnymasid, $commaster['companymasterId']);
 }
@@ -173,10 +175,12 @@ $result = mysqli_query($dbconn, $query);
 $PaidcompanyWiseTotal = array();
 $balance2 = 0;
 $TotalBalance2 = array("0");
+$companyWiseTotal = array();
+$companyWiseSummary = array();
 // Keep one total slot for every dynamic company column. Initializing these
 // positions prevents a company with no payment from being omitted and shifting
 // Total Balance into the preceding company column.
-$companyWiseTotal = array_fill(0, count($comnymasid), 0);
+// $companyWiseTotal = array_fill(0, count($comnymasid), 0);
 while ($row = mysqli_fetch_assoc($result)) {
     $desg = mysqli_fetch_array(mysqli_query($dbconn, "SELECT * FROM `employee`  where isDelete='0' and employeeId='" . $row['emp_id'] . "'"));
     $bank = mysqli_fetch_array(mysqli_query($dbconn, "SELECT bankname FROM `bankmaster`  where  bankmasterId='" . $desg['bankid'] . "'"));
@@ -245,7 +249,9 @@ while ($row = mysqli_fetch_assoc($result)) {
 
     $strPaymentDate = "";
     for ($iCounter = 0; $iCounter < sizeof($comnymasid); $iCounter++) {
-
+        if (!isset($companyWiseSummary[$iCounter])) {
+            $companyWiseSummary[$iCounter] = array(0, 0, 0, 0, 0);
+        }
         $Query = "SELECT * FROM `salarymaster`  where isDelete='0'  and  istatus='1' and month='" . $month . "' and companymasterId='" . $comnymasid[$iCounter] . "'";
         $saleryid = mysqli_fetch_array(mysqli_query($dbconn, $Query));
 
@@ -278,17 +284,21 @@ while ($row = mysqli_fetch_assoc($result)) {
 
                     if ($row['pay_cash'] == 0) {
                         if ($desg['bankid'] == 2) {
+                            $companyWiseSummary[$iCounter][2] += $rowfiltercom['netamountpaid'];
                             $array[1][2] = $rowfiltercom['netamountpaid'] + $array[1][2];
                             $array[3][2] = $rowfiltercom['netamountpaid'] + $array[3][2];
                         } else if ($desg['bankid'] == 1) {
+                            $companyWiseSummary[$iCounter][3] += $rowfiltercom['netamountpaid'];
                             $array[1][3] = $rowfiltercom['netamountpaid'] + $array[1][3];
                             $array[3][3] = $rowfiltercom['netamountpaid'] + $array[3][3];
                             //}
                         } else if ($desg['bankid'] != 2 || $desg['bankid'] != 1) {
+                            $companyWiseSummary[$iCounter][4] += $rowfiltercom['netamountpaid'];
                             $array[1][4] = $rowfiltercom['netamountpaid'] + $array[1][4];
                             $array[3][4] = $rowfiltercom['netamountpaid'] + $array[3][4];
                         }
                     } else {
+                        $companyWiseSummary[$iCounter][1] += $rowfiltercom['netamountpaid'];
                         $array[1][1] = $rowfiltercom['netamountpaid'] + $array[1][1];
                         $array[3][1] = $rowfiltercom['netamountpaid'] + $array[3][1];
                     }
@@ -434,15 +444,27 @@ $SummeryHeader = array(
     $array[0][5] => "TOTAL"
 );
 fputcsv($f, $SummeryHeader, $delimiter);
-$dataTable1 = array(
-    $array[1][0] => "BANK PAYMENT",
-    $array[1][1],
-    $array[1][2],
-    $array[1][3],
-    $array[1][4],
-    $array[1][5]
-);
-fputcsv($f, $dataTable1, $delimiter);
+// $dataTable1 = array(
+//     $array[1][0] => "BANK PAYMENT",
+//     $array[1][1],
+//     $array[1][2],
+//     $array[1][3],
+//     $array[1][4],
+//     $array[1][5]
+// );
+// fputcsv($f, $dataTable1, $delimiter);
+
+if (count($companyNames) > 1) {
+    foreach ($companyNames as $companyIndex => $companyName) {
+        $cash = isset($companyWiseSummary[$companyIndex][1]) ? $companyWiseSummary[$companyIndex][1] : 0;
+        $sbi = isset($companyWiseSummary[$companyIndex][2]) ? $companyWiseSummary[$companyIndex][2] : 0;
+        $bob = isset($companyWiseSummary[$companyIndex][3]) ? $companyWiseSummary[$companyIndex][3] : 0;
+        $other = isset($companyWiseSummary[$companyIndex][4]) ? $companyWiseSummary[$companyIndex][4] : 0;
+        fputcsv($f, array('BANK PAYMENT - ' . $companyName, $cash, $sbi, $bob, $other, $cash + $sbi + $bob + $other), $delimiter);
+    }
+} else {
+    fputcsv($f, array("BANK PAYMENT", $array[1][1], $array[1][2], $array[1][3], $array[1][4], $array[1][5]), $delimiter);
+}
 
 $dataTable2 = array(
     $array[2][0] => "BALANCE PAYMENT",
@@ -504,7 +526,9 @@ $employeeCount = mysqli_num_rows($result);
 $totalRow = $dataStartRow + $employeeCount;
 $summaryTitleRow = $totalRow + 3;
 $summaryHeaderRow = $summaryTitleRow + 1;
-$summaryLastRow = $summaryHeaderRow + 5;
+// $summaryLastRow = $summaryHeaderRow + 5;
+$summaryDataRowCount = count($companyNames) > 1 ? count($companyNames) + 4 : 5;
+$summaryLastRow = $summaryHeaderRow + $summaryDataRowCount;
 $lastColumnNumber = count($reportRows[$headerRow - 1]);
 $lastColumn = Coordinate::stringFromColumnIndex($lastColumnNumber);
 $balanceColumn = Coordinate::stringFromColumnIndex(19);
