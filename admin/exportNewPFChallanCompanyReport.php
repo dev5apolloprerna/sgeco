@@ -42,6 +42,9 @@ foreach (array('OT AMOUNT FOR ESIC', 'Joining Date', 'Profess. Tax Amt.') as $he
 }
 
 $row = 7;
+$presentDayColumns = array();
+$nationalHolidayColumns = array();
+$wagesColumns = array();
 foreach ($report['employees'] as $index => $employee) {
     $values = array($index + 1, $employee['name'], $employee['pfNo'], $employee['uan'], $employee['esicNo'], $employee['dob']);
     $totals = array(0, 0, 0, 0);
@@ -49,12 +52,12 @@ foreach ($report['employees'] as $index => $employee) {
         $company = isset($employee['companies'][$companyId]) ? $employee['companies'][$companyId] : array('presentDays' => 0, 'nationalHoliday' => 0, 'wages' => 0, 'differenceInESIC' => 0);
         $companyValues = array_values($company);
         foreach ($companyValues as $key => $value) {
-            $values[] = $value ?: '';
+            $values[] = $key < 3 ? (float) $value : ($value ?: '');
             $totals[$key] += $value;
         }
     }
-    foreach ($totals as $value) {
-        $values[] = $value ?: '';
+    foreach ($totals as $key => $value) {
+        $values[] = $key < 3 ? (float) $value : ($value ?: '');
     }
     $values[] = $employee['overtime'] ?: '';
     $values[] = $employee['joiningDate'];
@@ -66,6 +69,22 @@ foreach ($report['employees'] as $index => $employee) {
     }
     $row++;
 }
+$dataEndRow = max(7, $row - 1);
+for ($companyIndex = 0; $companyIndex <= $companyCount; $companyIndex++) {
+    $presentDayColumns[] = 7 + ($companyIndex * 4);
+    $nationalHolidayColumns[] = 8 + ($companyIndex * 4);
+    $wagesColumns[] = 9 + ($companyIndex * 4);
+}
+foreach ($presentDayColumns as $formatColumn) {
+    $sheet->getStyleByColumnAndRow($formatColumn, 7, $formatColumn, $dataEndRow)->getNumberFormat()->setFormatCode('0.00;-0.00;0');
+}
+foreach ($nationalHolidayColumns as $formatColumn) {
+    $sheet->getStyleByColumnAndRow($formatColumn, 7, $formatColumn, $dataEndRow)->getNumberFormat()->setFormatCode('0');
+}
+foreach ($wagesColumns as $formatColumn) {
+    $sheet->getStyleByColumnAndRow($formatColumn, 7, $formatColumn, $dataEndRow)->getNumberFormat()->setFormatCode('0.00');
+}
+
 $border = array('borders' => array('allBorders' => array('borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => array('argb' => 'FF000000'))));
 $sheet->getStyle('A1:' . $lastColumn . max(6, $row - 1))->applyFromArray($border)->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER)->setWrapText(true);
 $sheet->getStyle('A1:' . $lastColumn . '6')->getFont()->setBold(true);

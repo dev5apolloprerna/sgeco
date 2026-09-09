@@ -133,3 +133,18 @@ function newPFChallanValue($value)
     }
     return ((float) $value == (int) $value) ? (string) (int) $value : rtrim(rtrim(number_format((float) $value, 2, '.', ''), '0'), '.');
 }
+
+function newPFChallanPresentDays($value)
+{
+    return (float) $value == 0 ? '0' : number_format((float) $value, 2, '.', '');
+}
+
+function newPFChallanNationalHoliday($value)
+{
+    return (string) (int) round((float) $value);
+}
+
+function newPFChallanWages($value)
+{
+    return number_format((float) $value, 2, '.', '');
+}

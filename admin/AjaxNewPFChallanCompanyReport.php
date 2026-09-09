@@ -89,9 +89,17 @@ if (count($report['employees']) === 0) {
                         $totals[1] += $values['nationalHoliday'];
                         $totals[2] += $values['wages'];
                         $totals[3] += $values['differenceInESIC'];
-                        foreach ($values as $value) { ?><td><?php echo reportHtml(newPFChallanValue($value)); ?></td><?php }
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            } ?>
-                    <?php foreach ($totals as $value) { ?><td><?php echo reportHtml(newPFChallanValue($value)); ?></td><?php } ?><td><?php echo reportHtml(newPFChallanValue($employee['overtime'])); ?></td>
+                        ?><td><?php echo reportHtml(newPFChallanPresentDays($values['presentDays'])); ?></td>
+                        <td><?php echo reportHtml(newPFChallanNationalHoliday($values['nationalHoliday'])); ?></td>
+                        <td><?php echo reportHtml(newPFChallanWages($values['wages'])); ?></td>
+                        <td><?php echo reportHtml(newPFChallanValue($values['differenceInESIC'])); ?></td><?php
+                        } ?>
+                    <td><?php echo reportHtml(newPFChallanPresentDays($totals[0])); ?></td>
+                    <td><?php echo reportHtml(newPFChallanNationalHoliday($totals[1])); ?></td>
+                    <td><?php echo reportHtml(newPFChallanWages($totals[2])); ?></td>
+                    <td><?php echo reportHtml(newPFChallanValue($totals[3])); ?></td>
+                    <td><?php echo reportHtml(newPFChallanValue($employee['overtime'])); ?></td>
+                    
                     <td><?php echo reportHtml($employee['joiningDate']); ?></td>
                     <td><?php echo reportHtml(newPFChallanValue($employee['professionalTax'])); ?></td>
                 </tr><?php } ?>
