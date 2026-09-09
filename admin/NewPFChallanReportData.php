@@ -150,13 +150,42 @@ function newPFChallanEmployee($employee, $listType)
         'uan' => $employee['uan'],
         'esicNo' => $employee['ecsno'],
         'dob' => $employee['dateofbirth'] === '01/01/1970' ? '' : $employee['dateofbirth'],
-        'joiningDate' => $employee['dateofjoining'] === '01/70' ? '' : $employee['dateofjoining'],
+        'joiningDate' => newPFChallanJoiningDate($employee['dateofjoining']),
         'fatherName' => isset($employee['strFatherName']) ? ucwords(strtolower($employee['strFatherName'])) : '',
         'aadharNo' => isset($employee['adharcard']) ? $employee['adharcard'] : '',
         'companies' => array(),
         'overtime' => 0,
         'professionalTax' => 0
     );
+}
+
+/**
+ * Normalise the historical joining-date values to a single Mon-YYYY format.
+ * The employee table contains both complete dates and month/year values, with
+ * either numeric or abbreviated month names.
+ */
+function newPFChallanJoiningDate($value)
+{
+    $value = trim((string) $value);
+    if ($value === '' || $value === '01/70') {
+        return '';
+    }
+
+    $formats = array(
+        '!d-m-Y', '!j-n-Y', '!d/m/Y', '!j/n/Y', '!Y-m-d', '!Y/m/d',
+        '!m/y', '!n/y', '!m/Y', '!n/Y',
+        '!M-y', '!M-Y', '!F-y', '!F-Y'
+    );
+    foreach ($formats as $format) {
+        $date = DateTime::createFromFormat($format, $value);
+        $errors = DateTime::getLastErrors();
+        if ($date !== false && ($errors === false || ($errors['warning_count'] === 0 && $errors['error_count'] === 0))) {
+            return $date->format('M-Y');
+        }
+    }
+
+    // Do not hide an unexpected legacy value; leave it visible for correction.
+    return $value;
 }
 
 function newPFChallanValue($value)
