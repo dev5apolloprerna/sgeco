@@ -37,7 +37,7 @@ function getNewPFChallanReportData($dbconn, $month, $year)
         pfcode, uan, ecsno, dateofbirth, dateofjoining
         FROM employee
         WHERE isPermanent=1 AND isDelete=0 AND istatus=1
-        ORDER BY emp_name ASC, employeeId ASC");
+        ORDER BY employeecode ASC");
     if ($permanentEmployeeResult === false) {
         throw new RuntimeException('Unable to load permanent employees: ' . mysqli_error($dbconn));
     }
@@ -99,7 +99,8 @@ function getNewPFChallanReportData($dbconn, $month, $year)
         WHERE salarymaster.month='" . $escapedMonth . "' AND salarymaster.isDelete='0' AND salarymaster.istatus='1'
         AND employee.isPermanent=1 AND employee.isDelete='0' AND employee.istatus='1'
         GROUP BY employee.employeeId, salarymaster.companymasterId
-        ORDER BY employee.emp_name ASC, employee.employeeId ASC");
+        order by employee.employeecode asc");
+        // ORDER BY employee.emp_name ASC, employee.employeeId ASC");
     if ($permanentResult === false) {
         throw new RuntimeException('Unable to load permanent PF challan details: ' . mysqli_error($dbconn));
     }
@@ -131,16 +132,7 @@ function getNewPFChallanReportData($dbconn, $month, $year)
             $pfEmployees[] = $employee;
         }
     }
-    // The existing PF Challan lists employees alphabetically by name, using the
-    // employee ID as a stable tie-breaker. Apply that ordering after combining
-    // permanent and monthly employees so both reports display the same sequence.
-    // usort($pfEmployees, function ($first, $second) {
-    //     $nameComparison = strcasecmp($first['name'], $second['name']);
-    //     return $nameComparison !== 0
-    //         ? $nameComparison
-    //         : $first['employeeId'] - $second['employeeId'];
-    // });
-
+    
     return array(
         'salaryMonth' => $salaryMonth,
         'companies' => $companies,
