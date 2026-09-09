@@ -65,7 +65,8 @@ function getNewPFChallanReportData($dbconn, $month, $year)
         AND salarydetails.isDelete='0' AND salarydetails.istatus='1'
         AND salarydetails.workingdays > 0
         GROUP BY employee.employeeId, salarymaster.companymasterId
-        ORDER BY employee.emp_name ASC, employee.employeeId ASC");
+        order by employee.employeecode asc");
+        // ORDER BY employee.emp_name ASC, employee.employeeId ASC");
     if ($detailResult === false) {
         throw new RuntimeException('Unable to load PF challan details: ' . mysqli_error($dbconn));
     }
@@ -130,15 +131,16 @@ function getNewPFChallanReportData($dbconn, $month, $year)
             $pfEmployees[] = $employee;
         }
     }
-    // P.F. A/c No. is the employee code in both challan reports. Keep the New
-    // PF Challan rows in the same ascending PF-code order as the existing one.
-    usort($pfEmployees, function ($first, $second) {
-        $pfCodeComparison = (int) $first['pfNo'] - (int) $second['pfNo'];
-        return $pfCodeComparison !== 0
-            ? $pfCodeComparison
-            : $first['employeeId'] - $second['employeeId'];
-    });
-    
+    // The existing PF Challan lists employees alphabetically by name, using the
+    // employee ID as a stable tie-breaker. Apply that ordering after combining
+    // permanent and monthly employees so both reports display the same sequence.
+    // usort($pfEmployees, function ($first, $second) {
+    //     $nameComparison = strcasecmp($first['name'], $second['name']);
+    //     return $nameComparison !== 0
+    //         ? $nameComparison
+    //         : $first['employeeId'] - $second['employeeId'];
+    // });
+
     return array(
         'salaryMonth' => $salaryMonth,
         'companies' => $companies,
