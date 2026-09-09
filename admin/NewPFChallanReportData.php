@@ -28,6 +28,24 @@ function getNewPFChallanReportData($dbconn, $month, $year)
     }
 
     $employees = array();
+    
+    // The original PF Challan is made from two AJAX responses.  Its first
+    // response always lists every active permanent employee, even when that
+    // employee has no salary row for the selected month.  Start with the same
+    // employee set here; the monthly queries below add the company-wise values.
+    $permanentEmployeeResult = mysqli_query($dbconn, "SELECT employeeId, emp_name, employeecode,
+        pfcode, uan, ecsno, dateofbirth, dateofjoining
+        FROM employee
+        WHERE isPermanent=1 AND isDelete=0 AND istatus=1
+        ORDER BY emp_name ASC, employeeId ASC");
+    if ($permanentEmployeeResult === false) {
+        throw new RuntimeException('Unable to load permanent employees: ' . mysqli_error($dbconn));
+    }
+    while ($employee = mysqli_fetch_assoc($permanentEmployeeResult)) {
+        $employeeId = (int) $employee['employeeId'];
+        $employees[$employeeId] = newPFChallanEmployee($employee);
+    }
+
     $detailResult = mysqli_query($dbconn, "SELECT employee.employeeId, employee.emp_name, employee.employeecode,
         employee.pfcode, employee.uan, employee.ecsno, employee.dateofbirth, employee.dateofjoining,
         salarymaster.companymasterId,
@@ -42,7 +60,9 @@ function getNewPFChallanReportData($dbconn, $month, $year)
         INNER JOIN salarymaster ON salarydetails.salaryId=salarymaster.salarymasterId
         INNER JOIN companymaster ON salarymaster.companymasterId=companymaster.companymasterId
         WHERE salarymaster.month='" . $escapedMonth . "' AND salarymaster.isDelete='0' AND salarymaster.istatus='1'
-        AND salarydetails.isDelete='0' AND salarydetails.istatus='1' AND salarydetails.workingdays > 0
+        AND (employee.isPermanent=0 OR (employee.isPermanent=1 AND employee.isDelete=0 AND employee.istatus=1))
+        AND salarydetails.isDelete='0' AND salarydetails.istatus='1'
+        AND salarydetails.workingdays > 0
         GROUP BY employee.employeeId, salarymaster.companymasterId
         ORDER BY employee.emp_name ASC, employee.employeeId ASC");
     if ($detailResult === false) {
@@ -52,19 +72,7 @@ function getNewPFChallanReportData($dbconn, $month, $year)
     while ($detail = mysqli_fetch_assoc($detailResult)) {
         $employeeId = (int) $detail['employeeId'];
         if (!isset($employees[$employeeId])) {
-            $employees[$employeeId] = array(
-                'employeeId' => $employeeId,
-                'name' => ucwords(strtolower($detail['emp_name'])),
-                // The existing PF Challan labels the employee code as PF No.
-                'pfNo' => $detail['employeecode'],
-                'uan' => $detail['uan'],
-                'esicNo' => $detail['ecsno'],
-                'dob' => $detail['dateofbirth'] === '01/01/1970' ? '' : $detail['dateofbirth'],
-                'joiningDate' => $detail['dateofjoining'] === '01/70' ? '' : $detail['dateofjoining'],
-                'companies' => array(),
-                'overtime' => 0,
-                'professionalTax' => 0
-            );
+            $employees[$employeeId] = newPFChallanEmployee($detail);
         }
         $companyId = (int) $detail['companymasterId'];
         $employees[$employeeId]['companies'][$companyId] = array(
@@ -87,7 +95,7 @@ function getNewPFChallanReportData($dbconn, $month, $year)
         INNER JOIN employee ON permanentemployeesalarydetails.emp_id=employee.employeeId
         INNER JOIN salarymaster ON permanentemployeesalarydetails.salaryId=salarymaster.salarymasterId
         WHERE salarymaster.month='" . $escapedMonth . "' AND salarymaster.isDelete='0' AND salarymaster.istatus='1'
-        AND employee.isDelete='0' AND employee.istatus='1'
+        AND employee.isPermanent=1 AND employee.isDelete='0' AND employee.istatus='1'
         GROUP BY employee.employeeId, salarymaster.companymasterId
         ORDER BY employee.emp_name ASC, employee.employeeId ASC");
     if ($permanentResult === false) {
@@ -96,18 +104,7 @@ function getNewPFChallanReportData($dbconn, $month, $year)
     while ($detail = mysqli_fetch_assoc($permanentResult)) {
         $employeeId = (int) $detail['employeeId'];
         if (!isset($employees[$employeeId])) {
-            $employees[$employeeId] = array(
-                'employeeId' => $employeeId,
-                'name' => ucwords(strtolower($detail['emp_name'])),
-                'pfNo' => $detail['employeecode'],
-                'uan' => $detail['uan'],
-                'esicNo' => $detail['ecsno'],
-                'dob' => $detail['dateofbirth'] === '01/01/1970' ? '' : $detail['dateofbirth'],
-                'joiningDate' => $detail['dateofjoining'] === '01/70' ? '' : $detail['dateofjoining'],
-                'companies' => array(),
-                'overtime' => 0,
-                'professionalTax' => 0
-            );
+            $employees[$employeeId] = newPFChallanEmployee($detail);
         }
         $companyId = (int) $detail['companymasterId'];
         $existing = isset($employees[$employeeId]['companies'][$companyId])
@@ -124,6 +121,23 @@ function getNewPFChallanReportData($dbconn, $month, $year)
     });
 
     return array('salaryMonth' => $salaryMonth, 'companies' => $companies, 'employees' => array_values($employees));
+}
+
+function newPFChallanEmployee($employee)
+{
+    return array(
+        'employeeId' => (int) $employee['employeeId'],
+        'name' => ucwords(strtolower($employee['emp_name'])),
+        // The existing PF Challan labels the employee code as PF No.
+        'pfNo' => $employee['employeecode'],
+        'uan' => $employee['uan'],
+        'esicNo' => $employee['ecsno'],
+        'dob' => $employee['dateofbirth'] === '01/01/1970' ? '' : $employee['dateofbirth'],
+        'joiningDate' => $employee['dateofjoining'] === '01/70' ? '' : $employee['dateofjoining'],
+        'companies' => array(),
+        'overtime' => 0,
+        'professionalTax' => 0
+    );
 }
 
 function newPFChallanValue($value)
