@@ -45,7 +45,9 @@ function renderNewPFSection($report, $employees, $type)
                     <th class="fixed" rowspan="2">D.O.B</th>
                     <?php foreach ($report['companies'] as $companyName) { ?><th colspan="4"><?php echo reportHtml($companyName); ?></th><?php } ?>
                     <th class="total" colspan="4">Total</th>
-                    <th class="trailing" rowspan="2"><?php echo $isAadhar ? 'Joining Date' : 'OT AMOUNT FOR ESIC'; ?></th>
+                    <th class="trailing" rowspan="2">OT AMOUNT FOR ESIC</th>
+                    <th class="trailing" rowspan="2">Joining Date</th>
+                    <th class="trailing" rowspan="2">Professional Tax Amt.</th>
                 </tr>
                 <tr>
                     <?php foreach ($report['companies'] as $companyName) { ?>
@@ -84,7 +86,9 @@ function renderNewPFSection($report, $employees, $type)
                         <td><?php echo reportHtml(newPFChallanNationalHoliday($totals[1])); ?></td>
                         <td><?php echo reportHtml(newPFChallanWages($totals[2])); ?></td>
                         <td><?php echo reportHtml(newPFChallanValue($totals[3])); ?></td>
-                        <td><?php echo reportHtml($isAadhar ? $employee['joiningDate'] : newPFChallanValue($employee['overtime'])); ?></td>
+                        <td><?php echo reportHtml(newPFChallanValue($employee['overtime'])); ?></td>
+                        <td><?php echo reportHtml($employee['joiningDate']); ?></td>
+                        <td><?php echo reportHtml(newPFChallanValue($employee['professionalTax'])); ?></td>
                     </tr>
                 <?php } ?>
             </tbody>

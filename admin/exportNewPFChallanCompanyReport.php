@@ -15,7 +15,7 @@ $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
 $sheet = $spreadsheet->getActiveSheet();
 $sheet->setTitle('New PF Challan Report');
 $companyCount = count($report['companies']);
-$lastColumnNumber = 6 + ($companyCount * 4) + 5;
+$lastColumnNumber = 6 + ($companyCount * 4) + 7;
 $lastColumn = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($lastColumnNumber);
 $sheet->mergeCells('A1:' . $lastColumn . '1')->setCellValue('A1', 'FOR EPF & ESIC ONLY');
 $sheet->mergeCells('A2:' . $lastColumn . '2')->setCellValue('A2', 'SHREE GANESH ENGINEERING CO.');
@@ -48,8 +48,10 @@ $writeSection = function ($employees, $isAadhar) use (&$row, $sheet, $report, $c
     foreach (array('Present Days', 'National Holiday', 'Wages', 'Difference in ESIC') as $heading) {
         $sheet->setCellValueByColumnAndRow($column++, $row + 1, $heading);
     }
-    $trailingHeading = $isAadhar ? 'Joining Date' : 'OT AMOUNT FOR ESIC';
-    $sheet->mergeCellsByColumnAndRow($column, $row, $column, $row + 1)->setCellValueByColumnAndRow($column, $row, $trailingHeading);
+    foreach (array('OT AMOUNT FOR ESIC', 'Joining Date', 'Professional Tax Amt.') as $trailingHeading) {
+        $sheet->mergeCellsByColumnAndRow($column, $row, $column, $row + 1)->setCellValueByColumnAndRow($column, $row, $trailingHeading);
+        $column++;
+    }
     $sheet->getStyle('A' . $row . ':' . $lastColumn . ($row + 1))->getFont()->setBold(true);
     $sheet->getStyle('A' . $row . ':' . $lastColumn . ($row + 1))->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER)->setWrapText(true);
     $sheet->getStyle('A' . $row . ':F' . ($row + 1))->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFEDE9DD');
@@ -73,10 +75,13 @@ $writeSection = function ($employees, $isAadhar) use (&$row, $sheet, $report, $c
         foreach ($totals as $value) {
             $values[] = (float) $value;
         }
-        $values[] = $isAadhar ? $employee['joiningDate'] : (float) $employee['overtime'];
+        $values[] = (float) $employee['overtime'];
+        $values[] = $employee['joiningDate'];
+        $values[] = (float) $employee['professionalTax'];
+        $joiningDateIndex = count($values) - 2;
         foreach ($values as $indexValue => $value) {
             $cell = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($indexValue + 1) . $row;
-            if ($indexValue >= 1 && $indexValue <= 5) {
+            if (($indexValue >= 1 && $indexValue <= 5) || $indexValue === $joiningDateIndex) {
                 $sheet->setCellValueExplicit($cell, (string) $value, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             } else {
                 $sheet->setCellValue($cell, $value);
