@@ -116,10 +116,10 @@ function getNewPFChallanReportData($dbconn, $month, $year)
         $employees[$employeeId]['companies'][$companyId] = $existing;
     }
 
-    uasort($employees, function ($first, $second) {
-        $nameComparison = strcasecmp($first['name'], $second['name']);
-        return $nameComparison !== 0 ? $nameComparison : $first['employeeId'] - $second['employeeId'];
-    });
+    // uasort($employees, function ($first, $second) {
+    //     $nameComparison = strcasecmp($first['name'], $second['name']);
+    //     return $nameComparison !== 0 ? $nameComparison : $first['employeeId'] - $second['employeeId'];
+    // });
 
     $pfEmployees = array();
     $aadharEmployees = array();
@@ -130,7 +130,15 @@ function getNewPFChallanReportData($dbconn, $month, $year)
             $pfEmployees[] = $employee;
         }
     }
-
+    // P.F. A/c No. is the employee code in both challan reports. Keep the New
+    // PF Challan rows in the same ascending PF-code order as the existing one.
+    usort($pfEmployees, function ($first, $second) {
+        $pfCodeComparison = (int) $first['pfNo'] - (int) $second['pfNo'];
+        return $pfCodeComparison !== 0
+            ? $pfCodeComparison
+            : $first['employeeId'] - $second['employeeId'];
+    });
+    
     return array(
         'salaryMonth' => $salaryMonth,
         'companies' => $companies,
