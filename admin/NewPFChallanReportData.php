@@ -132,7 +132,7 @@ function getNewPFChallanReportData($dbconn, $month, $year)
             $pfEmployees[] = $employee;
         }
     }
-    
+
     return array(
         'salaryMonth' => $salaryMonth,
         'companies' => $companies,
@@ -200,15 +200,23 @@ function newPFChallanValue($value)
 
 function newPFChallanPresentDays($value)
 {
-    return (float) $value == 0 ? '0' : number_format((float) $value, 2, '.', '');
+    return (float) $value == 0 ? '' : number_format((float) $value, 2, '.', '');
 }
 
 function newPFChallanNationalHoliday($value)
 {
-    return (string) (int) round((float) $value);
+    return (float) $value == 0 ? '' : (string) (int) round((float) $value);
 }
 
 function newPFChallanWages($value)
 {
-    return number_format((float) $value, 2, '.', '');
+    return (float) $value == 0 ? '' : number_format((float) $value, 2, '.', '');
+}
+
+/**
+ * Keep non-zero report values numeric in Excel while displaying zero as blank.
+ */
+function newPFChallanExcelValue($value)
+{
+    return (float) $value == 0 ? '' : (float) $value;
 }

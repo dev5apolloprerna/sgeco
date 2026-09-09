@@ -68,16 +68,16 @@ $writeSection = function ($employees, $isAadhar) use (&$row, $sheet, $report, $c
         foreach ($report['companies'] as $companyId => $companyName) {
             $company = isset($employee['companies'][$companyId]) ? $employee['companies'][$companyId] : array('presentDays' => 0, 'nationalHoliday' => 0, 'wages' => 0, 'differenceInESIC' => 0);
             foreach (array_values($company) as $key => $value) {
-                $values[] = (float) $value;
+                $values[] = newPFChallanExcelValue($value);
                 $totals[$key] += $value;
             }
         }
         foreach ($totals as $value) {
-            $values[] = (float) $value;
+            $values[] = newPFChallanExcelValue($value);
         }
-        $values[] = (float) $employee['overtime'];
+        $values[] = newPFChallanExcelValue($employee['overtime']);
         $values[] = $employee['joiningDate'];
-        $values[] = (float) $employee['professionalTax'];
+        $values[] = newPFChallanExcelValue($employee['professionalTax']);
         $joiningDateIndex = count($values) - 2;
         foreach ($values as $indexValue => $value) {
             $cell = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($indexValue + 1) . $row;
