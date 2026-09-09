@@ -43,11 +43,12 @@ function getNewPFChallanReportData($dbconn, $month, $year)
     }
     while ($employee = mysqli_fetch_assoc($permanentEmployeeResult)) {
         $employeeId = (int) $employee['employeeId'];
-        $employees[$employeeId] = newPFChallanEmployee($employee);
+        $employees[$employeeId] = newPFChallanEmployee($employee, 'pf');
     }
 
     $detailResult = mysqli_query($dbconn, "SELECT employee.employeeId, employee.emp_name, employee.employeecode,
         employee.pfcode, employee.uan, employee.ecsno, employee.dateofbirth, employee.dateofjoining,
+        employee.strFatherName, employee.adharcard, employee.isPermanent,
         salarymaster.companymasterId,
         SUM(CONVERT(salarydetails.workingdays,DECIMAL(12,2))) AS workingdays,
         SUM(COALESCE(salarydetails.iNoOfNatioanHoliday,0)) AS nationalHolidays,
@@ -72,7 +73,7 @@ function getNewPFChallanReportData($dbconn, $month, $year)
     while ($detail = mysqli_fetch_assoc($detailResult)) {
         $employeeId = (int) $detail['employeeId'];
         if (!isset($employees[$employeeId])) {
-            $employees[$employeeId] = newPFChallanEmployee($detail);
+            $employees[$employeeId] = newPFChallanEmployee($detail, (int) $detail['employeecode'] === 0 ? 'aadhar' : 'pf');
         }
         $companyId = (int) $detail['companymasterId'];
         $employees[$employeeId]['companies'][$companyId] = array(
@@ -104,7 +105,7 @@ function getNewPFChallanReportData($dbconn, $month, $year)
     while ($detail = mysqli_fetch_assoc($permanentResult)) {
         $employeeId = (int) $detail['employeeId'];
         if (!isset($employees[$employeeId])) {
-            $employees[$employeeId] = newPFChallanEmployee($detail);
+            $employees[$employeeId] = newPFChallanEmployee($detail, 'pf');
         }
         $companyId = (int) $detail['companymasterId'];
         $existing = isset($employees[$employeeId]['companies'][$companyId])
@@ -120,20 +121,38 @@ function getNewPFChallanReportData($dbconn, $month, $year)
         return $nameComparison !== 0 ? $nameComparison : $first['employeeId'] - $second['employeeId'];
     });
 
-    return array('salaryMonth' => $salaryMonth, 'companies' => $companies, 'employees' => array_values($employees));
+    $pfEmployees = array();
+    $aadharEmployees = array();
+    foreach ($employees as $employee) {
+        if ($employee['listType'] === 'aadhar') {
+            $aadharEmployees[] = $employee;
+        } else {
+            $pfEmployees[] = $employee;
+        }
+    }
+
+    return array(
+        'salaryMonth' => $salaryMonth,
+        'companies' => $companies,
+        'pfEmployees' => $pfEmployees,
+        'aadharEmployees' => $aadharEmployees
+    );
 }
 
-function newPFChallanEmployee($employee)
+function newPFChallanEmployee($employee, $listType)
 {
     return array(
         'employeeId' => (int) $employee['employeeId'],
         'name' => ucwords(strtolower($employee['emp_name'])),
+        'listType' => $listType,
         // The existing PF Challan labels the employee code as PF No.
         'pfNo' => $employee['employeecode'],
         'uan' => $employee['uan'],
         'esicNo' => $employee['ecsno'],
         'dob' => $employee['dateofbirth'] === '01/01/1970' ? '' : $employee['dateofbirth'],
         'joiningDate' => $employee['dateofjoining'] === '01/70' ? '' : $employee['dateofjoining'],
+        'fatherName' => isset($employee['strFatherName']) ? ucwords(strtolower($employee['strFatherName'])) : '',
+        'aadharNo' => isset($employee['adharcard']) ? $employee['adharcard'] : '',
         'companies' => array(),
         'overtime' => 0,
         'professionalTax' => 0
