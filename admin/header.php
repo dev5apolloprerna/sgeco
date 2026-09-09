@@ -271,6 +271,11 @@ $advanced = array("advancedmaster.php", "AddAdvancedDetails.php", 'viewAdvancedD
                                             PF Challan Generate
                                         </a>
                                     </li>
+                                    <li>
+                                        <a href="<?php echo $web_url; ?>admin/New_PF_Challan_Generate.php" class="nav-link">
+                                            New PF Challan Generate
+                                        </a>
+                                    </li>
                                     <?php 
                                     }
                                     ?>
