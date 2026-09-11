@@ -73,10 +73,7 @@ function renderNewPFSection($report, $employees, $type)
                         <td><?php echo reportHtml($employee['dob']); ?></td>
                         <?php foreach ($report['companies'] as $companyId => $companyName) {
                             $values = isset($employee['companies'][$companyId]) ? $employee['companies'][$companyId] : array('presentDays' => 0, 'nationalHoliday' => 0, 'wages' => 0, 'differenceInESIC' => 0);
-                            $totals[0] += $values['presentDays'];
-                            $totals[1] += $values['nationalHoliday'];
-                            $totals[2] += $values['wages'];
-                            $totals[3] += $values['differenceInESIC']; ?>
+                            $totals = newPFChallanAddCompanyTotals($totals, $values); ?>
                             <td><?php echo reportHtml(newPFChallanPresentDays($values['presentDays'])); ?></td>
                             <td><?php echo reportHtml(newPFChallanNationalHoliday($values['nationalHoliday'])); ?></td>
                             <td><?php echo reportHtml(newPFChallanWages($values['wages'])); ?></td>

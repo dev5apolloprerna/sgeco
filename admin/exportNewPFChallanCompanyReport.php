@@ -67,10 +67,11 @@ $writeSection = function ($employees, $isAadhar) use (&$row, $sheet, $report, $c
         $totals = array(0, 0, 0, 0);
         foreach ($report['companies'] as $companyId => $companyName) {
             $company = isset($employee['companies'][$companyId]) ? $employee['companies'][$companyId] : array('presentDays' => 0, 'nationalHoliday' => 0, 'wages' => 0, 'differenceInESIC' => 0);
-            foreach (array_values($company) as $key => $value) {
+            foreach (array('presentDays', 'nationalHoliday', 'wages', 'differenceInESIC') as $key) {
+                $value = $company[$key];
                 $values[] = newPFChallanExcelValue($value);
-                $totals[$key] += $value;
             }
+            $totals = newPFChallanAddCompanyTotals($totals, $company);
         }
         foreach ($totals as $value) {
             $values[] = newPFChallanExcelValue($value);

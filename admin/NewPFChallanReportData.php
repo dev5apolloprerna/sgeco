@@ -114,7 +114,10 @@ function getNewPFChallanReportData($dbconn, $month, $year)
             ? $employees[$employeeId]['companies'][$companyId]
             : array('presentDays' => 0, 'nationalHoliday' => 0, 'wages' => 0, 'differenceInESIC' => 0);
         $existing['presentDays'] = (float) $detail['workingdays'];
-        $existing['wages'] = (float) $detail['wages'];
+        // A permanent salary row and a regular salary-detail row can both be
+        // present for the same employee/company.  Wages in this report are a
+        // rate, so retain the highest rate rather than replacing it.
+        $existing['wages'] = max((float) $existing['wages'], (float) $detail['wages']);
         $employees[$employeeId]['companies'][$companyId] = $existing;
     }
 
@@ -211,6 +214,22 @@ function newPFChallanNationalHoliday($value)
 function newPFChallanWages($value)
 {
     return (float) $value == 0 ? '' : number_format((float) $value, 2, '.', '');
+}
+
+/**
+ * Add a company's values to the employee totals.
+ *
+ * Wages represent a rate rather than an amount, so the report total must show
+ * the employee's highest company wage instead of adding company wage rates.
+ */
+function newPFChallanAddCompanyTotals($totals, $company)
+{
+    $totals[0] += (float) $company['presentDays'];
+    $totals[1] += (float) $company['nationalHoliday'];
+    $totals[2] = max((float) $totals[2], (float) $company['wages']);
+    $totals[3] += (float) $company['differenceInESIC'];
+
+    return $totals;
 }
 
 /**
