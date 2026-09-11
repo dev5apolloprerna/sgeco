@@ -67,6 +67,7 @@ $repayCompanies = mysqli_query($dbconn, "SELECT companymasterId, companyname FRO
                                     <div class="portlet-title">
                                         <div class="caption font-red-sunglo"><i class="icon-settings font-red-sunglo"></i><span class="caption-subject bold uppercase"> Add Advanced Details</span></div>
                                         <a class="btn blue pull-right" href="advancedmaster.php">Back</a>
+                                        &nbsp;
                                         <button type="button" class="btn green pull-right" data-toggle="modal" data-target="#advanceRepayModal"><i class="fa fa-repeat"></i> Repay</button>
                                     </div>
                                     <div class="portlet-body form">

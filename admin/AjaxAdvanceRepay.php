@@ -59,39 +59,17 @@ if (!$company || mysqli_num_rows($company) === 0) {
 }
 
 $monthYear = date('m/Y', strtotime($repayDate));
-$monthStart = date('Y-m-01', strtotime($repayDate));
-$monthEnd = date('Y-m-t', strtotime($repayDate));
+
 $escapedMonthYear = mysqli_real_escape_string($dbconn, $monthYear);
 $masterResult = mysqli_query($dbconn, "SELECT iAdvancedMasterId FROM advanced_master WHERE iCompanyId=" . $companyId . " AND strMonthYear='" . $escapedMonthYear . "' AND isDelete=0 AND istatus=1 LIMIT 1");
 $master = $masterResult ? mysqli_fetch_assoc($masterResult) : null;
+if (!$master) {
+    echo json_encode(array('success' => false, 'message' => 'Create an advanced master entry for the repayment month before submitting.'));
+    exit;
+}
+$advancedMasterId = (int) $master['iAdvancedMasterId'];
 
 mysqli_begin_transaction($dbconn);
-if ($master) {
-    $advancedMasterId = (int) $master['iAdvancedMasterId'];
-    $statement = mysqli_prepare($dbconn, 'UPDATE advanced_master SET fromdate=LEAST(fromdate, ?), todate=GREATEST(todate, ?) WHERE iAdvancedMasterId=?');
-    mysqli_stmt_bind_param($statement, 'ssi', $repayDate, $repayDate, $advancedMasterId);
-    if (!mysqli_stmt_execute($statement)) {
-        mysqli_rollback($dbconn);
-        echo json_encode(array('success' => false, 'message' => 'Unable to update the repayment month.'));
-        exit;
-    }
-    mysqli_stmt_close($statement);
-} else {
-    $statement = mysqli_prepare($dbconn, 'INSERT INTO advanced_master (iCompanyId, strMonthYear, fromdate, todate, strEntryDate, strIP, iEntryBy, EntryDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
-    $entryDateTime = date('d-m-Y H:i:s');
-    $ipAddress = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';
-    $entryBy = (int) $_SESSION['AdminId'];
-    $entryDate = date('Y-m-d');
-    mysqli_stmt_bind_param($statement, 'isssssis', $companyId, $monthYear, $monthStart, $monthEnd, $entryDateTime, $ipAddress, $entryBy, $entryDate);
-    if (!mysqli_stmt_execute($statement)) {
-        mysqli_rollback($dbconn);
-        echo json_encode(array('success' => false, 'message' => 'Unable to create the repayment month.'));
-        exit;
-    }
-    $advancedMasterId = (int) mysqli_insert_id($dbconn);
-    mysqli_stmt_close($statement);
-}
-
 $entryDateTime = date('d-m-Y H:i:s');
 $entryBy = (int) $_SESSION['AdminId'];
 $entryDate = date('Y-m-d');

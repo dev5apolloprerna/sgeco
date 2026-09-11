@@ -20,7 +20,7 @@ if (!$report['companies'] || !$report['employees']) {
 $spreadsheet = new PhpOffice\PhpSpreadsheet\Spreadsheet();
 $sheet = $spreadsheet->getActiveSheet();
 $sheet->setTitle('PF ESIC Deductions');
-$lastColumnNumber = 6 + count($report['companies']) * 4 + 3;
+$lastColumnNumber = 6 + count($report['companies']) * 5 + 4;
 $lastColumn = PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($lastColumnNumber);
 $sheet->mergeCells('A1:' . $lastColumn . '1')->setCellValue('A1', 'PF & ESIC Deduction Report');
 $periodDate = DateTime::createFromFormat('!m/Y', $report['period']);
@@ -42,12 +42,12 @@ $writeEmployees = function ($employees, $sectionTitle, $isAadhar) use (&$rowNumb
     }
     $column = 7;
     foreach ($report['companies'] as $name) {
-        $sheet->mergeCellsByColumnAndRow($column, $headerRow, $column + 3, $headerRow)->setCellValueByColumnAndRow($column, $headerRow, $name);
-        foreach (array('Present Days', 'Wages Rate', 'PF Amt.', 'ESIC Amt.') as $label) $sheet->setCellValueByColumnAndRow($column++, $headerRow + 1, $label);
+        $sheet->mergeCellsByColumnAndRow($column, $headerRow, $column + 4, $headerRow)->setCellValueByColumnAndRow($column, $headerRow, $name);
+        foreach (array('Present Days', 'National Holiday', 'Wages Rate', 'PF Amt.', 'ESIC Amt.') as $label) $sheet->setCellValueByColumnAndRow($column++, $headerRow + 1, $label);
     }
     $totalStart = $column;
-    $sheet->mergeCellsByColumnAndRow($column, $headerRow, $column + 2, $headerRow)->setCellValueByColumnAndRow($column, $headerRow, 'Total Deduction');
-    foreach (array('Present Days', 'PF Amt.', 'ESIC Amt.') as $label) $sheet->setCellValueByColumnAndRow($column++, $headerRow + 1, $label);
+    $sheet->mergeCellsByColumnAndRow($column, $headerRow, $column + 3, $headerRow)->setCellValueByColumnAndRow($column, $headerRow, 'Total Deduction');
+    foreach (array('Present Days', 'National Holiday', 'PF Amt.', 'ESIC Amt.') as $label) $sheet->setCellValueByColumnAndRow($column++, $headerRow + 1, $label);
     $sheet->getStyle('A' . $headerRow . ':' . $lastColumn . ($headerRow + 1))->getFont()->setBold(true);
     $sheet->getStyleByColumnAndRow($totalStart, $headerRow, $column - 1, $headerRow + 1)->getFill()->setFillType('solid')->getStartColor()->setRGB('9FD8F6');
     $rowNumber += 2;
@@ -57,10 +57,10 @@ $writeEmployees = function ($employees, $sectionTitle, $isAadhar) use (&$rowNumb
             ? array($serial++, $employee['name'], $employee['fatherName'], $employee['aadharNo'], $employee['esicNo'], $employee['dob'])
             : array($serial++, $employee['name'], $employee['pfAccount'], $employee['uan'], $employee['esicNo'], $employee['dob']);
         foreach ($report['companies'] as $companyId => $unused) {
-            $v = isset($employee['companies'][$companyId]) ? $employee['companies'][$companyId] : array('presentDays' => 0, 'wagesRate' => 0, 'pfAmount' => 0, 'esicAmount' => 0);
-            array_push($values, $v['presentDays'], $v['wagesRate'], $v['pfAmount'], $v['esicAmount']);
+            $v = isset($employee['companies'][$companyId]) ? $employee['companies'][$companyId] : array('presentDays' => 0, 'nationalHoliday' => 0, 'wagesRate' => 0, 'pfAmount' => 0, 'esicAmount' => 0);
+            array_push($values, $v['presentDays'], $v['nationalHoliday'], $v['wagesRate'], $v['pfAmount'], $v['esicAmount']);
         }
-        array_push($values, $employee['totalDays'], $employee['totalPf'], $employee['totalEsic']);
+        array_push($values, $employee['totalDays'], $employee['totalNationalHoliday'], $employee['totalPf'], $employee['totalEsic']);
         foreach ($values as $index => $value) {
             $isNumericColumn = $index >= 6;
             $sheet->setCellValueByColumnAndRow($index + 1, $rowNumber, $isNumericColumn && abs((float) $value) < 0.00001 ? null : $value);
@@ -68,13 +68,14 @@ $writeEmployees = function ($employees, $sectionTitle, $isAadhar) use (&$rowNumb
         }
         $rowNumber++;
     }
+
     $totals = pfEsicReportTotals($employees, $report['companies']);
     $sheet->mergeCellsByColumnAndRow(1, $rowNumber, 6, $rowNumber)->setCellValueByColumnAndRow(1, $rowNumber, 'Total');
     $totalValues = array();
     foreach ($totals['companies'] as $values) {
-        foreach (array('presentDays', 'wagesRate', 'pfAmount', 'esicAmount') as $key) $totalValues[] = $values[$key];
+        foreach (array('presentDays', 'nationalHoliday', 'wagesRate', 'pfAmount', 'esicAmount') as $key) $totalValues[] = $values[$key];
     }
-    array_push($totalValues, $totals['totalDays'], $totals['totalPf'], $totals['totalEsic']);
+    array_push($totalValues, $totals['totalDays'], $totals['totalNationalHoliday'], $totals['totalPf'], $totals['totalEsic']);
     foreach ($totalValues as $index => $value) {
         $column = $index + 7;
         $sheet->setCellValueByColumnAndRow($column, $rowNumber, abs((float) $value) < 0.00001 ? null : $value);

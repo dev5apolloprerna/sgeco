@@ -95,14 +95,17 @@ function pfEsicReportEmployee($employee)
 {
     $companies = array();
     $totalDays = 0;
+    $totalNationalHoliday = 0;
     foreach ($employee['companies'] as $companyId => $values) {
         $companies[$companyId] = array(
             'presentDays' => $values['presentDays'],
+            'nationalHoliday' => $values['nationalHoliday'],
             'wagesRate' => $values['wages'],
             'pfAmount' => 0,
             'esicAmount' => 0
         );
         $totalDays += (float) $values['presentDays'];
+        $totalNationalHoliday += (float) $values['nationalHoliday'];
     }
     return array(
         'employeeId' => (int) $employee['employeeId'],
@@ -118,6 +121,7 @@ function pfEsicReportEmployee($employee)
         'aadharNo' => $employee['aadharNo'],
         'companies' => $companies,
         'totalDays' => $totalDays,
+        'totalNationalHoliday' => $totalNationalHoliday,
         'totalPf' => 0,
         'totalEsic' => 0
     );
@@ -136,9 +140,9 @@ function pfEsicReportNumber($value, $money = false)
 
 function pfEsicReportTotals($employees, $companies)
 {
-    $totals = array('companies' => array(), 'totalDays' => 0, 'totalPf' => 0, 'totalEsic' => 0);
+    $totals = array('companies' => array(), 'totalDays' => 0, 'totalNationalHoliday' => 0, 'totalPf' => 0, 'totalEsic' => 0);
     foreach ($companies as $companyId => $unused) {
-        $totals['companies'][$companyId] = array('presentDays' => 0, 'wagesRate' => 0, 'pfAmount' => 0, 'esicAmount' => 0);
+        $totals['companies'][$companyId] = array('presentDays' => 0, 'nationalHoliday' => 0, 'wagesRate' => 0, 'pfAmount' => 0, 'esicAmount' => 0);
     }
     foreach ($employees as $employee) {
         foreach ($companies as $companyId => $unused) {
@@ -148,6 +152,7 @@ function pfEsicReportTotals($employees, $companies)
             }
         }
         $totals['totalDays'] += (float) $employee['totalDays'];
+        $totals['totalNationalHoliday'] += (float) $employee['totalNationalHoliday'];
         $totals['totalPf'] += (float) $employee['totalPf'];
         $totals['totalEsic'] += (float) $employee['totalEsic'];
     }
@@ -174,7 +179,7 @@ function pfEsicReportSectionHtml($report, $employees, $sectionTitle, $date, $isA
     }
     $e = 'pfEsicReportEscape';
     $html = '<div class="table-responsive pf-esic-section"><table class="table table-bordered pf-esic-report"><thead>';
-    $columnCount = 6 + count($report['companies']) * 4 + 3;
+    $columnCount = 6 + count($report['companies']) * 5 + 4;
     $html .= '<tr class="report-title"><th colspan="' . $columnCount . '">PF &amp; ESIC Deduction Report </th></tr>';
     $html .= '<tr><th colspan="' . $columnCount . '">Month : ' . $e($date ? $date->format('M-Y') : $report['period']) . '</th></tr>';
     $html .= '<tr><th rowspan="2">Sr.<br>No.</th><th rowspan="2">' . ($isAadhar ? 'Name as per Aadhar' : 'Name') . '</th>';
@@ -182,10 +187,10 @@ function pfEsicReportSectionHtml($report, $employees, $sectionTitle, $date, $isA
         ? '<th rowspan="2">Father Name</th><th rowspan="2">Aadhar No.</th>'
         : '<th rowspan="2">PF A/C<br>No.</th><th rowspan="2">UAN No.</th>';
     $html .= '<th rowspan="2">ESIC No.</th><th rowspan="2">D.O.B</th>';
-    foreach ($report['companies'] as $name) $html .= '<th colspan="4" class="company-heading">' . $e($name) . '</th>';
-    $html .= '<th colspan="3" class="total-heading">Total Deduction</th></tr><tr>';
-    foreach ($report['companies'] as $unused) $html .= '<th>Present<br>Days</th><th>Wages<br>Rate</th><th>PF Amt.</th><th>ESIC Amt.</th>';
-    $html .= '<th class="total-heading">Present<br>Days</th><th class="total-heading">PF Amt.</th><th class="total-heading">ESIC Amt.</th></tr></thead><tbody>';
+    foreach ($report['companies'] as $name) $html .= '<th colspan="5" class="company-heading">' . $e($name) . '</th>';
+    $html .= '<th colspan="4" class="total-heading">Total Deduction</th></tr><tr>';
+    foreach ($report['companies'] as $unused) $html .= '<th>Present<br>Days</th><th>National<br>Holiday</th><th>Wages<br>Rate</th><th>PF Amt.</th><th>ESIC Amt.</th>';
+    $html .= '<th class="total-heading">Present<br>Days</th><th class="total-heading">National<br>Holiday</th><th class="total-heading">PF Amt.</th><th class="total-heading">ESIC Amt.</th></tr></thead><tbody>';
     $index = 1;
     foreach ($employees as $employee) {
         $html .= '<tr><td>' . $index++ . '</td><td class="employee-name">' . $e($employee['name']) . '</td>';
@@ -194,18 +199,18 @@ function pfEsicReportSectionHtml($report, $employees, $sectionTitle, $date, $isA
             : '<td>' . $e($employee['pfAccount']) . '</td><td>' . $e($employee['uan']) . '</td>';
         $html .= '<td>' . $e($employee['esicNo']) . '</td><td>' . $e($employee['dob']) . '</td>';
         foreach ($report['companies'] as $companyId => $unused) {
-            $v = isset($employee['companies'][$companyId]) ? $employee['companies'][$companyId] : array('presentDays' => 0, 'wagesRate' => 0, 'pfAmount' => 0, 'esicAmount' => 0);
-            $html .= '<td>' . pfEsicReportNumber($v['presentDays']) . '</td><td>' . pfEsicReportNumber($v['wagesRate'], true) . '</td><td>' . pfEsicReportNumber($v['pfAmount'], true) . '</td><td>' . pfEsicReportNumber($v['esicAmount'], true) . '</td>';
+            $v = isset($employee['companies'][$companyId]) ? $employee['companies'][$companyId] : array('presentDays' => 0, 'nationalHoliday' => 0, 'wagesRate' => 0, 'pfAmount' => 0, 'esicAmount' => 0);
+            $html .= '<td>' . pfEsicReportNumber($v['presentDays']) . '</td><td>' . pfEsicReportNumber($v['nationalHoliday']) . '</td><td>' . pfEsicReportNumber($v['wagesRate'], true) . '</td><td>' . pfEsicReportNumber($v['pfAmount'], true) . '</td><td>' . pfEsicReportNumber($v['esicAmount'], true) . '</td>';
         }
-        $html .= '<td class="report-total">' . pfEsicReportNumber($employee['totalDays']) . '</td><td class="report-total">' . pfEsicReportNumber($employee['totalPf'], true) . '</td><td class="report-total">' . pfEsicReportNumber($employee['totalEsic'], true) . '</td></tr>';
+        $html .= '<td class="report-total">' . pfEsicReportNumber($employee['totalDays']) . '</td><td class="report-total">' . pfEsicReportNumber($employee['totalNationalHoliday']) . '</td><td class="report-total">' . pfEsicReportNumber($employee['totalPf'], true) . '</td><td class="report-total">' . pfEsicReportNumber($employee['totalEsic'], true) . '</td></tr>';
     }
     $totals = pfEsicReportTotals($employees, $report['companies']);
     $html .= '<tr class="report-total total-heading"><td colspan="6">Total</td>';
     foreach ($totals['companies'] as $values) {
-        foreach (array('presentDays', 'wagesRate', 'pfAmount', 'esicAmount') as $key) {
+        foreach (array('presentDays', 'nationalHoliday', 'wagesRate', 'pfAmount', 'esicAmount') as $key) {
             $html .= '<td>' . pfEsicReportNumber($values[$key]) . '</td>';
         }
     }
-    $html .= '<td>' . pfEsicReportNumber($totals['totalDays']) . '</td><td>' . pfEsicReportNumber($totals['totalPf']) . '</td><td>' . pfEsicReportNumber($totals['totalEsic']) . '</td></tr>';
+    $html .= '<td>' . pfEsicReportNumber($totals['totalDays']) . '</td><td>' . pfEsicReportNumber($totals['totalNationalHoliday']) . '</td><td>' . pfEsicReportNumber($totals['totalPf']) . '</td><td>' . pfEsicReportNumber($totals['totalEsic']) . '</td></tr>';
     return $html . '</tbody></table></div>';
 }
