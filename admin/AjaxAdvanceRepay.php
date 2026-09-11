@@ -25,8 +25,7 @@ if (!canAddAdvanceRepay($dbconn)) {
 $action = isset($_POST['action']) ? $_POST['action'] : '';
 $companyId = isset($_POST['companyId']) ? (int) $_POST['companyId'] : 0;
 $sourceDate = isset($_POST['sourceDate']) ? trim($_POST['sourceDate']) : '';
-$repayDate = date('Y-m-d');
-$monthYear = date('m/Y', strtotime($repayDate));
+$repayDate = isset($_POST['repayDate']) ? trim($_POST['repayDate']) : '';
 
 function advanceRepayMaster($dbconn, $companyId, $monthYear)
 {
@@ -39,28 +38,28 @@ function advanceRepayMaster($dbconn, $companyId, $monthYear)
     return $master;
 }
 
-function advanceRepayDate($dbconn, $companyId, $sourceDate)
+function advanceRepayExists($dbconn, $companyId, $sourceDate, $repayDate)
 {
     $remarks = 'Repay of advance dated ' . $sourceDate;
-    $statement = mysqli_prepare($dbconn, "SELECT DATE(ad.strDate) AS repayDate FROM advanced_details ad INNER JOIN advanced_master am ON am.iAdvancedMasterId=ad.iAdvancedMasterId WHERE ad.iCompanyId=? AND ad.strRemarks=? AND am.isDelete=0 AND am.istatus=1 ORDER BY ad.strDate LIMIT 1");
-    mysqli_stmt_bind_param($statement, 'is', $companyId, $remarks);
+    $statement = mysqli_prepare($dbconn, "SELECT 1 FROM advanced_details ad INNER JOIN advanced_master am ON am.iAdvancedMasterId=ad.iAdvancedMasterId WHERE ad.iCompanyId=? AND ad.strRemarks=? AND DATE(ad.strDate)=? AND am.isDelete=0 AND am.istatus=1 LIMIT 1");
+    mysqli_stmt_bind_param($statement, 'iss', $companyId, $remarks, $repayDate);
     mysqli_stmt_execute($statement);
     $result = mysqli_stmt_get_result($statement);
-    $row = $result ? mysqli_fetch_assoc($result) : null;
+    $exists = $result && mysqli_num_rows($result) > 0;
     mysqli_stmt_close($statement);
-    return $row ? $row['repayDate'] : null;
+    return $exists;
 }
 
 if ($action === 'Preview') {
-    if ($companyId < 1 || !isValidAdvanceRepayDate($sourceDate) || $sourceDate >= $repayDate) {
-        echo '<div class="alert alert-danger">Select a valid company and old advance payment date.</div>';
+    if ($companyId < 1 || !isValidAdvanceRepayDate($sourceDate) || !isValidAdvanceRepayDate($repayDate) || $sourceDate >= $repayDate) {
+        echo '<div class="alert alert-danger">Select a valid company, old advance payment date and later repayment date.</div>';
         exit;
     }
-    $existingRepayDate = advanceRepayDate($dbconn, $companyId, $sourceDate);
-    if ($existingRepayDate) {
-        echo '<div class="alert alert-warning">This advance payment date has already been repaid on ' . date('d-m-Y', strtotime($existingRepayDate)) . '.</div>';
+    if (advanceRepayExists($dbconn, $companyId, $sourceDate, $repayDate)) {
+        echo '<div class="alert alert-warning">This advance payment already has a repayment entry for ' . date('d-m-Y', strtotime($repayDate)) . '.</div>';
         exit;
     }
+    $monthYear = date('m/Y', strtotime($repayDate));
     $master = advanceRepayMaster($dbconn, $companyId, $monthYear);
     if (!$master) {
         echo '<div class="alert alert-danger">Create an advanced master entry for ' . htmlspecialchars($monthYear, ENT_QUOTES, 'UTF-8') . ' before repaying this advance.</div>';
@@ -95,6 +94,13 @@ if (!$company || mysqli_num_rows($company) === 0) {
     echo json_encode(array('success' => false, 'message' => 'Selected company is not available.'));
     exit;
 }
+
+if (advanceRepayExists($dbconn, $companyId, $sourceDate, $repayDate)) {
+    echo json_encode(array('success' => false, 'message' => 'This advance payment already has a repayment entry for ' . date('d-m-Y', strtotime($repayDate)) . '.'));
+    exit;
+}
+$monthYear = date('m/Y', strtotime($repayDate));
+$master = advanceRepayMaster($dbconn, $companyId, $monthYear);
 
 $existingRepayDate = advanceRepayDate($dbconn, $companyId, $sourceDate);
 if ($existingRepayDate) {
