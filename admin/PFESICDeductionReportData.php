@@ -13,7 +13,7 @@ function pfEsicReportData($dbconn, $month, $year)
 {
     $period = pfEsicReportPeriod($month, $year);
     if ($period === null) {
-        return array('period' => '', 'companies' => array(), 'employees' => array(), 'permanentEmployees' => array(), 'otherEmployees' => array());
+        return array('period' => '', 'companies' => array(), 'employees' => array(), 'pfEmployees' => array(), 'aadharEmployees' => array());
     }
     // Use the PF Challan data source as the canonical employee order, employee
     // set, company set, present days and wage rate. This keeps both screens in
@@ -54,21 +54,22 @@ function pfEsicReportData($dbconn, $month, $year)
         $employees[$employeeId]['totalEsic'] += (float) $row['esicAmount'];
     }
 
-    $permanentEmployees = array();
-    $otherEmployees = array();
+    $pfEmployees = array();
+    $aadharEmployees = array();
     foreach ($employees as $employeeId => $employee) {
-        if ($employee['isPermanent'] === 1) {
-            $permanentEmployees[$employeeId] = $employee;
+        if ($employee['listType'] === 'aadhar') {
+            $aadharEmployees[$employeeId] = $employee;
         } else {
-            $otherEmployees[$employeeId] = $employee;
+            $pfEmployees[$employeeId] = $employee;
         }
     }
     return array(
         'period' => $period,
         'companies' => $companies,
         'employees' => $employees,
-        'permanentEmployees' => $permanentEmployees,
-        'otherEmployees' => $otherEmployees
+        // Keep the same two lists and insertion order as New PF Challan.
+        'pfEmployees' => $pfEmployees,
+        'aadharEmployees' => $aadharEmployees
     );
 }
 
@@ -89,9 +90,14 @@ function pfEsicReportEmployee($employee)
         'employeeId' => (int) $employee['employeeId'],
         'name' => $employee['name'],
         'employeeCode' => $employee['pfNo'],
+        'listType' => $employee['listType'],
         'isPermanent' => (int) $employee['isPermanent'],
         'pfAccount' => $employee['pfNo'],
         'uan' => $employee['uan'],
+        'esicNo' => $employee['esicNo'],
+        'dob' => $employee['dob'],
+        'fatherName' => $employee['fatherName'],
+        'aadharNo' => $employee['aadharNo'],
         'companies' => $companies,
         'totalDays' => $totalDays,
         'totalPf' => 0,
@@ -117,28 +123,37 @@ function pfEsicReportHtml($report)
     $e = 'pfEsicReportEscape';
     $date = DateTime::createFromFormat('!m/Y', $report['period']);
     $html = '';
-    $html .= pfEsicReportSectionHtml($report, $report['permanentEmployees'], 'Permanent Employees', $date);
-    $html .= pfEsicReportSectionHtml($report, $report['otherEmployees'], 'Non-Permanent Employees', $date);
+    $html .= pfEsicReportSectionHtml($report, $report['pfEmployees'], 'PF Employees', $date, false);
+    $html .= pfEsicReportSectionHtml($report, $report['aadharEmployees'], 'Aadhar Employees', $date, true);
     return $html;
 }
 
-function pfEsicReportSectionHtml($report, $employees, $sectionTitle, $date)
+function pfEsicReportSectionHtml($report, $employees, $sectionTitle, $date, $isAadhar)
 {
     if (!$employees) {
         return '';
     }
     $e = 'pfEsicReportEscape';
     $html = '<div class="table-responsive pf-esic-section"><table class="table table-bordered pf-esic-report"><thead>';
-    $html .= '<tr class="report-title"><th colspan="' . (4 + count($report['companies']) * 4 + 3) . '">PF &amp; ESIC Deduction Report - ' . $e($sectionTitle) . '</th></tr>';
-    $html .= '<tr><th colspan="' . (4 + count($report['companies']) * 4 + 3) . '">Month : ' . $e($date ? $date->format('M-Y') : $report['period']) . '</th></tr>';
-    $html .= '<tr><th rowspan="2">Sr.<br>No.</th><th rowspan="2">Name</th><th rowspan="2">PF A/C<br>No.</th><th rowspan="2">UAN No.</th>';
+    $columnCount = 6 + count($report['companies']) * 4 + 3;
+    $html .= '<tr class="report-title"><th colspan="' . $columnCount . '">PF &amp; ESIC Deduction Report - ' . $e($sectionTitle) . '</th></tr>';
+    $html .= '<tr><th colspan="' . $columnCount . '">Month : ' . $e($date ? $date->format('M-Y') : $report['period']) . '</th></tr>';
+    $html .= '<tr><th rowspan="2">Sr.<br>No.</th><th rowspan="2">' . ($isAadhar ? 'Name as per Aadhar' : 'Name') . '</th>';
+    $html .= $isAadhar
+        ? '<th rowspan="2">Father Name</th><th rowspan="2">Aadhar No.</th>'
+        : '<th rowspan="2">PF A/C<br>No.</th><th rowspan="2">UAN No.</th>';
+    $html .= '<th rowspan="2">ESIC No.</th><th rowspan="2">D.O.B</th>';
     foreach ($report['companies'] as $name) $html .= '<th colspan="4" class="company-heading">' . $e($name) . '</th>';
     $html .= '<th colspan="3" class="total-heading">Total Deduction</th></tr><tr>';
     foreach ($report['companies'] as $unused) $html .= '<th>Present<br>Days</th><th>Wages<br>Rate</th><th>PF Amt.</th><th>ESIC Amt.</th>';
     $html .= '<th class="total-heading">Present<br>Days</th><th class="total-heading">PF Amt.</th><th class="total-heading">ESIC Amt.</th></tr></thead><tbody>';
     $index = 1;
     foreach ($employees as $employee) {
-        $html .= '<tr><td>' . $index++ . '</td><td class="employee-name">' . $e($employee['name']) . '</td><td>' . $e($employee['pfAccount']) . '</td><td>' . $e($employee['uan']) . '</td>';
+        $html .= '<tr><td>' . $index++ . '</td><td class="employee-name">' . $e($employee['name']) . '</td>';
+        $html .= $isAadhar
+            ? '<td>' . $e($employee['fatherName']) . '</td><td>' . $e($employee['aadharNo']) . '</td>'
+            : '<td>' . $e($employee['pfAccount']) . '</td><td>' . $e($employee['uan']) . '</td>';
+        $html .= '<td>' . $e($employee['esicNo']) . '</td><td>' . $e($employee['dob']) . '</td>';
         foreach ($report['companies'] as $companyId => $unused) {
             $v = isset($employee['companies'][$companyId]) ? $employee['companies'][$companyId] : array('presentDays' => 0, 'wagesRate' => 0, 'pfAmount' => 0, 'esicAmount' => 0);
             $html .= '<td>' . pfEsicReportNumber($v['presentDays']) . '</td><td>' . pfEsicReportNumber($v['wagesRate'], true) . '</td><td>' . pfEsicReportNumber($v['pfAmount'], true) . '</td><td>' . pfEsicReportNumber($v['esicAmount'], true) . '</td>';

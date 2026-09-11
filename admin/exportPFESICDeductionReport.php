@@ -15,24 +15,27 @@ if (!$report['companies'] || !$report['employees']) {
 $spreadsheet = new PhpOffice\PhpSpreadsheet\Spreadsheet();
 $sheet = $spreadsheet->getActiveSheet();
 $sheet->setTitle('PF ESIC Deductions');
-$lastColumnNumber = 4 + count($report['companies']) * 4 + 3;
+$lastColumnNumber = 6 + count($report['companies']) * 4 + 3;
 $lastColumn = PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($lastColumnNumber);
 $sheet->mergeCells('A1:' . $lastColumn . '1')->setCellValue('A1', 'PF & ESIC Deduction Report');
 $periodDate = DateTime::createFromFormat('!m/Y', $report['period']);
 $sheet->mergeCells('A2:' . $lastColumn . '2')->setCellValue('A2', 'Month : ' . ($periodDate ? $periodDate->format('M-Y') : $report['period']));
 $rowNumber = 3;
-$writeEmployees = function ($employees, $sectionTitle) use (&$rowNumber, $sheet, $report, $lastColumn) {
+$writeEmployees = function ($employees, $sectionTitle, $isAadhar) use (&$rowNumber, $sheet, $report, $lastColumn) {
     if (!$employees) return;
     $sheet->mergeCells('A' . $rowNumber . ':' . $lastColumn . $rowNumber)->setCellValue('A' . $rowNumber, $sectionTitle);
     $sheet->getStyle('A' . $rowNumber . ':' . $lastColumn . $rowNumber)->getFont()->setBold(true);
     $sheet->getStyle('A' . $rowNumber . ':' . $lastColumn . $rowNumber)->getFill()->setFillType('solid')->getStartColor()->setRGB('D9E2F3');
     $rowNumber++;
     $headerRow = $rowNumber;
-    foreach (array('Sr. No.', 'Name', 'PF A/C No.', 'UAN No.') as $index => $label) {
+    $identityHeaders = $isAadhar
+        ? array('Sr. No.', 'Name as per Aadhar', 'Father Name', 'Aadhar No.', 'ESIC No.', 'D.O.B')
+        : array('Sr. No.', 'Name', 'PF A/C No.', 'UAN No.', 'ESIC No.', 'D.O.B');
+    foreach ($identityHeaders as $index => $label) {
         $column = $index + 1;
         $sheet->mergeCellsByColumnAndRow($column, $headerRow, $column, $headerRow + 1)->setCellValueByColumnAndRow($column, $headerRow, $label);
     }
-    $column = 5;
+    $column = 7;
     foreach ($report['companies'] as $name) {
         $sheet->mergeCellsByColumnAndRow($column, $headerRow, $column + 3, $headerRow)->setCellValueByColumnAndRow($column, $headerRow, $name);
         foreach (array('Present Days', 'Wages Rate', 'PF Amt.', 'ESIC Amt.') as $label) $sheet->setCellValueByColumnAndRow($column++, $headerRow + 1, $label);
@@ -45,7 +48,9 @@ $writeEmployees = function ($employees, $sectionTitle) use (&$rowNumber, $sheet,
     $rowNumber += 2;
     $serial = 1;
     foreach ($employees as $employee) {
-        $values = array($serial++, $employee['name'], $employee['pfAccount'], $employee['uan']);
+        $values = $isAadhar
+            ? array($serial++, $employee['name'], $employee['fatherName'], $employee['aadharNo'], $employee['esicNo'], $employee['dob'])
+            : array($serial++, $employee['name'], $employee['pfAccount'], $employee['uan'], $employee['esicNo'], $employee['dob']);
         foreach ($report['companies'] as $companyId => $unused) {
             $v = isset($employee['companies'][$companyId]) ? $employee['companies'][$companyId] : array('presentDays' => 0, 'wagesRate' => 0, 'pfAmount' => 0, 'esicAmount' => 0);
             array_push($values, $v['presentDays'], $v['wagesRate'], $v['pfAmount'], $v['esicAmount']);
@@ -56,8 +61,8 @@ $writeEmployees = function ($employees, $sectionTitle) use (&$rowNumber, $sheet,
     }
     $rowNumber++;
 };
-$writeEmployees($report['permanentEmployees'], 'Permanent Employees');
-$writeEmployees($report['otherEmployees'], 'Non-Permanent Employees');
+$writeEmployees($report['pfEmployees'], 'PF Employees', false);
+$writeEmployees($report['aadharEmployees'], 'Aadhar Employees', true);
 $sheet->getStyle('A1:' . $lastColumn . '2')->getFont()->setBold(true);
 $sheet->getStyle('A1')->getFont()->setSize(18);
 $sheet->getStyle('A1:' . $lastColumn . ($rowNumber - 1))->getBorders()->getAllBorders()->setBorderStyle(PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
