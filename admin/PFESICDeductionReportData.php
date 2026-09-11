@@ -136,7 +136,7 @@ function pfEsicReportSectionHtml($report, $employees, $sectionTitle, $date, $isA
     $e = 'pfEsicReportEscape';
     $html = '<div class="table-responsive pf-esic-section"><table class="table table-bordered pf-esic-report"><thead>';
     $columnCount = 6 + count($report['companies']) * 4 + 3;
-    $html .= '<tr class="report-title"><th colspan="' . $columnCount . '">PF &amp; ESIC Deduction Report - ' . $e($sectionTitle) . '</th></tr>';
+    $html .= '<tr class="report-title"><th colspan="' . $columnCount . '">PF &amp; ESIC Deduction Report </th></tr>';
     $html .= '<tr><th colspan="' . $columnCount . '">Month : ' . $e($date ? $date->format('M-Y') : $report['period']) . '</th></tr>';
     $html .= '<tr><th rowspan="2">Sr.<br>No.</th><th rowspan="2">' . ($isAadhar ? 'Name as per Aadhar' : 'Name') . '</th>';
     $html .= $isAadhar

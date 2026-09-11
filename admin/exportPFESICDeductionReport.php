@@ -23,7 +23,7 @@ $sheet->mergeCells('A2:' . $lastColumn . '2')->setCellValue('A2', 'Month : ' . (
 $rowNumber = 3;
 $writeEmployees = function ($employees, $sectionTitle, $isAadhar) use (&$rowNumber, $sheet, $report, $lastColumn) {
     if (!$employees) return;
-    $sheet->mergeCells('A' . $rowNumber . ':' . $lastColumn . $rowNumber)->setCellValue('A' . $rowNumber, $sectionTitle);
+    //$sheet->mergeCells('A' . $rowNumber . ':' . $lastColumn . $rowNumber)->setCellValue('A' . $rowNumber, $sectionTitle);
     $sheet->getStyle('A' . $rowNumber . ':' . $lastColumn . $rowNumber)->getFont()->setBold(true);
     $sheet->getStyle('A' . $rowNumber . ':' . $lastColumn . $rowNumber)->getFill()->setFillType('solid')->getStartColor()->setRGB('D9E2F3');
     $rowNumber++;
