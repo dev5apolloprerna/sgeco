@@ -25,8 +25,47 @@ if (!canAddAdvanceRepay($dbconn)) {
 $action = isset($_POST['action']) ? $_POST['action'] : '';
 $companyId = isset($_POST['companyId']) ? (int) $_POST['companyId'] : 0;
 $sourceDate = isset($_POST['sourceDate']) ? trim($_POST['sourceDate']) : '';
+$repayDate = date('Y-m-d');
+$monthYear = date('m/Y', strtotime($repayDate));
+
+function advanceRepayMaster($dbconn, $companyId, $monthYear)
+{
+    $statement = mysqli_prepare($dbconn, "SELECT iAdvancedMasterId FROM advanced_master WHERE iCompanyId=? AND strMonthYear=? AND isDelete=0 AND istatus=1 LIMIT 1");
+    mysqli_stmt_bind_param($statement, 'is', $companyId, $monthYear);
+    mysqli_stmt_execute($statement);
+    $result = mysqli_stmt_get_result($statement);
+    $master = $result ? mysqli_fetch_assoc($result) : null;
+    mysqli_stmt_close($statement);
+    return $master;
+}
+
+function advanceRepayDate($dbconn, $companyId, $sourceDate)
+{
+    $remarks = 'Repay of advance dated ' . $sourceDate;
+    $statement = mysqli_prepare($dbconn, "SELECT DATE(ad.strDate) AS repayDate FROM advanced_details ad INNER JOIN advanced_master am ON am.iAdvancedMasterId=ad.iAdvancedMasterId WHERE ad.iCompanyId=? AND ad.strRemarks=? AND am.isDelete=0 AND am.istatus=1 ORDER BY ad.strDate LIMIT 1");
+    mysqli_stmt_bind_param($statement, 'is', $companyId, $remarks);
+    mysqli_stmt_execute($statement);
+    $result = mysqli_stmt_get_result($statement);
+    $row = $result ? mysqli_fetch_assoc($result) : null;
+    mysqli_stmt_close($statement);
+    return $row ? $row['repayDate'] : null;
+}
 
 if ($action === 'Preview') {
+    if ($companyId < 1 || !isValidAdvanceRepayDate($sourceDate) || $sourceDate >= $repayDate) {
+        echo '<div class="alert alert-danger">Select a valid company and old advance payment date.</div>';
+        exit;
+    }
+    $existingRepayDate = advanceRepayDate($dbconn, $companyId, $sourceDate);
+    if ($existingRepayDate) {
+        echo '<div class="alert alert-warning">This advance payment date has already been repaid on ' . date('d-m-Y', strtotime($existingRepayDate)) . '.</div>';
+        exit;
+    }
+    $master = advanceRepayMaster($dbconn, $companyId, $monthYear);
+    if (!$master) {
+        echo '<div class="alert alert-danger">Create an advanced master entry for ' . htmlspecialchars($monthYear, ENT_QUOTES, 'UTF-8') . ' before repaying this advance.</div>';
+        exit;
+    }
     $statement = mysqli_prepare($dbconn, "SELECT e.emp_name, e.employeecode, SUM(ad.iAmount) iAmount FROM advanced_details ad INNER JOIN advanced_master am ON am.iAdvancedMasterId=ad.iAdvancedMasterId INNER JOIN employee e ON e.employeeId=ad.iEmployeeId WHERE ad.iCompanyId=? AND DATE(ad.strDate)=? AND am.isDelete=0 AND am.istatus=1 GROUP BY ad.iEmployeeId, e.emp_name, e.employeecode ORDER BY e.emp_name");
     mysqli_stmt_bind_param($statement, 'is', $companyId, $sourceDate);
     mysqli_stmt_execute($statement);
@@ -46,8 +85,7 @@ if ($action === 'Preview') {
 }
 
 header('Content-Type: application/json');
-$repayDate = isset($_POST['repayDate']) ? trim($_POST['repayDate']) : '';
-if ($action !== 'Add' || $companyId < 1 || !isValidAdvanceRepayDate($sourceDate) || !isValidAdvanceRepayDate($repayDate) || $sourceDate >= $repayDate) {
+if ($action !== 'Add' || $companyId < 1 || !isValidAdvanceRepayDate($sourceDate) || $sourceDate >= $repayDate) {
     echo json_encode(array('success' => false, 'message' => 'Select a valid company, old payment date and repayment date.'));
     exit;
 }
@@ -58,13 +96,15 @@ if (!$company || mysqli_num_rows($company) === 0) {
     exit;
 }
 
-$monthYear = date('m/Y', strtotime($repayDate));
+$existingRepayDate = advanceRepayDate($dbconn, $companyId, $sourceDate);
+if ($existingRepayDate) {
+    echo json_encode(array('success' => false, 'message' => 'This advance payment date has already been repaid on ' . date('d-m-Y', strtotime($existingRepayDate)) . '.'));
+    exit;
+}
 
-$escapedMonthYear = mysqli_real_escape_string($dbconn, $monthYear);
-$masterResult = mysqli_query($dbconn, "SELECT iAdvancedMasterId FROM advanced_master WHERE iCompanyId=" . $companyId . " AND strMonthYear='" . $escapedMonthYear . "' AND isDelete=0 AND istatus=1 LIMIT 1");
-$master = $masterResult ? mysqli_fetch_assoc($masterResult) : null;
+$master = advanceRepayMaster($dbconn, $companyId, $monthYear);
 if (!$master) {
-    echo json_encode(array('success' => false, 'message' => 'Create an advanced master entry for the repayment month before submitting.'));
+    echo json_encode(array('success' => false, 'message' => 'Create an advanced master entry for ' . $monthYear . ' before repaying this advance.'));
     exit;
 }
 $advancedMasterId = (int) $master['iAdvancedMasterId'];

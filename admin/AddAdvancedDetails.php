@@ -114,9 +114,9 @@ $repayCompanies = mysqli_query($dbconn, "SELECT companymasterId, companyname FRO
                     <div class="modal-body">
                         <div class="form-group"><label for="repayCompanyId">Company</label><select id="repayCompanyId" class="form-control" required><option value="">Select company</option><?php while ($repayCompanies && $company = mysqli_fetch_assoc($repayCompanies)) { ?><option value="<?php echo (int) $company['companymasterId']; ?>"<?php echo (int) $company['companymasterId'] === (int) $advancedPeriod['iCompanyId'] ? ' selected' : ''; ?>><?php echo htmlspecialchars($company['companyname'], ENT_QUOTES, 'UTF-8'); ?></option><?php } ?></select></div>
                         <div class="form-group"><label for="repaySourceDate">Old Advance Payment Date</label><input type="date" id="repaySourceDate" class="form-control" required></div>
-                        <!-- <div class="form-group"><label for="repayDate">Repayment Date</label> -->
-                            <input type="hidden" id="repayDate" class="form-control" value="<?php echo date('Y-m-d'); ?>" required readonly>
-                        <!-- </div> -->
+                        <div class="form-group"><label for="repayDate">Repayment Date</label>
+                            <input type="date" id="repayDate" class="form-control" value="<?php echo date('Y-m-d'); ?>" required>
+                        </div> 
                         <button type="button" class="btn default" id="previewRepay">Preview Employees</button><div id="repayPreview" class="margin-top-20"></div><div id="repayMessage" class="margin-top-20"></div>
                     </div>
                     <div class="modal-footer"><button type="button" class="btn default" data-dismiss="modal">Cancel</button><button type="submit" class="btn blue">Repay</button></div>
