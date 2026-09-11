@@ -30,9 +30,43 @@ function advancedDetailsPrimaryKey($dbconn)
 }
 
 $action = isset($_POST['action']) ? $_POST['action'] : '';
-if (!in_array($action, array('ListAdvancedDetails', 'SearchAdvancedEmployees', 'UpdateAdvancedDetail', 'DeleteAdvancedDetail'), true)) {
+if (!in_array($action, array('ListAdvancedDetails', 'ResolveAdvancedMaster', 'SearchAdvancedEmployees', 'UpdateAdvancedDetail', 'DeleteAdvancedDetail'), true)) {
     http_response_code(400);
     exit('Invalid request.');
+}
+
+if ($action === 'ResolveAdvancedMaster') {
+    header('Content-Type: application/json');
+    $companyId = isset($_POST['companyId']) ? (int) $_POST['companyId'] : 0;
+    $month = isset($_POST['month']) && preg_match('/^(0[1-9]|1[0-2])$/', $_POST['month']) ? $_POST['month'] : '';
+    $year = isset($_POST['year']) && preg_match('/^[0-9]{4}$/', $_POST['year']) ? $_POST['year'] : '';
+
+    if ($companyId < 1) {
+        echo json_encode(array('success' => false, 'message' => 'Select a company and search before adding an advance.'));
+        exit;
+    }
+
+    if ($month !== '' && $year !== '') {
+        $monthYear = $month . '/' . $year;
+        $statement = mysqli_prepare($dbconn, "SELECT iAdvancedMasterId FROM advanced_master WHERE iCompanyId=? AND strMonthYear=? AND isDelete=0 AND istatus=1 ORDER BY fromdate DESC, iAdvancedMasterId DESC LIMIT 1");
+        mysqli_stmt_bind_param($statement, 'is', $companyId, $monthYear);
+    } else {
+        $statement = mysqli_prepare($dbconn, "SELECT iAdvancedMasterId FROM advanced_master WHERE iCompanyId=? AND isDelete=0 AND istatus=1 ORDER BY fromdate DESC, iAdvancedMasterId DESC LIMIT 1");
+        mysqli_stmt_bind_param($statement, 'i', $companyId);
+    }
+    mysqli_stmt_execute($statement);
+    $result = mysqli_stmt_get_result($statement);
+    $master = $result ? mysqli_fetch_assoc($result) : null;
+    mysqli_stmt_close($statement);
+
+    if (!$master) {
+        $period = $month !== '' && $year !== '' ? ' for ' . $month . '/' . $year : '';
+        echo json_encode(array('success' => false, 'message' => 'No active advanced master exists for the selected company' . $period . '. Create the advanced master first.'));
+        exit;
+    }
+
+    echo json_encode(array('success' => true, 'advancedId' => (int) $master['iAdvancedMasterId']));
+    exit;
 }
 
 $primaryKey = advancedDetailsPrimaryKey($dbconn);

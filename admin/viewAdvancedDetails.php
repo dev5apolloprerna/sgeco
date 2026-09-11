@@ -37,7 +37,7 @@ if ($_SESSION['AdminType'] != 1 && (!isset($rights['isAdvancedEntry']) || $right
                             <div class="portlet light">
                                 <div class="portlet-title">
                                     <div class="caption font-red-sunglo"><i class="icon-settings font-red-sunglo"></i><span class="caption-subject bold uppercase">List of Advanced Details</span></div>
-                                    <a class="btn blue pull-right" href="advancedmaster.php"><i class="fa fa-plus"></i> Add Advanced</a>
+                                    <a class="btn blue pull-right" id="addAdvancedButton" href="advancedmaster.php"><i class="fa fa-plus"></i> Add Advanced</a>
                                 </div>
                                 <div class="portlet-body form">
                                     <form id="advancedSearchForm" role="form">
@@ -135,6 +135,8 @@ if ($_SESSION['AdminType'] != 1 && (!isset($rights['isAdvancedEntry']) || $right
     </div>
     <?php include_once './footer.php'; ?>
     <script>
+        var advancedSearchApplied = false;
+
         function PageLoadData(page) {
             $('#loading').show();
             $.post('AjaxViewAdvancedDetails.php', {
@@ -157,9 +159,41 @@ if ($_SESSION['AdminType'] != 1 && (!isset($rights['isAdvancedEntry']) || $right
 
         $('#advancedSearchForm').on('submit', function(event) {
             event.preventDefault();
+            advancedSearchApplied = true;
             PageLoadData(1);
         });
 
+        $('#advancedSearchForm').on('input change', function() {
+            advancedSearchApplied = false;
+        });
+
+        $('#addAdvancedButton').on('click', function(event) {
+            var companyId = $('#companyId').val();
+            if (!advancedSearchApplied || !companyId) return;
+
+            event.preventDefault();
+            var button = $(this).addClass('disabled');
+            $('#loading').show();
+            $.post('AjaxViewAdvancedDetails.php', {
+                action: 'ResolveAdvancedMaster',
+                companyId: companyId,
+                month: $('#month').val(),
+                year: $('#year').val()
+            }, function(response) {
+                if (response.success) {
+                    window.location.href = 'AddAdvancedDetails.php?token=' + encodeURIComponent(response.advancedId);
+                    return;
+                }
+                $('#loading').hide();
+                button.removeClass('disabled');
+                $('#advancedDetailsList').html($('<div class="alert alert-warning"></div>').text(response.message));
+            }, 'json').fail(function(xhr) {
+                $('#loading').hide();
+                button.removeClass('disabled');
+                $('#advancedDetailsList').html($('<div class="alert alert-danger"></div>').text(xhr.responseText || 'Unable to open advanced entry.'));
+            });
+        });
+        
         function updateDateRange() {
             var month = $('#month').val();
             var year = $('#year').val();
