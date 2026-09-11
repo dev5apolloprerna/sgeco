@@ -16,30 +16,29 @@ function pfEsicReportData($dbconn, $month, $year)
     }
     $periodSql = mysqli_real_escape_string($dbconn, $period);
 
-    // This is a multi-company payment report, so paymentMaster/multicompany
-    // decide which paid employees and company groups belong in the report.
-    // The companies in each paid group are expanded through
-    // multiycompanysalarymaster; their salarydetails rows provide the requested
-    // company-wise days, rate, PF and ESIC breakdown.
-    echo $sql = "SELECT cm.companymasterId AS companyId, cm.companyname,
+    // A generated multi-company salary is sufficient for this report; it may
+    // not have a bank/cash paymentMaster row yet. Start with
+    // companysalarymaster/multicompany so newly generated salary months are
+    // visible, then expand the group's companies for the company-wise values.
+    $sql = "SELECT cm.companymasterId AS companyId, cm.companyname,
                    e.employeeId, e.emp_name, e.pfcode, e.uan,
                    COALESCE(SUM(sd.workingdays), 0) AS presentDays,
                    COALESCE(MAX(CONVERT(sd.skillrate, DECIMAL(12,2))), 0) AS wagesRate,
                    COALESCE(SUM(sd.pf), 0) AS pfAmount,
                    COALESCE(SUM(sd.esi), 0) AS esicAmount
-            FROM paymentMaster pm
-            INNER JOIN multicompany mc ON mc.iPaymentId=pm.iPaymentId
-                AND mc.iPaymentStatus=1 AND mc.isDelete=0 AND mc.istatus=1
+            FROM companysalarymaster csm
+            INNER JOIN multicompany mc ON mc.companysalarymasterId=csm.companysalarymasterId
+                AND mc.isDelete=0 AND mc.istatus=1
             INNER JOIN employee e ON e.employeeId=mc.emp_id AND e.isDelete=0
             INNER JOIN multiycompanysalarymaster msm
-                ON msm.companysalarymasterId=pm.iCompanySalaryMasterId AND msm.isDelete=0
+                ON msm.companysalarymasterId=csm.companysalarymasterId AND msm.isDelete=0
             INNER JOIN companymaster cm ON cm.companymasterId=msm.companymasterId AND cm.isDelete=0
-            INNER JOIN salarymaster sm ON sm.companymasterId=cm.companymasterId
-                AND sm.month=pm.salarymonth AND sm.isDelete=0 AND sm.istatus=1
-            INNER JOIN salarydetails sd ON sd.salaryId=sm.salarymasterId
+            LEFT JOIN salarymaster sm ON sm.companymasterId=cm.companymasterId
+                AND sm.month=csm.month AND sm.isDelete=0 AND sm.istatus=1
+            LEFT JOIN salarydetails sd ON sd.salaryId=sm.salarymasterId
                 AND sd.companyId=cm.companymasterId AND sd.emp_id=mc.emp_id
                 AND sd.isDelete=0 AND sd.istatus=1
-            WHERE pm.salarymonth='" . $periodSql . "' AND pm.isDelete=0 AND pm.iStatus=1
+            WHERE csm.month='" . $periodSql . "' AND csm.isDelete=0 AND csm.istatus=1
             GROUP BY cm.companymasterId, cm.companyname, e.employeeId, e.emp_name, e.pfcode, e.uan
             ORDER BY cm.companyname, e.emp_name, e.employeeId";
     $result = mysqli_query($dbconn, $sql);
