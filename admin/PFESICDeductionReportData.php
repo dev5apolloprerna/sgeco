@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/NewPFChallanReportData.php';
 
 function pfEsicReportPeriod($month, $year)
 {
@@ -14,78 +15,45 @@ function pfEsicReportData($dbconn, $month, $year)
     if ($period === null) {
         return array('period' => '', 'companies' => array(), 'employees' => array(), 'permanentEmployees' => array(), 'otherEmployees' => array());
     }
+    // Use the PF Challan data source as the canonical employee order, employee
+    // set, company set, present days and wage rate. This keeps both screens in
+    // lockstep while this query adds the deduction-only PF and ESIC amounts.
+    $challan = getNewPFChallanReportData($dbconn, $month, $year);
     $periodSql = mysqli_real_escape_string($dbconn, $period);
 
-    // A generated multi-company salary is sufficient for this report; it may
-    // not have a bank/cash paymentMaster row yet. Start with
-    // companysalarymaster/multicompany so newly generated salary months are
-    // visible, then expand the group's companies for the company-wise values.
-    $sql = "SELECT cm.companymasterId AS companyId, cm.companyname,
-                   e.employeeId, e.emp_name, e.employeecode, e.isPermanent, e.pfcode, e.uan,
-                   COALESCE(SUM(sd.workingdays), 0) AS presentDays,
-                   COALESCE(MAX(CONVERT(sd.skillrate, DECIMAL(12,2))), 0) AS wagesRate,
+     $sql = "SELECT sd.emp_id AS employeeId, sm.companymasterId AS companyId,
                    COALESCE(SUM(sd.pf), 0) AS pfAmount,
                    COALESCE(SUM(sd.esi), 0) AS esicAmount
-            FROM companysalarymaster csm
-            INNER JOIN multicompany mc ON mc.companysalarymasterId=csm.companysalarymasterId
-                AND mc.isDelete=0 AND mc.istatus=1
-            INNER JOIN employee e ON e.employeeId=mc.emp_id AND e.isDelete=0
-            INNER JOIN multiycompanysalarymaster msm
-                ON msm.companysalarymasterId=csm.companysalarymasterId AND msm.isDelete=0
-            INNER JOIN companymaster cm ON cm.companymasterId=msm.companymasterId AND cm.isDelete=0
-            LEFT JOIN salarymaster sm ON sm.companymasterId=cm.companymasterId
-                AND sm.month=csm.month AND sm.isDelete=0 AND sm.istatus=1
-            LEFT JOIN salarydetails sd ON sd.salaryId=sm.salarymasterId
-                AND sd.companyId=cm.companymasterId AND sd.emp_id=mc.emp_id
-                AND sd.isDelete=0 AND sd.istatus=1
-            WHERE csm.month='" . $periodSql . "' AND csm.isDelete=0 AND csm.istatus=1
-            GROUP BY cm.companymasterId, cm.companyname, e.employeeId, e.emp_name,
-                e.employeecode, e.isPermanent, e.pfcode, e.uan
-            ORDER BY cm.companyname, e.isPermanent DESC, e.employeecode ASC, e.employeeId ASC";
+            FROM salarydetails sd
+            INNER JOIN salarymaster sm ON sm.salarymasterId=sd.salaryId
+            INNER JOIN employee e ON e.employeeId=sd.emp_id
+            WHERE sm.month='" . $periodSql . "' AND sm.isDelete=0 AND sm.istatus=1
+                AND sd.isDelete=0 AND sd.istatus=1 AND sd.workingdays > 0
+                AND (e.isPermanent=0 OR (e.isPermanent=1 AND e.isDelete=0 AND e.istatus=1))
+            GROUP BY sd.emp_id, sm.companymasterId";
     $result = mysqli_query($dbconn, $sql);
     if (!$result) {
         throw new RuntimeException('Unable to load PF & ESIC deduction report: ' . mysqli_error($dbconn));
     }
 
-    $companies = array();
+    $companies = $challan['companies'];
     $employees = array();
-    // Match the New PF Challan report by keeping every active permanent
-    // employee in the first list, even when the selected month has no detail
-    // row for that employee.
-    $permanentResult = mysqli_query($dbconn, "SELECT employeeId, emp_name, employeecode,
-            isPermanent, pfcode, uan
-        FROM employee
-        WHERE isPermanent=1 AND isDelete=0 AND istatus=1
-        ORDER BY employeecode ASC, employeeId ASC");
-    if (!$permanentResult) {
-        throw new RuntimeException('Unable to load permanent employees: ' . mysqli_error($dbconn));
-    }
-    while ($permanent = mysqli_fetch_assoc($permanentResult)) {
-        $employeeId = (int) $permanent['employeeId'];
-        $employees[$employeeId] = pfEsicReportEmployee($permanent);
+    foreach (array_merge($challan['pfEmployees'], $challan['aadharEmployees']) as $challanEmployee) {
+        $employeeId = $challanEmployee['employeeId'];
+        $employees[$employeeId] = pfEsicReportEmployee($challanEmployee);
     }
     while ($row = mysqli_fetch_assoc($result)) {
         $companyId = (int) $row['companyId'];
         $employeeId = (int) $row['employeeId'];
-        $companies[$companyId] = $row['companyname'];
         if (!isset($employees[$employeeId])) {
-            $employees[$employeeId] = pfEsicReportEmployee($row);
+            continue;
         }
-        $values = array(
-            'presentDays' => (float) $row['presentDays'],
-            'wagesRate' => (float) $row['wagesRate'],
-            'pfAmount' => (float) $row['pfAmount'],
-            'esicAmount' => (float) $row['esicAmount']
-        );
-        $employees[$employeeId]['companies'][$companyId] = $values;
-        $employees[$employeeId]['totalDays'] += $values['presentDays'];
-        $employees[$employeeId]['totalPf'] += $values['pfAmount'];
-        $employees[$employeeId]['totalEsic'] += $values['esicAmount'];
+        $employees[$employeeId]['companies'][$companyId]['pfAmount'] = (float) $row['pfAmount'];
+        $employees[$employeeId]['companies'][$companyId]['esicAmount'] = (float) $row['esicAmount'];
+        $employees[$employeeId]['totalPf'] += (float) $row['pfAmount'];
+        $employees[$employeeId]['totalEsic'] += (float) $row['esicAmount'];
     }
-    uasort($employees, function ($a, $b) {
-        $codeComparison = strcmp((string) $a['employeeCode'], (string) $b['employeeCode']);
-        return $codeComparison !== 0 ? $codeComparison : $a['employeeId'] - $b['employeeId'];
-    });
+
     $permanentEmployees = array();
     $otherEmployees = array();
     foreach ($employees as $employeeId => $employee) {
@@ -106,15 +74,26 @@ function pfEsicReportData($dbconn, $month, $year)
 
 function pfEsicReportEmployee($employee)
 {
+    $companies = array();
+    $totalDays = 0;
+    foreach ($employee['companies'] as $companyId => $values) {
+        $companies[$companyId] = array(
+            'presentDays' => $values['presentDays'],
+            'wagesRate' => $values['wages'],
+            'pfAmount' => 0,
+            'esicAmount' => 0
+        );
+        $totalDays += (float) $values['presentDays'];
+    }
     return array(
         'employeeId' => (int) $employee['employeeId'],
-        'name' => $employee['emp_name'],
-        'employeeCode' => $employee['employeecode'],
+        'name' => $employee['name'],
+        'employeeCode' => $employee['pfNo'],
         'isPermanent' => (int) $employee['isPermanent'],
-        'pfAccount' => $employee['pfcode'],
+        'pfAccount' => $employee['pfNo'],
         'uan' => $employee['uan'],
-        'companies' => array(),
-        'totalDays' => 0,
+        'companies' => $companies,
+        'totalDays' => $totalDays,
         'totalPf' => 0,
         'totalEsic' => 0
     );

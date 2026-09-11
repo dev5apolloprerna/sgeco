@@ -150,6 +150,7 @@ function newPFChallanEmployee($employee, $listType)
         'employeeId' => (int) $employee['employeeId'],
         'name' => ucwords(strtolower($employee['emp_name'])),
         'listType' => $listType,
+        'isPermanent' => isset($employee['isPermanent']) ? (int) $employee['isPermanent'] : 1,
         // The existing PF Challan labels the employee code as PF No.
         'pfNo' => $employee['employeecode'],
         'uan' => $employee['uan'],
