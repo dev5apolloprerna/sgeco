@@ -20,6 +20,7 @@ if (!$advancedResult || mysqli_num_rows($advancedResult) === 0) {
     exit('Advanced date range not found.');
 }
 $advancedPeriod = mysqli_fetch_assoc($advancedResult);
+$repayCompanies = mysqli_query($dbconn, "SELECT companymasterId, companyname FROM companymaster WHERE isDelete=0 AND istatus=1 ORDER BY companyname");
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -66,6 +67,7 @@ $advancedPeriod = mysqli_fetch_assoc($advancedResult);
                                     <div class="portlet-title">
                                         <div class="caption font-red-sunglo"><i class="icon-settings font-red-sunglo"></i><span class="caption-subject bold uppercase"> Add Advanced Details</span></div>
                                         <a class="btn blue pull-right" href="advancedmaster.php">Back</a>
+                                        <button type="button" class="btn green pull-right" data-toggle="modal" data-target="#advanceRepayModal"><i class="fa fa-repeat"></i> Repay</button>
                                     </div>
                                     <div class="portlet-body form">
                                         <div class="alert alert-info">
@@ -103,11 +105,46 @@ $advancedPeriod = mysqli_fetch_assoc($advancedResult);
             </div>
         </div>
     </div>
+     <div class="modal fade" id="advanceRepayModal" tabindex="-1" role="dialog" aria-labelledby="advanceRepayTitle">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form id="advanceRepayForm">
+                    <div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="advanceRepayTitle">Advance Repay</h4></div>
+                    <div class="modal-body">
+                        <div class="form-group"><label for="repayCompanyId">Company</label><select id="repayCompanyId" class="form-control" required><option value="">Select company</option><?php while ($repayCompanies && $company = mysqli_fetch_assoc($repayCompanies)) { ?><option value="<?php echo (int) $company['companymasterId']; ?>"<?php echo (int) $company['companymasterId'] === (int) $advancedPeriod['iCompanyId'] ? ' selected' : ''; ?>><?php echo htmlspecialchars($company['companyname'], ENT_QUOTES, 'UTF-8'); ?></option><?php } ?></select></div>
+                        <div class="form-group"><label for="repaySourceDate">Old Advance Payment Date</label><input type="date" id="repaySourceDate" class="form-control" required></div>
+                        <!-- <div class="form-group"><label for="repayDate">Repayment Date</label> -->
+                            <input type="hidden" id="repayDate" class="form-control" value="<?php echo date('Y-m-d'); ?>" required readonly>
+                        <!-- </div> -->
+                        <button type="button" class="btn default" id="previewRepay">Preview Employees</button><div id="repayPreview" class="margin-top-20"></div><div id="repayMessage" class="margin-top-20"></div>
+                    </div>
+                    <div class="modal-footer"><button type="button" class="btn default" data-dismiss="modal">Cancel</button><button type="submit" class="btn blue">Repay</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
     <?php include_once './footer.php'; ?>
     <script>
         function showMessage(type, text) {
             $('#message').html('<div class="alert alert-' + type + '"></div>').find('.alert').text(text);
         }
+        $('#previewRepay').click(function() {
+            $('#repayPreview').html('<div class="text-center">Loading...</div>');
+            $.post('<?php echo $web_url; ?>admin/AjaxAdvanceRepay.php', {
+                action: 'Preview', companyId: $('#repayCompanyId').val(), sourceDate: $('#repaySourceDate').val()
+            }, function(html) { $('#repayPreview').html(html); });
+        });
+        $('#advanceRepayForm').submit(function(event) {
+            event.preventDefault();
+            $('#loading').show();
+            $.post('<?php echo $web_url; ?>admin/AjaxAdvanceRepay.php', {
+                action: 'Add', companyId: $('#repayCompanyId').val(), sourceDate: $('#repaySourceDate').val(), repayDate: $('#repayDate').val()
+            }, function(response) {
+                $('#loading').hide();
+                $('#repayMessage').html($('<div>').addClass('alert ' + (response.success ? 'alert-success' : 'alert-danger')).text(response.message));
+                if (response.success) setTimeout(function() { window.location.href = 'viewAdvancedDetails.php'; }, 700);
+            }, 'json');
+        });
         $('#searchForm').on('submit', function(event) {
             event.preventDefault();
             if (!this.checkValidity()) {

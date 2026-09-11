@@ -44,7 +44,7 @@ include 'IsLogin.php';
         .pf-esic-report .report-total {
             font-weight: bold
         }
-        
+
         .pf-esic-section {
             margin-bottom: 26px
         }
@@ -69,8 +69,9 @@ include 'IsLogin.php';
                                 <div class="form-group col-md-3"><label>Month</label><select class="form-control" id="month" required>
                                         <option value="">Select Month</option><?php for ($m = 1; $m <= 12; $m++) echo '<option value="' . sprintf('%02d', $m) . '">' . date('F', mktime(0, 0, 0, $m, 1)) . '</option>'; ?>
                                     </select></div>
-                                <div class="form-group col-md-3"><label>Year</label><select class="form-control" id="year" required><?php for ($y = date('Y') - 5; $y <= date('Y') + 4; $y++) echo '<option value="' . $y . '"' . ($y == date('Y') ? ' selected' : '') . '>' . $y . '</option>'; ?></select></div>
-                                <div class="form-group col-md-6" style="padding-top:25px"><button class="btn blue" type="submit"><i class="fa fa-search"></i> Search</button> <button class="btn green" id="excel" type="button" disabled><i class="fa fa-file-excel-o"></i> Export Excel</button></div>
+                                <div class="form-group col-md-2"><label>Year</label><select class="form-control" id="year" required><?php for ($y = date('Y') - 5; $y <= date('Y') + 4; $y++) echo '<option value="' . $y . '"' . ($y == date('Y') ? ' selected' : '') . '>' . $y . '</option>'; ?></select></div>
+                                <div class="form-group col-md-3"><label>Employee</label><input class="form-control" id="employee" type="search" placeholder="Name / PF / UAN / ESIC / Aadhar"></div>
+                                <div class="form-group col-md-4" style="padding-top:25px"><button class="btn blue" type="submit"><i class="fa fa-search"></i> Search</button> <button class="btn green" id="excel" type="button" disabled><i class="fa fa-file-excel-o"></i> Export Excel</button> <button class="btn red" id="pdf" type="button" disabled><i class="fa fa-file-pdf-o"></i> Export PDF</button></div>
                             </form>
                             <div id="report"></div>
                         </div>
@@ -89,10 +90,11 @@ include 'IsLogin.php';
                 $('#report').html('<div class="text-center"><i class="fa fa-spinner fa-spin fa-2x"></i></div>');
                 $.post('AjaxPFESICDeductionReport.php', {
                     month: $('#month').val(),
-                    year: $('#year').val()
+                    year: $('#year').val(),
+                    employee: $('#employee').val()
                 }).done(function(html) {
                     $('#report').html(html);
-                    $('#excel').prop('disabled', !$('#report table').length)
+                    $('#excel, #pdf').prop('disabled', !$('#report table').length)
                 }).fail(function(xhr) {
                     $('#report').html(xhr.responseText || '<div class="alert alert-danger">Unable to load report.</div>')
                 }).always(function() {
@@ -100,8 +102,14 @@ include 'IsLogin.php';
                 })
             });
             $('#excel').click(function() {
-                window.open('exportPFESICDeductionReport.php?month=' + encodeURIComponent($('#month').val()) + '&year=' + encodeURIComponent($('#year').val()), '_blank')
-            })
+                window.open(exportUrl('exportPFESICDeductionReport.php'), '_blank')
+            });
+            $('#pdf').click(function() {
+                window.open(exportUrl('exportPFESICDeductionReportPDF.php'), '_blank')
+            });
+            function exportUrl(file) {
+                return file + '?month=' + encodeURIComponent($('#month').val()) + '&year=' + encodeURIComponent($('#year').val()) + '&employee=' + encodeURIComponent($('#employee').val())
+            }
         })();
     </script>
 </body>

@@ -6,7 +6,12 @@ include 'IsLogin.php';
 require_once 'PFESICDeductionReportData.php';
 require_once '../vendor/autoload.php';
 
-$report = pfEsicReportData($dbconn, isset($_GET['month']) ? $_GET['month'] : '', isset($_GET['year']) ? $_GET['year'] : '');
+$report = pfEsicReportData(
+    $dbconn,
+    isset($_GET['month']) ? $_GET['month'] : '',
+    isset($_GET['year']) ? $_GET['year'] : '',
+    isset($_GET['employee']) ? $_GET['employee'] : ''
+);
 if (!$report['companies'] || !$report['employees']) {
     http_response_code(404);
     exit('No paid salary data found for the selected month and year.');

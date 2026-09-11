@@ -9,7 +9,7 @@ function pfEsicReportPeriod($month, $year)
         ? $month . '/' . $year : null;
 }
 
-function pfEsicReportData($dbconn, $month, $year)
+function pfEsicReportData($dbconn, $month, $year, $employeeSearch = '')
 {
     $period = pfEsicReportPeriod($month, $year);
     if ($period === null) {
@@ -56,7 +56,12 @@ function pfEsicReportData($dbconn, $month, $year)
 
     $pfEmployees = array();
     $aadharEmployees = array();
+    $filteredEmployees = array();
     foreach ($employees as $employeeId => $employee) {
+        if (!pfEsicReportEmployeeMatches($employee, $employeeSearch)) {
+            continue;
+        }
+        $filteredEmployees[$employeeId] = $employee;
         if ($employee['listType'] === 'aadhar') {
             $aadharEmployees[$employeeId] = $employee;
         } else {
@@ -66,11 +71,24 @@ function pfEsicReportData($dbconn, $month, $year)
     return array(
         'period' => $period,
         'companies' => $companies,
-        'employees' => $employees,
+        'employees' => $filteredEmployees,
         // Keep the same two lists and insertion order as New PF Challan.
         'pfEmployees' => $pfEmployees,
         'aadharEmployees' => $aadharEmployees
     );
+}
+
+function pfEsicReportEmployeeMatches($employee, $employeeSearch)
+{
+    $employeeSearch = trim((string) $employeeSearch);
+    if ($employeeSearch === '') {
+        return true;
+    }
+    $haystack = implode(' ', array(
+        $employee['name'], $employee['employeeCode'], $employee['pfAccount'],
+        $employee['uan'], $employee['esicNo'], $employee['fatherName'], $employee['aadharNo']
+    ));
+    return stripos($haystack, $employeeSearch) !== false;
 }
 
 function pfEsicReportEmployee($employee)
