@@ -2,7 +2,7 @@
 $MasterEntry = array("State.php", "City.php", "Location.php", "ExcelFormMaster.php", "Category.php");
 $salary = array("salarydetails.php", "salarymaster.php");
 $report = array("paypayment.php", "paidpayment.php");
-$reportHistory = array("MultiCompanyPaymentHistory.php", "CompanyPaymentHistory.php", "EmployeePaymentHistory.php");
+$reportHistory = array("MultiCompanyPaymentHistory.php", "CompanyPaymentHistory.php", "EmployeePaymentHistory.php", "PFESICDeductionReport.php");
 $advanced = array("advancedmaster.php", "AddAdvancedDetails.php", 'viewAdvancedDetails.php', 'advancedPaymentReport.php', 'summaryAdvancePayment.php');
 ?>
 <div class="page-header">
@@ -418,6 +418,9 @@ $advanced = array("advancedmaster.php", "AddAdvancedDetails.php", 'viewAdvancedD
                                     ?>
                                     <li>
                                         <a href="<?php echo $web_url; ?>admin/EmployeePaymentHistory.php">Employee Payment History</a>
+                                    </li>
+                                    <li>
+                                        <a href="<?php echo $web_url; ?>admin/PFESICDeductionReport.php">PF &amp; ESIC Deduction Report</a>
                                     </li>
                                 </ul>
                            </li>
