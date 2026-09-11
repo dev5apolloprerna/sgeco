@@ -101,7 +101,7 @@ function pfEsicReportHtml($report)
     $html .= '<tr class="report-title"><th colspan="' . (4 + count($report['companies']) * 4 + 3) . '">PF &amp; ESIC Deduction Report</th></tr>';
     $html .= '<tr><th colspan="' . (4 + count($report['companies']) * 4 + 3) . '">Month : ' . $e($date ? $date->format('M-Y') : $report['period']) . '</th></tr>';
     $html .= '<tr><th rowspan="2">Sr.<br>No.</th><th rowspan="2">Name</th><th rowspan="2">PF A/C<br>No.</th><th rowspan="2">UAN No.</th>';
-    foreach ($report['companies'] as $name) $html .= '<th colspan="4" class="company-heading">Company Name {' . $e($name) . '}</th>';
+        foreach ($report['companies'] as $name) $html .= '<th colspan="4" class="company-heading">' . $e($name) . '</th>';
     $html .= '<th colspan="3" class="total-heading">Total Deduction</th></tr><tr>';
     foreach ($report['companies'] as $unused) $html .= '<th>Present<br>Days</th><th>Wages<br>Rate</th><th>PF Amt.</th><th>ESIC Amt.</th>';
     $html .= '<th class="total-heading">Present<br>Days</th><th class="total-heading">PF Amt.</th><th class="total-heading">ESIC Amt.</th></tr></thead><tbody>';

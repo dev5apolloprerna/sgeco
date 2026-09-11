@@ -28,7 +28,7 @@ $column = 5;
 foreach ($report['companies'] as $name) {
     $start = PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($column);
     $end = PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($column + 3);
-    $sheet->mergeCells($start . '3:' . $end . '3')->setCellValue($start . '3', 'Company Name {' . $name . '}');
+    $sheet->mergeCells($start . '3:' . $end . '3')->setCellValue($start . '3', $name);
     foreach (array('Present Days', 'Wages Rate', 'PF Amt.', 'ESIC Amt.') as $label) $sheet->setCellValueByColumnAndRow($column++, 4, $label);
 }
 $totalStart = PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($column);
