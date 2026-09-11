@@ -130,7 +130,28 @@ function pfEsicReportEscape($value)
 
 function pfEsicReportNumber($value, $money = false)
 {
-    return $money ? number_format((float) $value, 2, '.', '') : rtrim(rtrim(number_format((float) $value, 2, '.', ''), '0'), '.');
+    $value = (float) $value;
+    return abs($value) < 0.00001 ? '' : number_format($value, 2, '.', '');
+}
+
+function pfEsicReportTotals($employees, $companies)
+{
+    $totals = array('companies' => array(), 'totalDays' => 0, 'totalPf' => 0, 'totalEsic' => 0);
+    foreach ($companies as $companyId => $unused) {
+        $totals['companies'][$companyId] = array('presentDays' => 0, 'wagesRate' => 0, 'pfAmount' => 0, 'esicAmount' => 0);
+    }
+    foreach ($employees as $employee) {
+        foreach ($companies as $companyId => $unused) {
+            if (!isset($employee['companies'][$companyId])) continue;
+            foreach ($totals['companies'][$companyId] as $key => $zero) {
+                $totals['companies'][$companyId][$key] += (float) $employee['companies'][$companyId][$key];
+            }
+        }
+        $totals['totalDays'] += (float) $employee['totalDays'];
+        $totals['totalPf'] += (float) $employee['totalPf'];
+        $totals['totalEsic'] += (float) $employee['totalEsic'];
+    }
+    return $totals;
 }
 
 function pfEsicReportHtml($report)
@@ -178,5 +199,13 @@ function pfEsicReportSectionHtml($report, $employees, $sectionTitle, $date, $isA
         }
         $html .= '<td class="report-total">' . pfEsicReportNumber($employee['totalDays']) . '</td><td class="report-total">' . pfEsicReportNumber($employee['totalPf'], true) . '</td><td class="report-total">' . pfEsicReportNumber($employee['totalEsic'], true) . '</td></tr>';
     }
+    $totals = pfEsicReportTotals($employees, $report['companies']);
+    $html .= '<tr class="report-total total-heading"><td colspan="6">Total</td>';
+    foreach ($totals['companies'] as $values) {
+        foreach (array('presentDays', 'wagesRate', 'pfAmount', 'esicAmount') as $key) {
+            $html .= '<td>' . pfEsicReportNumber($values[$key]) . '</td>';
+        }
+    }
+    $html .= '<td>' . pfEsicReportNumber($totals['totalDays']) . '</td><td>' . pfEsicReportNumber($totals['totalPf']) . '</td><td>' . pfEsicReportNumber($totals['totalEsic']) . '</td></tr>';
     return $html . '</tbody></table></div>';
 }

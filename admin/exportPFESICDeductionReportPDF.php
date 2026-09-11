@@ -75,6 +75,17 @@ function pfEsicPdfSection($report, $employees, $sectionTitle, $companies, $part,
         }
         $html .= '</tr>';
     }
+    $totals = pfEsicReportTotals($employees, $companies);
+    $html .= '<tr nobr="true"><td class="total" colspan="6">Total</td>';
+    foreach ($totals['companies'] as $values) {
+        foreach (array('presentDays', 'wagesRate', 'pfAmount', 'esicAmount') as $key) {
+            $html .= '<td class="total" width="4%">' . pfEsicReportNumber($values[$key]) . '</td>';
+        }
+    }
+    foreach (array($totals['totalDays'], $totals['totalPf'], $totals['totalEsic']) as $value) {
+        $html .= '<td class="total" width="' . ($totalWidth / 3) . '%">' . pfEsicReportNumber($value) . '</td>';
+    }
+    $html .= '</tr>';
     return $html . '</tbody></table>';
 }
 

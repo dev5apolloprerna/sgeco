@@ -61,7 +61,26 @@ $writeEmployees = function ($employees, $sectionTitle, $isAadhar) use (&$rowNumb
             array_push($values, $v['presentDays'], $v['wagesRate'], $v['pfAmount'], $v['esicAmount']);
         }
         array_push($values, $employee['totalDays'], $employee['totalPf'], $employee['totalEsic']);
-        foreach ($values as $index => $value) $sheet->setCellValueByColumnAndRow($index + 1, $rowNumber, $value);
+        foreach ($values as $index => $value) {
+            $isNumericColumn = $index >= 6;
+            $sheet->setCellValueByColumnAndRow($index + 1, $rowNumber, $isNumericColumn && abs((float) $value) < 0.00001 ? null : $value);
+            if ($isNumericColumn) $sheet->getStyleByColumnAndRow($index + 1, $rowNumber)->getNumberFormat()->setFormatCode('0.00');
+        }
+        $totals = pfEsicReportTotals($employees, $report['companies']);
+        $sheet->mergeCellsByColumnAndRow(1, $rowNumber, 6, $rowNumber)->setCellValueByColumnAndRow(1, $rowNumber, 'Total');
+        $totalValues = array();
+        foreach ($totals['companies'] as $values) {
+            foreach (array('presentDays', 'wagesRate', 'pfAmount', 'esicAmount') as $key) $totalValues[] = $values[$key];
+        }
+        array_push($totalValues, $totals['totalDays'], $totals['totalPf'], $totals['totalEsic']);
+        foreach ($totalValues as $index => $value) {
+            $column = $index + 7;
+            $sheet->setCellValueByColumnAndRow($column, $rowNumber, abs((float) $value) < 0.00001 ? null : $value);
+            $sheet->getStyleByColumnAndRow($column, $rowNumber)->getNumberFormat()->setFormatCode('0.00');
+        }
+        $sheet->getStyle('A' . $rowNumber . ':' . $lastColumn . $rowNumber)->getFont()->setBold(true);
+        $sheet->getStyle('A' . $rowNumber . ':' . $lastColumn . $rowNumber)->getFill()->setFillType('solid')->getStartColor()->setRGB('9FD8F6');
+        $rowNumber++;
         $rowNumber++;
     }
     $rowNumber++;
