@@ -25,9 +25,12 @@ function pfEsicPdfSection($report, $employees, $sectionTitle, $companies, $part,
     $identity = $isAadhar
         ? array('Name as per Aadhar', 'Father Name', 'Aadhar No.', 'ESIC No.', 'D.O.B')
         : array('Name', 'PF A/C No.', 'UAN No.', 'ESIC No.', 'D.O.B');
-    $widths = array(3, 11, 7, 8, 7, 6);
-    $companyWidth = 16;
-    $totalWidth = 10;
+    $unitScale = 100 / (52 + count($companies) * 16);
+    $widths = array_map(function ($width) use ($unitScale) {
+        return $width * $unitScale;
+    }, array(3, 11, 7, 8, 7, 6));
+    $companyWidth = 16 * $unitScale;
+    $totalWidth = 10 * $unitScale;
     $html = '<style>table{border-collapse:collapse;table-layout:fixed;width:100%}th,td{border:0.2mm solid #333;text-align:center;vertical-align:middle;padding:2px;font-size:6.2pt}th{font-weight:bold}.title{background-color:#c9ffff;font-size:11pt}.company{background-color:#d9e2f3}.total{background-color:#9fd8f6;font-weight:bold}.name{text-align:left}</style>';
     $html .= '<table border="1" cellpadding="2"><thead>';
     $columnCount = 6 + count($companies) * 5 + 4;
@@ -91,7 +94,9 @@ function pfEsicPdfSection($report, $employees, $sectionTitle, $companies, $part,
 while (ob_get_level() > 0) {
     ob_end_clean();
 }
-$pdf = new TCPDF('L', PDF_UNIT, 'LEGAL', true, 'UTF-8', false);
+$layoutUnits = 52 + count($report['companies']) * 16;
+$pageWidth = max(355.6, $layoutUnits * 3.5 + 10);
+$pdf = new TCPDF('L', PDF_UNIT, array($pageWidth, 215.9), true, 'UTF-8', false);
 $pdf->SetCreator('SGECO');
 $pdf->SetTitle('PF & ESIC Deduction Report');
 $pdf->setPrintHeader(false);
@@ -100,10 +105,10 @@ $pdf->SetMargins(5, 5, 5);
 $pdf->SetAutoPageBreak(true, 5);
 $pdf->SetFont('helvetica', '', 6.2);
 
-// Three companies plus identity and total columns fit within legal landscape.
-// Additional companies are rendered in horizontal continuation parts so no
-// dynamically generated company columns can run beyond the printable page.
-$companyParts = array_chunk($report['companies'], 3, true);
+// Keep every company in one wide table. Splitting the companies into separate
+// parts repeated the complete employee list for every part and made entries
+// appear duplicated in the PDF.
+$companyParts = array($report['companies']);
 $sections = array(
     array($report['pfEmployees'], 'PF Employees', false),
     array($report['aadharEmployees'], 'Aadhar Employees', true)
@@ -113,7 +118,7 @@ foreach ($sections as $section) {
         continue;
     }
     foreach ($companyParts as $partIndex => $companies) {
-        $pdf->AddPage('L', 'LEGAL');
+        $pdf->AddPage('L', array($pageWidth, 215.9));
         $pdf->writeHTML(
             pfEsicPdfSection($report, $section[0], $section[1], $companies, $partIndex + 1, count($companyParts), $section[2]),
             true,
