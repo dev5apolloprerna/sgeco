@@ -44,6 +44,10 @@ include 'IsLogin.php';
         .pf-esic-report .report-total {
             font-weight: bold
         }
+        
+        .pf-esic-section {
+            margin-bottom: 26px
+        }
     </style>
 </head>
 
