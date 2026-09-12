@@ -75,6 +75,14 @@ function getFormXIXSlipData(array $employees, $salaryMonth, $companyName, array 
     foreach ($employees as $employee) {
         // $advance = getEmployeeCompanyReportAdvance($advances, $employee['employeeId']);
         $advance = getSalaryReportAdvance($employee, $advances);
+        // Some older salary rows contain a whole-number holiday payment even
+        // when the daily skill rate has paise. Rebuild the displayed amount
+        // from the persisted rate and holiday count so both PDF and Excel keep
+        // the exact two-decimal value (for example, 512.50 instead of 513.00).
+        $nationalHolidayPayment = round(
+            (float) $employee['skillrate'] * (float) $employee['iNoOfNatioanHoliday'],
+            2
+        );
         // $fatherName = formXIXValue($employee['strFatherName']);
         $slips[] = array(
             'serial' => formXIXValue($employee['report_serial']),
@@ -97,7 +105,7 @@ function getFormXIXSlipData(array $employees, $salaryMonth, $companyName, array 
                 0,
                 $employee['iBonusAmt'],
                 $employee['iLeaveAmt'],
-                $employee['national_holiday_payment']
+                $nationalHolidayPayment //$employee['national_holiday_payment']
             ),
             'deductions' => array(
                 $employee['pt'],

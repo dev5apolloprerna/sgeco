@@ -48,7 +48,7 @@ function formXIXBuildWorksheet($sheet, array $slip, $title)
     $sheet->mergeCells('C7:G7');
     $sheet->setCellValue('A6', 'Nature and Location of Work :');
     $sheet->setCellValue('C6', $slip['company']);
-    $sheet->setCellValue('C7', '0');
+    // $sheet->setCellValue('C7', '0');
     $sheet->setCellValue('A8', 'Head');
     $sheet->setCellValue('B8', 'Wages');
     $sheet->mergeCells('C8:D8');

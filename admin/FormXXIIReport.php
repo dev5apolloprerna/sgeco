@@ -144,7 +144,7 @@ function renderFormXXIIHtml(array $employees, $salaryMonth, $companyName)
         };
         $lastDate = formXXIIFormatDate($employee['last_advance_date']);
         $wageTotal = (float) $employee['workingdays'] * (float) $employee['wage_rate'];
-        $wages = 'Rs. ' . formXXIIFormatNumber($wageTotal) . '/-';
+        $wages = 'Monthly / <br> Rs. ' . formXXIIFormatNumber($wageTotal) . '/-';// $wages = 'Rs. ' . formXXIIFormatNumber($wageTotal) . '/-';
         $advance = $lastDate === '' ? '' : $lastDate . '<br>Rs. '
             . formXXIIFormatNumber($employee['advance_total']) . '/-';
         $instalments = '';
