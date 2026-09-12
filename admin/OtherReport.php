@@ -289,7 +289,8 @@ include('IsLogin.php');
                 'form-xxiii': 'exportFormXXIIIReportExcel.php',
                 'form-xix': 'exportFormXIXReportExcel.php',
                 'form-bonus-c': 'exportBonusFormCReportExcel.php',
-                'form-viii': 'exportFormVIIIReportExcel.php',
+                //'form-viii': 'exportFormVIIIReportExcel.php',
+                'form-viii': 'exportFormVIIIReportWord.php',
                 'form-xii': 'exportFormXIIReportExcel.php',
             };
             var reportUrl = reportUrls[$('#Report').val()];
