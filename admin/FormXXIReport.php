@@ -22,7 +22,7 @@ function getFormXXIEmployees($dbconn, $companyId, $salaryMonth)
               AND salarydetails.istatus = '1'
               AND salarydetails.workingdays > 0
             ORDER BY employee.emp_name ASC, salarydetails.salarydetailsId ASC";
-
+    
     $result = mysqli_query($dbconn, $sql);
     if ($result === false) {
         throw new RuntimeException('Unable to retrieve Form XXI employees.');
@@ -92,7 +92,11 @@ function renderFormXXIHtml(array $employees, $salaryMonth, $companyName)
         throw new RuntimeException('The Form XXI template could not be loaded.');
     }
 
-    if (!preg_match('/(<section class="form-page">.*?<tbody>)(.*?)(<\/tbody>.*?<\/section>)/s', $template, $matches)) {
+    // Anchor the body match after the real table header. The supplied template
+    // also contains a commented-out `<tbody>` tag; matching the first tbody in
+    // the section placed every generated employee row inside that HTML comment,
+    // so the browser displayed only the headings.
+    if (!preg_match('/(<section class="form-page">.*?<\/thead>\s*<tbody>)(.*?)(<\/tbody>.*?<\/section>)/s', $template, $matches)) {
         throw new RuntimeException('The Form XXI template has an unexpected format.');
     }
 
