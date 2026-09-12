@@ -139,7 +139,8 @@ include('IsLogin.php');
                                                 </div> -->
                                             <div class="col-md-4">
                                                 <a href="#" class="btn blue margin-bottom-20" id="clickbutton" onclick="PageLoadData(1);">Search</a>
-                                                <a class="m-portlet__nav-link btn btn-success margin-bottom-20" onclick="exporttoexcel();"><i class="fa fa-file-excel-o"></i>&nbsp; Export Excel</a>
+                                                <!-- <a class="m-portlet__nav-link btn btn-success margin-bottom-20" onclick="exporttoexcel();"><i class="fa fa-file-excel-o"></i>&nbsp; Export Excel</a> -->
+                                                <a class="m-portlet__nav-link btn btn-success margin-bottom-20" id="documentExportButton" onclick="exportReportDocument();"><i class="fa fa-file-excel-o"></i>&nbsp; <span>Export Excel</span></a>
                                                 <a href="#" onclick="checkb4submit();" class="btn red pull-right margin-bottom-20"><i class="fa fa-file-pdf-o"></i>&nbsp;&nbsp;Download PDF</a>
                                             </div>
                                         </div>
@@ -270,7 +271,7 @@ include('IsLogin.php');
         }
         //foreach($attr_array[1] as $id => $name) {
 
-        function exporttoexcel() {
+        function exportReportDocument() {
             var Company = $('#Company').val();
             var month = $('#month').val();
             var Year = $('#Year').val();
@@ -291,11 +292,20 @@ include('IsLogin.php');
                 'form-bonus-c': 'exportBonusFormCReportExcel.php',
                 //'form-viii': 'exportFormVIIIReportExcel.php',
                 'form-viii': 'exportFormVIIIReportWord.php',
-                'form-xii': 'exportFormXIIReportExcel.php',
+                // 'form-xii': 'exportFormXIIReportExcel.php',
+                'form-xii': 'exportFormXIIReportWord.php',
             };
             var reportUrl = reportUrls[$('#Report').val()];
             window.open(reportUrl + "?Company=" + encodeURIComponent(Company) + "&salarymasterId=" + encodeURIComponent(salarymasterId), '_blank');
         }
+
+         $('#Report').on('change', function () {
+            var isWordReport = this.value === 'form-viii' || this.value === 'form-xii';
+            $('#documentExportButton i')
+                .toggleClass('fa-file-excel-o', !isWordReport)
+                .toggleClass('fa-file-word-o', isWordReport);
+            $('#documentExportButton span').text(isWordReport ? 'Export Word' : 'Export Excel');
+        });
     </script>
 </body>
 

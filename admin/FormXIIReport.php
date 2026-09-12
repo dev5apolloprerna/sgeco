@@ -76,12 +76,12 @@ function renderFormXIIList(array $employees, $companyId, $salaryMonth)
         return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
     };
     $html = '<!doctype html><html><head><meta charset="utf-8"><style>body{font-family:Arial,sans-serif;padding:18px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:9px;text-align:left}th{background:#f5f5f5}.actions{white-space:nowrap}.exports{margin-bottom:14px}.exports a,.actions a{color:#167ac6;text-decoration:none;font-weight:bold}.empty{text-align:center}</style></head><body>';
-    $html .= '<div class="exports"><a target="_blank" href="generateFormXIIReportPDF.php?' . $query . '">Export All PDF</a> | <a target="_blank" href="exportFormXIIReportExcel.php?' . $query . '">Export All Excel</a></div>';
+    $html .= '<div class="exports"><a target="_blank" href="generateFormXIIReportPDF.php?' . $query . '">Export All PDF</a> | <a target="_blank" href="exportFormXIIReportWord.php?' . $query . '">Export All Word</a></div>';
     $html .= '<table><thead><tr><th>Sr. No.</th><th>Employee Name</th><th>UAN / Aadhaar No.</th><th>Mobile</th><th>Designation</th><th>Wages Rate</th><th>Joining Date</th><th>Action</th></tr></thead><tbody>';
     foreach ($employees as $index => $employee) {
         $d = formXIIEmployeeData($employee);
         $employeeQuery = $query . '&employeeId=' . rawurlencode($employee['employeeId']);
-        $html .= '<tr><td>' . ($index + 1) . '</td><td>' . $e($d['name']) . '</td><td>' . $e($d['uan_aadhaar']) . '</td><td>' . $e($d['mobile']) . '</td><td>' . $e($d['designation']) . '</td><td>' . $e($d['rate']) . '</td><td>' . $e($d['joining']) . '</td><td class="actions"><a target="_blank" href="generateFormXIIReportPDF.php?' . $employeeQuery . '">PDF</a> | <a target="_blank" href="exportFormXIIReportExcel.php?' . $employeeQuery . '">Excel</a></td></tr>';
+        $html .= '<tr><td>' . ($index + 1) . '</td><td>' . $e($d['name']) . '</td><td>' . $e($d['uan_aadhaar']) . '</td><td>' . $e($d['mobile']) . '</td><td>' . $e($d['designation']) . '</td><td>' . $e($d['rate']) . '</td><td>' . $e($d['joining']) . '</td><td class="actions"><a target="_blank" href="generateFormXIIReportPDF.php?' . $employeeQuery . '">PDF</a> | <a target="_blank" href="exportFormXIIReportWord.php?' . $employeeQuery . '">Word</a></td></tr>';
     }
     if (!$employees) $html .= '<tr><td colspan="8" class="empty">No Data Found !</td></tr>';
     return $html . '</tbody></table></body></html>';
