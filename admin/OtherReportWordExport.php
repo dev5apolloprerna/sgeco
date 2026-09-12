@@ -28,22 +28,30 @@ function buildOtherReportWordDocument(array $pages, $title, $pageSelector)
 
     $wordStyle = '@page{size:A4;margin:0}' .
         'body{margin:0;padding:0;background:#fff}' .
-        // Word displays dotted table gridlines for borderless HTML tables. A
-        // white structural border keeps those gridlines hidden while the
-        // form's intentional underline and photo-box borders remain visible.
-        'table,table td{border:1pt solid #fff;mso-border-alt:solid #fff 1pt}' .
+        // Do not turn layout tables into bordered Word tables. Form VIII in
+        // particular must remain borderless; its underlines are drawn by the
+        // spans in the supplied template instead.
+        'table,table td{border:0;mso-border-alt:none}' .
         $pageSelector . '{margin:0 auto;page-break-inside:avoid}';
 
-    // Word's HTML importer does not consistently honour page-break-after on a
-    // fixed-height div. Its proprietary line-break marker is reliable and
-    // guarantees exactly one employee form on every page.
-    $pageBreak = '<br clear="all" style="mso-special-character:line-break;' .
-        'page-break-before:always">';
+    // A separate empty break can be pulled onto the preceding fixed-height
+    // form by Word, causing the next employee's heading to appear at the foot
+    // of that page. Applying the break directly to the next form keeps every
+    // employee together from the first record onward.
+    foreach ($bodies as $index => $body) {
+        if ($index === 0) continue;
+        $bodies[$index] = preg_replace(
+            '/(<(?:div|section)\b[^>]*class\s*=\s*(["\'])[^"\']*' .
+                preg_quote(ltrim($pageSelector, '.'), '/') . '\b[^"\']*\2)([^>]*>)/i',
+            '$1 style="page-break-before:always;mso-break-type:page-break"$3',
+            $body,
+            1
+        );
+    }
 
     return '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>' .
         htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . '</title><style>' .
-        $style . $wordStyle . '</style></head><body>' .
-        implode("\n" . $pageBreak . "\n", $bodies) .
+        $style . $wordStyle . '</style></head><body>' . implode("\n", $bodies) .
         '</body></html>';
 }
 
