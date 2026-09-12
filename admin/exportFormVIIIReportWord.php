@@ -10,7 +10,7 @@ try {
     $month = isset($_GET['salarymasterId']) ? trim($_GET['salarymasterId']) : '';
     $employeeId = isset($_GET['employeeId']) ? (int) $_GET['employeeId'] : 0;
     $employees = getFormVIIIEmployees($dbconn, $companyId, $month, $employeeId);
-    $pages = array_map('renderFormVIIICertificate', $employees);
+    $pages = array_map('renderFormVIIIWordCertificate', $employees);
     $html = buildOtherReportWordDocument($pages, 'Form VIII - Service Certificate', '.certificate-page');
 } catch (Throwable $exception) {
     while (ob_get_level() > 0) ob_end_clean();

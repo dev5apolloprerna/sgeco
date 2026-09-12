@@ -32,7 +32,12 @@ function buildOtherReportWordDocument(array $pages, $title, $pageSelector)
         // particular must remain borderless; its underlines are drawn by the
         // spans in the supplied template instead.
         'table,table td{border:0;mso-border-alt:none}' .
-        $pageSelector . '{margin:0 auto;page-break-inside:avoid}';
+        // Word does not consistently honour CSS border-box sizing. The source
+        // templates use full-page fixed heights with padding, which Word can
+        // count twice and then split the first records across two pages. Let
+        // the Word document size each form from its content instead.
+        $pageSelector . '{width:auto;height:auto;min-height:0;margin:0 auto;' .
+            'overflow:visible;page-break-inside:avoid;mso-pagination:none}';
 
     // A separate empty break can be pulled onto the preceding fixed-height
     // form by Word, causing the next employee's heading to appear at the foot
