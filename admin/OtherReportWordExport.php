@@ -28,12 +28,22 @@ function buildOtherReportWordDocument(array $pages, $title, $pageSelector)
 
     $wordStyle = '@page{size:A4;margin:0}' .
         'body{margin:0;padding:0;background:#fff}' .
-        $pageSelector . '{margin:0 auto;page-break-after:always}' .
-        $pageSelector . ':last-child{page-break-after:auto}';
+        // Word displays dotted table gridlines for borderless HTML tables. A
+        // white structural border keeps those gridlines hidden while the
+        // form's intentional underline and photo-box borders remain visible.
+        'table,table td{border:1pt solid #fff;mso-border-alt:solid #fff 1pt}' .
+        $pageSelector . '{margin:0 auto;page-break-inside:avoid}';
+
+    // Word's HTML importer does not consistently honour page-break-after on a
+    // fixed-height div. Its proprietary line-break marker is reliable and
+    // guarantees exactly one employee form on every page.
+    $pageBreak = '<br clear="all" style="mso-special-character:line-break;' .
+        'page-break-before:always">';
 
     return '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>' .
         htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . '</title><style>' .
-        $style . $wordStyle . '</style></head><body>' . implode("\n", $bodies) .
+        $style . $wordStyle . '</style></head><body>' .
+        implode("\n" . $pageBreak . "\n", $bodies) .
         '</body></html>';
 }
 
