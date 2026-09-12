@@ -30,6 +30,10 @@ $repayDate = isset($_POST['repayDate']) ? trim($_POST['repayDate']) : '';
 function advanceRepayMaster($dbconn, $companyId, $monthYear)
 {
     $statement = mysqli_prepare($dbconn, "SELECT iAdvancedMasterId FROM advanced_master WHERE iCompanyId=? AND strMonthYear=? AND isDelete=0 AND istatus=1 LIMIT 1");
+    if (!$statement) {
+        error_log('AjaxAdvanceRepay: master lookup prepare failed: ' . mysqli_error($dbconn));
+        return null;
+    }
     mysqli_stmt_bind_param($statement, 'is', $companyId, $monthYear);
     mysqli_stmt_execute($statement);
     $result = mysqli_stmt_get_result($statement);
@@ -42,6 +46,10 @@ function advanceRepayExists($dbconn, $companyId, $sourceDate, $repayDate)
 {
     $remarks = 'Repay of advance dated ' . $sourceDate;
     $statement = mysqli_prepare($dbconn, "SELECT 1 FROM advanced_details ad INNER JOIN advanced_master am ON am.iAdvancedMasterId=ad.iAdvancedMasterId WHERE ad.iCompanyId=? AND ad.strRemarks=? AND DATE(ad.strDate)=? AND am.isDelete=0 AND am.istatus=1 LIMIT 1");
+    if (!$statement) {
+        error_log('AjaxAdvanceRepay: duplicate lookup prepare failed: ' . mysqli_error($dbconn));
+        return false;
+    }
     mysqli_stmt_bind_param($statement, 'iss', $companyId, $remarks, $repayDate);
     mysqli_stmt_execute($statement);
     $result = mysqli_stmt_get_result($statement);
@@ -84,7 +92,7 @@ if ($action === 'Preview') {
 }
 
 header('Content-Type: application/json');
-if ($action !== 'Add' || $companyId < 1 || !isValidAdvanceRepayDate($sourceDate) || $sourceDate >= $repayDate) {
+if ($action !== 'Add' || $companyId < 1 || !isValidAdvanceRepayDate($sourceDate) || !isValidAdvanceRepayDate($repayDate) || $sourceDate >= $repayDate) {
     echo json_encode(array('success' => false, 'message' => 'Select a valid company, old payment date and repayment date.'));
     exit;
 }
@@ -99,15 +107,8 @@ if (advanceRepayExists($dbconn, $companyId, $sourceDate, $repayDate)) {
     echo json_encode(array('success' => false, 'message' => 'This advance payment already has a repayment entry for ' . date('d-m-Y', strtotime($repayDate)) . '.'));
     exit;
 }
+
 $monthYear = date('m/Y', strtotime($repayDate));
-$master = advanceRepayMaster($dbconn, $companyId, $monthYear);
-
-$existingRepayDate = advanceRepayDate($dbconn, $companyId, $sourceDate);
-if ($existingRepayDate) {
-    echo json_encode(array('success' => false, 'message' => 'This advance payment date has already been repaid on ' . date('d-m-Y', strtotime($existingRepayDate)) . '.'));
-    exit;
-}
-
 $master = advanceRepayMaster($dbconn, $companyId, $monthYear);
 if (!$master) {
     echo json_encode(array('success' => false, 'message' => 'Create an advanced master entry for ' . $monthYear . ' before repaying this advance.'));
@@ -121,11 +122,22 @@ $entryBy = (int) $_SESSION['AdminId'];
 $entryDate = date('Y-m-d');
 $sql = "INSERT INTO advanced_details (iAdvancedMasterId, iEmployeeId, iCompanyId, iAmount, strDate, strRemarks, iBankId, strEntryDate, iEntryBy, EntryDate) SELECT ?, ad.iEmployeeId, ?, SUM(ad.iAmount), ?, CONCAT('Repay of advance dated ', ?), MAX(ad.iBankId), ?, ?, ? FROM advanced_details ad INNER JOIN advanced_master am ON am.iAdvancedMasterId=ad.iAdvancedMasterId WHERE ad.iCompanyId=? AND DATE(ad.strDate)=? AND am.isDelete=0 AND am.istatus=1 GROUP BY ad.iEmployeeId";
 $statement = mysqli_prepare($dbconn, $sql);
+if (!$statement) {
+    mysqli_rollback($dbconn);
+    error_log('AjaxAdvanceRepay: insert prepare failed: ' . mysqli_error($dbconn));
+    echo json_encode(array('success' => false, 'message' => 'Unable to prepare the repayment. Please try again.'));
+    exit;
+}
 mysqli_stmt_bind_param($statement, 'iisssisis', $advancedMasterId, $companyId, $repayDate, $sourceDate, $entryDateTime, $entryBy, $entryDate, $companyId, $sourceDate);
 $success = mysqli_stmt_execute($statement);
+$statementError = $success ? '' : mysqli_stmt_error($statement);
 $count = $success ? mysqli_stmt_affected_rows($statement) : 0;
 mysqli_stmt_close($statement);
 
 if ($success && $count > 0) mysqli_commit($dbconn);
-else mysqli_rollback($dbconn);
-echo json_encode(array('success' => $success && $count > 0, 'message' => $count > 0 ? $count . ' advance payment(s) repaid successfully.' : 'No advance payments were found.'));
+else {
+    mysqli_rollback($dbconn);
+    if (!$success) error_log('AjaxAdvanceRepay: insert execute failed: ' . $statementError);
+}
+$message = $count > 0 ? $count . ' advance payment(s) repaid successfully.' : ($success ? 'No advance payments were found.' : 'Unable to save the repayment. Please try again.');
+echo json_encode(array('success' => $success && $count > 0, 'message' => $message));

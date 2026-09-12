@@ -25,21 +25,21 @@ function pfEsicPdfSection($report, $employees, $sectionTitle, $companies, $part,
     $identity = $isAadhar
         ? array('Name as per Aadhar', 'Father Name', 'Aadhar No.', 'ESIC No.', 'D.O.B')
         : array('Name', 'PF A/C No.', 'UAN No.', 'ESIC No.', 'D.O.B');
-    $unitScale = 100 / (52 + count($companies) * 16);
+    $unitScale = 100 / (58 + count($companies) * 22);
     $widths = array_map(function ($width) use ($unitScale) {
         return $width * $unitScale;
-    }, array(3, 11, 7, 8, 7, 6));
-    $companyWidth = 16 * $unitScale;
-    $totalWidth = 10 * $unitScale;
-    $html = '<style>table{border-collapse:collapse;table-layout:fixed;width:100%}th,td{border:0.2mm solid #333;text-align:center;vertical-align:middle;padding:2px;font-size:6.2pt}th{font-weight:bold}.title{background-color:#c9ffff;font-size:11pt}.company{background-color:#d9e2f3}.total{background-color:#9fd8f6;font-weight:bold}.name{text-align:left}</style>';
+    }, array(3, 18, 5, 6, 5, 5));
+    $companyWidth = 22 * $unitScale;
+    $totalWidth = 16 * $unitScale;
+    $html = '<style>table{border-collapse:collapse;table-layout:fixed;width:100%}th,td{border:0.2mm solid #333;text-align:center;vertical-align:middle;padding:2px;font-size:6.2pt;white-space:nowrap}th{font-weight:bold}.title{background-color:#c9ffff;font-size:11pt}.company{background-color:#d9e2f3}.total{background-color:#9fd8f6;font-weight:bold}.name{text-align:left}</style>';
     $html .= '<table border="1" cellpadding="2"><thead>';
     $columnCount = 6 + count($companies) * 5 + 4;
     $partLabel = $partCount > 1 ? ' &mdash; Companies ' . $part . ' of ' . $partCount : '';
     $html .= '<tr><th class="title" colspan="' . $columnCount . '">PF &amp; ESIC Deduction Report</th></tr>';
     $html .= '<tr><th colspan="' . $columnCount . '">' . $e($sectionTitle) . ' | Month: ' . $e($date ? $date->format('M-Y') : $report['period']) . $partLabel . '</th></tr>';
-    $html .= '<tr><th width="' . $widths[0] . '%" rowspan="2">Sr.<br>No.</th>';
+    $html .= '<tr><th nowrap="nowrap" width="' . $widths[0] . '%" rowspan="2">Sr. No.</th>';
     foreach ($identity as $index => $label) {
-        $html .= '<th width="' . $widths[$index + 1] . '%" rowspan="2">' . $e($label) . '</th>';
+        $html .= '<th nowrap="nowrap" width="' . $widths[$index + 1] . '%" rowspan="2">' . $e($label) . '</th>';
     }
     foreach ($companies as $name) {
         $html .= '<th class="company" width="' . $companyWidth . '%" colspan="5">' . $e($name) . '</th>';
@@ -47,11 +47,11 @@ function pfEsicPdfSection($report, $employees, $sectionTitle, $companies, $part,
     $html .= '<th class="total" width="' . $totalWidth . '%" colspan="4">Total Deduction</th></tr><tr>';
     foreach ($companies as $unused) {
         foreach (array('Present Days', 'National Holiday', 'Wages Rate', 'PF Amt.', 'ESIC Amt.') as $label) {
-            $html .= '<th class="company" width="' . ($companyWidth / 5) . '%">' . $label . '</th>';
+            $html .= '<th class="company" nowrap="nowrap" width="' . ($companyWidth / 5) . '%">' . $label . '</th>';
         }
     }
     foreach (array('Present Days', 'National Holiday', 'PF Amt.', 'ESIC Amt.') as $label) {
-        $html .= '<th class="total" width="' . ($totalWidth / 4) . '%">' . $label . '</th>';
+        $html .= '<th class="total" nowrap="nowrap" width="' . ($totalWidth / 4) . '%">' . $label . '</th>';
     }
     $html .= '</tr></thead><tbody>';
     $serial = 1;
@@ -59,21 +59,21 @@ function pfEsicPdfSection($report, $employees, $sectionTitle, $companies, $part,
         $identityValues = $isAadhar
             ? array($employee['name'], $employee['fatherName'], $employee['aadharNo'], $employee['esicNo'], $employee['dob'])
             : array($employee['name'], $employee['pfAccount'], $employee['uan'], $employee['esicNo'], $employee['dob']);
-        $html .= '<tr nobr="true"><td width="' . $widths[0] . '%">' . $serial++ . '</td>';
+        $html .= '<tr nobr="true"><td nowrap="nowrap" width="' . $widths[0] . '%">' . $serial++ . '</td>';
         foreach ($identityValues as $index => $value) {
             $class = $index === 0 ? ' class="name"' : '';
-            $html .= '<td' . $class . ' width="' . $widths[$index + 1] . '%">' . $e($value) . '</td>';
+            $html .= '<td' . $class . ' nowrap="nowrap" width="' . $widths[$index + 1] . '%">' . $e($value) . '</td>';
         }
         foreach ($companies as $companyId => $unused) {
             $values = isset($employee['companies'][$companyId])
                 ? $employee['companies'][$companyId]
                 : array('presentDays' => 0, 'nationalHoliday' => 0, 'wagesRate' => 0, 'pfAmount' => 0, 'esicAmount' => 0);
             foreach (array('presentDays', 'nationalHoliday', 'wagesRate', 'pfAmount', 'esicAmount') as $key) {
-                $html .= '<td width="' . ($companyWidth / 5) . '%">' . pfEsicReportNumber($values[$key], in_array($key, array('wagesRate', 'pfAmount', 'esicAmount'))) . '</td>';
+                $html .= '<td nowrap="nowrap" width="' . ($companyWidth / 5) . '%">' . pfEsicReportNumber($values[$key], in_array($key, array('wagesRate', 'pfAmount', 'esicAmount'))) . '</td>';
             }
         }
         foreach (array($employee['totalDays'], $employee['totalNationalHoliday'], $employee['totalPf'], $employee['totalEsic']) as $index => $value) {
-            $html .= '<td class="total" width="' . ($totalWidth / 4) . '%">' . pfEsicReportNumber($value, $index > 1) . '</td>';
+            $html .= '<td class="total" nowrap="nowrap" width="' . ($totalWidth / 4) . '%">' . pfEsicReportNumber($value, $index > 1) . '</td>';
         }
         $html .= '</tr>';
     }
@@ -81,11 +81,11 @@ function pfEsicPdfSection($report, $employees, $sectionTitle, $companies, $part,
     $html .= '<tr nobr="true"><td class="total" colspan="6">Total</td>';
     foreach ($totals['companies'] as $values) {
         foreach (array('presentDays', 'nationalHoliday', 'wagesRate', 'pfAmount', 'esicAmount') as $key) {
-            $html .= '<td class="total" width="' . ($companyWidth / 5) . '%">' . pfEsicReportNumber($values[$key]) . '</td>';
+            $html .= '<td class="total" nowrap="nowrap" width="' . ($companyWidth / 5) . '%">' . pfEsicReportNumber($values[$key]) . '</td>';
         }
     }
     foreach (array($totals['totalDays'], $totals['totalNationalHoliday'], $totals['totalPf'], $totals['totalEsic']) as $value) {
-        $html .= '<td class="total" width="' . ($totalWidth / 4) . '%">' . pfEsicReportNumber($value) . '</td>';
+        $html .= '<td class="total" nowrap="nowrap" width="' . ($totalWidth / 4) . '%">' . pfEsicReportNumber($value) . '</td>';
     }
     $html .= '</tr>';
     return $html . '</tbody></table>';
@@ -94,7 +94,7 @@ function pfEsicPdfSection($report, $employees, $sectionTitle, $companies, $part,
 while (ob_get_level() > 0) {
     ob_end_clean();
 }
-$layoutUnits = 52 + count($report['companies']) * 16;
+$layoutUnits = 58 + count($report['companies']) * 22;
 $pageWidth = max(355.6, $layoutUnits * 3.5 + 10);
 $pdf = new TCPDF('L', PDF_UNIT, array($pageWidth, 215.9), true, 'UTF-8', false);
 $pdf->SetCreator('SGECO');

@@ -93,8 +93,20 @@ $sheet->getStyle('A1')->getFont()->setSize(18);
 $sheet->getStyle('A1:' . $lastColumn . ($rowNumber - 1))->getBorders()->getAllBorders()->setBorderStyle(PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
 $sheet->getStyle('A1:' . $lastColumn . ($rowNumber - 1))->getAlignment()->setHorizontal('center')->setVertical('center')->setWrapText(true);
 $sheet->getStyle('A1:' . $lastColumn . '1')->getFill()->setFillType('solid')->getStartColor()->setRGB('C9FFFF');
-$sheet->getColumnDimension('B')->setWidth(32);
+$sheet->getColumnDimension('B')->setWidth(38);
 for ($i = 1; $i <= $lastColumnNumber; $i++) if ($i !== 2) $sheet->getColumnDimensionByColumn($i)->setWidth(14);
+$sheet->getColumnDimension('C')->setWidth(10);
+$sheet->getColumnDimension('D')->setWidth(15);
+$sheet->getColumnDimension('E')->setWidth(13);
+$sheet->getColumnDimension('F')->setWidth(11);
+$sheet->getStyle('B1:B' . ($rowNumber - 1))->getAlignment()->setWrapText(false);
+for ($column = 7; $column <= $lastColumnNumber; $column++) {
+    $companyColumnOffset = ($column - 7) % 5;
+    $isAmountColumn = $companyColumnOffset === 3 || $companyColumnOffset === 4 || $column > 6 + count($report['companies']) * 5 + 2;
+    if ($isAmountColumn) {
+        $sheet->getStyleByColumnAndRow($column, 1, $column, $rowNumber - 1)->getAlignment()->setWrapText(false);
+    }
+}
 
 $temporaryFile = tempnam(sys_get_temp_dir(), 'pf-esic-deduction-');
 (new PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save($temporaryFile);

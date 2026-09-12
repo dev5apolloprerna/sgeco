@@ -131,18 +131,30 @@ $repayCompanies = mysqli_query($dbconn, "SELECT companymasterId, companyname FRO
             $('#repayPreview').html('<div class="text-center">Loading...</div>');
             $.post('<?php echo $web_url; ?>admin/AjaxAdvanceRepay.php', {
                 action: 'Preview', companyId: $('#repayCompanyId').val(), sourceDate: $('#repaySourceDate').val(), repayDate: $('#repayDate').val()
-            }, function(html) { $('#repayPreview').html(html); });
+            }, function(html) {
+                $('#repayPreview').html(html);
+            }).fail(function(xhr) {
+                $('#repayPreview').html($('<div class="alert alert-danger"></div>').text(xhr.responseText || 'Unable to preview the repayment. Please try again.'));
+            });
         });
         $('#advanceRepayForm').submit(function(event) {
             event.preventDefault();
+            var repayButton = $(this).find('[type="submit"]');
+            repayButton.prop('disabled', true);
             $('#loading').show();
             $.post('<?php echo $web_url; ?>admin/AjaxAdvanceRepay.php', {
                 action: 'Add', companyId: $('#repayCompanyId').val(), sourceDate: $('#repaySourceDate').val(), repayDate: $('#repayDate').val()
             }, function(response) {
-                $('#loading').hide();
                 $('#repayMessage').html($('<div>').addClass('alert ' + (response.success ? 'alert-success' : 'alert-danger')).text(response.message));
                 if (response.success) setTimeout(function() { window.location.href = 'viewAdvancedDetails.php'; }, 700);
-            }, 'json');
+            }, 'json').fail(function(xhr) {
+                var message = 'Unable to save the repayment. Please try again.';
+                if (xhr.responseJSON && xhr.responseJSON.message) message = xhr.responseJSON.message;
+                $('#repayMessage').html($('<div class="alert alert-danger"></div>').text(message));
+            }).always(function() {
+                $('#loading').hide();
+                repayButton.prop('disabled', false);
+            });
         });
         $('#searchForm').on('submit', function(event) {
             event.preventDefault();
