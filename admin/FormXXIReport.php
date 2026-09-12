@@ -92,11 +92,10 @@ function renderFormXXIHtml(array $employees, $salaryMonth, $companyName)
         throw new RuntimeException('The Form XXI template could not be loaded.');
     }
 
-    // Anchor the body match after the real table header. The supplied template
-    // also contains a commented-out `<tbody>` tag; matching the first tbody in
-    // the section placed every generated employee row inside that HTML comment,
-    // so the browser displayed only the headings.
-    if (!preg_match('/(<section class="form-page">.*?<\/thead>\s*<tbody>)(.*?)(<\/tbody>.*?<\/section>)/s', $template, $matches)) {
+    // Match the explicitly identified live table body. The template contains
+    // old tbody markup inside an HTML comment, so positional tbody matching can
+    // silently place employee rows inside that comment in HTML, Excel and PDF.
+    if (!preg_match('/(<section class="form-page">.*?<tbody class="register-body">)(.*?)(<\/tbody>.*?<\/section>)/s', $template, $matches)) {
         throw new RuntimeException('The Form XXI template has an unexpected format.');
     }
 
