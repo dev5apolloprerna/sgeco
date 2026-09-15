@@ -127,34 +127,6 @@ function docxPara($runsXml, $align = 'left', array $opts = array())
 }
 
 /**
- * Floating passport-photo placeholder positioned beside the employer details.
- *
- * VML is used here because it is supported by the desktop Word versions used
- * to open these exports, while still allowing the rest of the form to remain
- * table-free. The shape is anchored to the employee's page and therefore does
- * not consume paragraph space or move the numbered fields.
- */
-function docxPhotoBox($shapeId)
-{
-    $shapeId = preg_replace('/[^A-Za-z0-9_-]/', '', (string)$shapeId);
-
-    return '<w:p><w:pPr><w:spacing w:before="0" w:after="0" w:line="1" w:lineRule="exact"/></w:pPr>'
-        . '<w:r><w:pict>'
-        . '<v:rect id="' . docxEscape($shapeId) . '" '
-        . 'style="position:absolute;margin-left:425pt;margin-top:165pt;width:105pt;height:130pt;z-index:1;'
-        . 'mso-position-horizontal-relative:page;mso-position-vertical-relative:page" '
-        . 'stroked="t" strokeweight="1.5pt" strokecolor="#000000" fillcolor="#ffffff">'
-        . '<v:textbox inset="8pt,8pt,5pt,7pt">'
-        . '<w:txbxContent><w:p><w:pPr><w:spacing w:before="1300" w:after="0"/><w:jc w:val="left"/></w:pPr>'
-        . docxRun('Passport Size', false, false, false, 24)
-        . '</w:p><w:p><w:pPr><w:spacing w:before="0" w:after="0"/><w:jc w:val="left"/></w:pPr>'
-        . docxRun('Photo', false, false, false, 24)
-        . '</w:p></w:txbxContent>'
-        . '</v:textbox><w10:wrap type="none"/></v:rect>'
-        . '</w:pict></w:r></w:p>';
-}
-
-/**
  * Builds the entire XML body for one employee.
  * $pageBreakBefore = true means "this employee starts on a new page".
  */
@@ -191,10 +163,6 @@ function formVIIIEmployeeXml(array $employee, $pageBreakBefore)
         'center',
         array('keepNext' => true, 'spaceAfter' => 480)
     );
-
-    /* Passport-size photo box at the top-right, matching the printed form. */
-    $photoShapeId = 'FormVIIIPhoto' . (isset($employee['employeeId']) ? (int)$employee['employeeId'] : 0);
-    $xml .= docxPhotoBox($photoShapeId);
 
     /* Rows 1-4 */
     $xml .= docxPara(
@@ -326,10 +294,7 @@ try {
 
 /* -------- word/document.xml -------- */
 $documentXml  = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' . "\n";
-$documentXml .= '<w:document '
-             .  'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" '
-             .  'xmlns:v="urn:schemas-microsoft-com:vml" '
-             .  'xmlns:w10="urn:schemas-microsoft-com:office:word">';
+$documentXml .= '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">';
 $documentXml .= '<w:body>';
 
 if (!$employees) {
