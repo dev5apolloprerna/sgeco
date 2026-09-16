@@ -7,9 +7,17 @@ include ('User_Paging.php');
 
 
 if ($_POST['action'] == 'ListUser') {
+    if (empty($_POST['bank'])) {
+        http_response_code(400);
+        echo '<div class="alert alert-warning text-center">Please select Bank.</div>';
+        exit;
+    }
     $where = "";
     if ($_REQUEST['Company'] != NULL && $_REQUEST['bank'] != NULL && $_REQUEST['salaryId'] != NULL) {
-        $where = " and employee.bankid= '" . $_POST['bank'] . "'";
+        // $where = " and employee.bankid= '" . $_POST['bank'] . "'";
+        if ($_POST['bank'] !== 'all') {
+            $where = " and employee.bankid= '" . $_POST['bank'] . "'";
+        }
         if ($_POST['bank'] == 3) {
             $where = " and employee.bankid not in (1,2)";
         }
@@ -42,11 +50,11 @@ if ($_POST['action'] == 'ListUser') {
                     <th class="desktop">Beneficiary Account Number</th>
                     <th class="desktop">Amount</th>
                     <th class="desktop">Beneficiary Name</th>
-                    <?php if ($_POST['bank'] == 3 || $_POST['bank'] == "") { ?>
+                    <?php if ($_POST['bank'] == 3) { ?>
                         <th class="desktop">Beneficiary Address</th>
                     <?php } ?>
                     <th class="desktop">IFSC Code</th>
-                    <?php if ($_POST['bank'] == 3 || $_POST['bank'] == "") { ?>
+                    <?php if ($_POST['bank'] == 3) { ?>
                         <!--<th class="desktop">Bank Name</th> -->
                         <th class="desktop">Comm.</th>
                     <?php } ?>
@@ -75,7 +83,7 @@ if ($_POST['action'] == 'ListUser') {
                             <div class="form-group form-md-line-input "><?php echo ucwords(strtolower($rowfilter['emp_name'])); if(isset($rowfilter['emp_other_info'])) { echo " - ".$rowfilter['emp_other_info'];}?>
                             </div>
                         </td>
-                        <?php if ($_POST['bank'] == 3|| $_POST['bank'] == "") {?>
+                        <?php if ($_POST['bank'] == 3) {?>
                             <td>
                                 <div class="form-group form-md-line-input "></div>
                             </td>
@@ -85,7 +93,7 @@ if ($_POST['action'] == 'ListUser') {
                             </div>
                         </td>
                         <?php
-                        if ($_POST['bank'] == 3|| $_POST['bank'] == "") {
+                        if ($_POST['bank'] == 3) {
                         //$bank = mysqli_fetch_array(mysqli_query($dbconn, "SELECT * FROM `bankmaster`  where isDelete='0'  and  istatus='1' and bankmasterId='" . $rowfilter['bankid'] . "'"));
                         ?>
                         <td>
@@ -120,11 +128,11 @@ if ($_POST['action'] == 'ListUser') {
                     <th class="desktop">Total</th>
                     <th class="desktop"><?= number_format($Total[0],2) ?></th>
                     <th class="desktop"></th>
-                    <?php if ($_POST['bank'] == 3 || $_POST['bank'] == "") { ?>
+                    <?php if ($_POST['bank'] == 3) { ?>
                         <th class="desktop"></th>
                     <?php } ?>
                     <th class="desktop"></th>
-                    <?php if ($_POST['bank'] == 3 || $_POST['bank'] == "") { ?>
+                    <?php if ($_POST['bank'] == 3) { ?>
                         <th class="desktop"><?= number_format($Total[1],2) ?></th>
                     <?php } ?>
                     
@@ -132,7 +140,7 @@ if ($_POST['action'] == 'ListUser') {
             </thead>
         </table>
         <br />
-        <?php if ($_POST['bank'] == 3 || $_POST['bank'] == "") { ?>
+        <?php if ($_POST['bank'] == 3) { ?>
             <table class="table-striped table-bordered table-hover dt-responsive" width="40%" id="tableC">
                 <tr>
                     <td>Amount.</td>

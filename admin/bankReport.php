@@ -137,6 +137,7 @@ include('IsLogin.php');
                                                     $resultCom = mysqli_query($dbconn, $queryCom) or die(mysql_error());
                                                     echo '<select class="form-control" name="bank" id="bank" required="" >';
                                                     echo "<option value='' >Select Bank </option>";
+                                                    echo "<option value='all'>All Bank</option>";
                                                     while ($rowCom = mysqli_fetch_array($resultCom)) {
                                                         echo "<option value='" . $rowCom['bankmasterId'] . "'>" . $rowCom['bankname'] . "</option>";
                                                     }
@@ -195,6 +196,11 @@ include('IsLogin.php');
                                                             var Year = $('#Year').val();
                                                             //var salaryId = $('#salarymasterId').val();
                                                             var salaryId = month+'/'+Year;
+                                                            if (!bank) {
+                                                                alert('Please select Bank.');
+                                                                $('#bank').focus();
+                                                                return false;
+                                                            }
                                                             $('#loading').css("display", "block");
                                                             $.ajax({
                                                                 type: "POST",
@@ -209,7 +215,8 @@ include('IsLogin.php');
                                                         }// end of filter
 //                                                        if($('#Skill').val() != '' || $('#companyId').val() != '' || $('#salaryId').val() != '')
 //                                                            {
-                                                        PageLoadData(1);
+                                                        // PageLoadData(1);
+                                                        // Do not load a report until the user selects a bank.
 //                                                            }
 
                                                         function checkb4submit()
@@ -220,6 +227,11 @@ include('IsLogin.php');
                                                             var Year = $('#Year').val();
                                                             //var salaryId = $('#salarymasterId').val();
                                                             var salaryId = month+'/'+Year;
+                                                            if (!bank) {
+                                                                alert('Please select Bank.');
+                                                                $('#bank').focus();
+                                                                return false;
+                                                            }
                                                             //var strURL = "generateBankRepotPDF.php?bank=" + bank + "&Company=" + Company + "&salaryId=" + salaryId;
                                                             var strURL = "generateNewBankRepotPDF.php?bank=" + bank + "&Company=" + Company + "&salaryId=" + salaryId;
                                                             window.open(strURL, '_blank');
@@ -232,6 +244,11 @@ include('IsLogin.php');
                                                             var Year = $('#Year').val();
                                                             //var salaryId = $('#salarymasterId').val();
                                                             var salaryId = month+'/'+Year;
+                                                            if (!bank) {
+                                                                alert('Please select Bank.');
+                                                                $('#bank').focus();
+                                                                return false;
+                                                            }
                                                             //alert(salaryId);
                                                             //var strURL = "generateBankRepotExcel.php?bank=" + bank + "&Company=" + Company + "&salaryId=" + salaryId;
                                                             var strURL = "newgenerateBankRepotExcel.php?bank=" + bank + "&Company=" + Company + "&salaryId=" + salaryId;

@@ -13,19 +13,29 @@ $spreadsheet = new Spreadsheet();
 
 include('../config.php');
 
+if (empty($_REQUEST['bank'])) {
+    http_response_code(400);
+    exit('Please select Bank.');
+}
+
 $where = " and 1=1";
 if ($_REQUEST['Company'] != NULL && $_REQUEST['bank'] != NULL && $_REQUEST['salaryId'] != NULL) {
-    $where = " and employee.bankid= '" . $_REQUEST['bank'] . "'";
+    if ($_REQUEST['bank'] !== 'all') {
+        $where = " and employee.bankid= '" . $_REQUEST['bank'] . "'";
+    }
+
     if ($_REQUEST['bank'] == 3) {
         $where = " and employee.bankid not in (1,2)";
         //$where = " and employee.bankid not in (2)";
     }
 }
-$query = "SELECT * FROM employee INNER JOIN salarydetails ON employee.employeeId=salarydetails.emp_id where   salarydetails.companyId='" . $_REQUEST['Company'] . "' and salarydetails.salaryId  in (select salarymasterId from salarymaster where  month='" . $_REQUEST['salaryId'] . "' and isDelete='0' and  istatus='1') and salarydetails.workingdays > 0  " . $where . " and  employee.isDelete=0 and employee.istatus=1 ORDER BY employee.emp_name ASC";";
+$query = "SELECT * FROM employee INNER JOIN salarydetails ON employee.employeeId=salarydetails.emp_id where   salarydetails.companyId='" . $_REQUEST['Company'] . "' and salarydetails.salaryId  in (select salarymasterId from salarymaster where  month='" . $_REQUEST['salaryId'] . "' and isDelete='0' and  istatus='1') and salarydetails.workingdays > 0  " . $where . " and  employee.isDelete=0 and employee.istatus=1 ORDER BY employee.emp_name ASC";
 $filterstr = mysqli_query($dbconn, $query);
 if (mysqli_num_rows($filterstr) > 0) {
     $comp = mysqli_fetch_array(mysqli_query($dbconn, "SELECT * FROM `companymaster` where isDelete='0' and istatus='1' and companymasterId='" . $_REQUEST['Company'] . "'"));
-    $bank = mysqli_fetch_array(mysqli_query($dbconn, "SELECT * FROM `bankmaster` where isDelete='0' and istatus='1' and bankmasterId='" . $_REQUEST['bank'] . "'"));
+    $bank = $_REQUEST['bank'] === 'all'
+        ? array('bankname' => 'All Bank')
+        : mysqli_fetch_array(mysqli_query($dbconn, "SELECT * FROM `bankmaster` where isDelete='0' and istatus='1' and bankmasterId='" . $_REQUEST['bank'] . "'"));
     $salaryid = mysqli_fetch_array(mysqli_query($dbconn, "SELECT * FROM `salarymaster`  where isDelete='0'  and  istatus='1' and salarymasterId='" . $_REQUEST['salaryId'] . "'"));
     
     $date = DateTime::createFromFormat('m/Y', $_REQUEST['salaryId']);
@@ -43,7 +53,7 @@ if (mysqli_num_rows($filterstr) > 0) {
         $sheet = $spreadsheet->getActiveSheet();
         $pageSetup = $sheet->getPageSetup();
     
-    if ($_REQUEST['bank'] == 3 || $_REQUEST['bank'] == "") {
+    if ($_REQUEST['bank'] == 3) {
         $bankname = 'Other';
         
         $spreadsheet->setActiveSheetIndex(0)
@@ -469,7 +479,7 @@ if (mysqli_num_rows($filterstr) > 0) {
 
 $rowNumber++;
 $rowNumber++;
-if ($_REQUEST['bank'] == 3 || $_REQUEST['bank'] == "") {
+if ($_REQUEST['bank'] == 3) {
     $spreadsheet->setActiveSheetIndex(0)
         ->setCellValue('B'.$rowNumber, 'Amount.')
         //->setCellValue('C'.$rowNumber, number_format(floatval($Total),2));
@@ -512,7 +522,7 @@ if ($_REQUEST['bank'] == 3 || $_REQUEST['bank'] == "") {
 }
 
 $rowNumber++;    
-if ($_REQUEST['bank'] == 3 || $_REQUEST['bank'] == "") {
+if ($_REQUEST['bank'] == 3) {
     $spreadsheet->setActiveSheetIndex(0)
         ->setCellValue('B'.$rowNumber, 'Bank Comm.')
         // ->setCellValue('C'.$rowNumber, number_format(floatval($totalComm),2));

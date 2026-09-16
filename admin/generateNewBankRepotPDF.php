@@ -9,8 +9,16 @@ require_once('tcpdf/tcpdf.php');
 include('../config.php');
 $where = "where 1=1";
 
+if (empty($_REQUEST['bank'])) {
+    http_response_code(400);
+    exit('Please select Bank.');
+}
+
 if ($_REQUEST['Company'] != NULL && $_REQUEST['bank'] != NULL && $_REQUEST['salaryId'] != NULL) {
-    $where = " and employee.bankid= '" . $_REQUEST['bank'] . "'";
+    $where = "";
+    if ($_REQUEST['bank'] !== 'all') {
+        $where = " and employee.bankid= '" . $_REQUEST['bank'] . "'";
+    }
     if ($_REQUEST['bank'] == 3) {
         $where = " and employee.bankid not in (1,2)";
         //$where = " and employee.bankid not in (2)";
@@ -31,14 +39,14 @@ while ($rowapplication = mysqli_fetch_array($result)) {
     
     $comp = mysqli_fetch_array(mysqli_query($dbconn, "SELECT * FROM `companymaster`  where isDelete='0'  and  istatus='1' and companymasterId='" . $_REQUEST['Company'] . "'"));
     $bank = mysqli_fetch_array(mysqli_query($dbconn, "SELECT * FROM `bankmaster`  where isDelete='0'  and  istatus='1' and bankmasterId='" . $rowapplication['bankid'] . "'"));
-    if ($_REQUEST['bank'] == 3 || $_REQUEST['bank'] == "") {
+    if ($_REQUEST['bank'] == 3) {
         $bankname = 'Other';
         $bankstyle = "display: block;";
         $BankNameStyle = "width: 350px;";
         $CommBankstyle = "display: block;";
         $Comm_Bankstyle = "display: none;";
     } else {
-        $bankname = $bank['bankname'];
+        $bankname = $_REQUEST['bank'] === 'all' ? 'All Bank' : $bank['bankname']; // $bankname = $bank['bankname'];
         $bankstyle = "display: none;";
         $BankNameStyle = "width: 520px;";
         $CommBankstyle = "display: none;";
@@ -56,7 +64,7 @@ while ($rowapplication = mysqli_fetch_array($result)) {
     
     
     $month = $salaryid['fromdate'];
-    if ($_REQUEST['bank'] == 3 || $_REQUEST['bank'] == "") {
+    if ($_REQUEST['bank'] == 3) {
         $mailFormat_main = str_replace("#bankname#", ucfirst(urldecode($bankname)), $mailFormat_main);
         $mailFormat_main = str_replace("#BankNameStyle#", ucfirst(urldecode($BankNameStyle)), $mailFormat_main);
         $mailFormat = str_replace("#bankname#", ucfirst(urldecode($bankName)), $mailFormat); 
@@ -76,7 +84,7 @@ while ($rowapplication = mysqli_fetch_array($result)) {
     } else {
         $mailFormat_main = str_replace("#BankNameStyle#", ucfirst(urldecode($BankNameStyle)), $mailFormat_main);
         $mailFormat_main = str_replace("#bankstyle#", ucfirst(urldecode($bankstyle)), $mailFormat_main);
-        $mailFormat_main = str_replace("#bankname#", ucfirst(urldecode($bankName)), $mailFormat_main); 
+        $mailFormat_main = str_replace("#bankname#", ucfirst(urldecode($bankname)), $mailFormat_main);
         $mailFormat = str_replace("#bankstyle#", ucfirst(urldecode($bankstyle)), $mailFormat); 
         $mailFormat_main = str_replace("#CommBankstyle#", urldecode($CommBankstyle), $mailFormat_main);
         $mailFormat = str_replace("#Comm#", " ", $mailFormat);
