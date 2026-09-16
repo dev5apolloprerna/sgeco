@@ -5,7 +5,8 @@
  *
  * Same delivery as exportFormVIIIReportWord.php. Because there is NO
  * <w:tbl> in the document, Word cannot draw table gridlines. The only
- * visible lines are the intentional underline on form fields.
+  * visible lines are the intentional underline on form fields and the
+ * passport-photo placeholder border.
  */
 
 ob_start();
@@ -63,6 +64,32 @@ function docxTab()
     return '<w:r><w:tab/></w:r>';
 }
 
+/**
+ * Floating passport-photo placeholder used by the printed employment card.
+ *
+ * VML is used here because it is supported by the older desktop Word versions
+ * used to open these exports. The shape is anchored to the page's text margin,
+ * so it remains in the top-right corner without requiring a layout table.
+ */
+function docxPhotoBox()
+{
+    return '<w:r><w:pict>'
+        . '<v:rect id="FormXIIPhotoBox" '
+        . 'style="position:absolute;width:105pt;height:115pt;z-index:1;'
+        . 'mso-position-horizontal:right;mso-position-horizontal-relative:margin;'
+        . 'mso-position-vertical:top;mso-position-vertical-relative:paragraph" '
+        . 'stroked="t" strokeweight="1pt" strokecolor="#000000" fillcolor="#ffffff">'
+        . '<v:textbox inset="8pt,6pt,6pt,6pt" style="mso-fit-shape-to-text:f">'
+        . '<w:txbxContent>'
+        . docxPara(docxRun('Passport Size', false, false, false, 22), 'left', array('spaceBefore' => 1080))
+        . docxPara(docxRun('Photo', false, false, false, 22), 'left')
+        . '</w:txbxContent>'
+        . '</v:textbox>'
+        . '<w10:wrap type="square" side="left"/>'
+        . '</v:rect>'
+        . '</w:pict></w:r>';
+}
+
 /* =========================================================
    ONE EMPLOYEE = ONE PAGE  (paragraphs only)
    ========================================================= */
@@ -78,12 +105,6 @@ function formXIIEmployeeXml(array $employee, $pageBreakBefore)
     $designation = $d['designation'];
     $rate        = $d['rate'];
     $joining     = $d['joining'];
-
-    /* Page-level right tab stop: page width minus right margin.
-       A4 = 11906 twips wide. Right margin = 1134 twips.
-       Right tab at 11906 - 1134 = 10772 twips from left edge of text area.
-       Word counts tabs from the text-area left edge, so use ~9625. */
-    $rightTab = 9600;
 
     $firstOpts = array('keepNext' => true, 'spaceAfter' => 120);
     if ($pageBreakBefore) $firstOpts['pageBreakBefore'] = true;
@@ -103,15 +124,14 @@ function formXIIEmployeeXml(array $employee, $pageBreakBefore)
         array('keepNext' => true, 'spaceAfter' => 360)
     );
 
-    /* ---------- A / A1 / A2 / A3 (photo label right-aligned on row A) ---------- */
+    /* ---------- A / A1 / A2 / A3 (photo box anchored at the right) ---------- */
     $xml .= docxPara(
+        docxPhotoBox() .
         docxRun('A. ', true) .
         docxRun('Name Contractor: ') .
-        docxRun('Shree Ganesh Engineering Co.', true, true) .
-        docxTab() .
-        docxRun('Passport Size Photo', false, false, false, 22),
+        docxRun('Shree Ganesh Engineering Co.', true, true),
         'left',
-        array('keepNext' => true, 'spaceAfter' => 100, 'rightTabPos' => $rightTab)
+        array('keepNext' => true, 'spaceAfter' => 100)
     );
     $xml .= docxPara(
         docxRun('A1. ', true) .
@@ -236,7 +256,10 @@ try {
    ========================================================= */
 
 $documentXml  = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' . "\n";
-$documentXml .= '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">';
+$documentXml .= '<w:document '
+             .  'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" '
+             .  'xmlns:v="urn:schemas-microsoft-com:vml" '
+             .  'xmlns:w10="urn:schemas-microsoft-com:office:word">';
 $documentXml .= '<w:body>';
 
 if (!$employees) {

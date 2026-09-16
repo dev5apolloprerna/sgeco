@@ -17,6 +17,18 @@ try {
     exit(htmlspecialchars($exception->getMessage(), ENT_QUOTES, 'UTF-8'));
 }
 
+/**
+ * Render the bordered passport-photo placeholder used on the PDF card.
+ * The border is set on the table itself because TCPDF reliably preserves
+ * table borders when converting its supported HTML subset to PDF.
+ */
+function formXIIPdfPhotoBox()
+{
+    return '<table border="1" cellpadding="4">'
+        . '<tr><td height="112" valign="bottom">Passport Size<br>Photo</td></tr>'
+        . '</table>';
+}
+
 function formXIIPdfHtml(array $employee)
 {
     $d = formXIIEmployeeData($employee);
@@ -35,7 +47,7 @@ function formXIIPdfHtml(array $employee)
         $line('A1. LIN/PAN No. of the contractor:', 'AAMFS3884N') .
         $line('A2. Email Id of the contractor:', 'hkshah@sgeco.in') .
         $line('A3. Mobile No. of the contractor:', '7984454082') .
-        '</table></td><td width="23%"><table cellpadding="4"><tr><td height="112" style="border:1px solid #000" valign="bottom">Passport Size<br>Photo</td></tr></table></td></tr></table>' .
+        '</table></td><td width="23%">' . formXIIPdfPhotoBox() . '</td></tr></table>' .
         '<table cellpadding="4">' .
         '<tr><td height="18"></td><td></td></tr>' .
         $line('B. &nbsp; Nature and location of work:', '') .
