@@ -139,6 +139,7 @@ include('IsLogin.php');
                                                     $resultCom = mysqli_query($dbconn, $queryCom) or die(mysqli_error($dbconn));
                                                     echo '<select class="form-control" name="bank" id="bank" required="" >';
                                                     echo "<option value='' >Select Bank </option>";
+                                                    echo "<option value='all'>All Bank</option>";
                                                     while ($rowCom = mysqli_fetch_array($resultCom)) {
                                                         echo "<option value='" . $rowCom['bankmasterId'] . "'>" . $rowCom['bankname'] . "</option>";
                                                     }
@@ -202,6 +203,11 @@ include('IsLogin.php');
                                                         var Year = $('#Year').val();
                                                         //var salarymonthId = $('#salarymonthId').val();
                                                         var salarymonthId = month+'/'+Year;
+                                                        if (!bank) {
+                                                            alert('Please select Bank.');
+                                                            $('#bank').focus();
+                                                            return false;
+                                                        }
                                                         $('#loading').css("display", "block");
                                                         $.ajax({
                                                             type: "POST",
@@ -223,6 +229,11 @@ include('IsLogin.php');
                                                         var Year = $('#Year').val();
                                                         //var salarymonthId = $('#salarymonthId').val();
                                                         var salarymonthId = month+'/'+Year;
+                                                        if (!bank) {
+                                                            alert('Please select Bank.');
+                                                            $('#bank').focus();
+                                                            return false;
+                                                        }
                                                         //var strURL = "generatemulticompanyBankRepotPDF.php?bank=" + bank + "&companysalarymasterId=" + companysalarymasterId + "&salarymonthId=" + salarymonthId;
                                                         var strURL = "generatenewmulticompanyBankRepotPDF.php?bank=" + bank + "&companysalarymasterId=" + companysalarymasterId + "&salarymonthId=" + salarymonthId;
                                                         window.open(strURL, '_blank');
@@ -235,6 +246,11 @@ include('IsLogin.php');
                                                         var Year = $('#Year').val();
                                                         //var salarymonthId = $('#salarymonthId').val();
                                                         var salarymonthId = month+'/'+Year;
+                                                        if (!bank) {
+                                                            alert('Please select Bank.');
+                                                            $('#bank').focus();
+                                                            return false;
+                                                        }
                                                         //var strURL = "generatemulticompanyBankRepotExcel.php?bank=" + bank + "&companysalarymasterId=" + companysalarymasterId + "&salarymonthId=" + salarymonthId;
                                                         var strURL = "newgeneratemulticompanyBankRepotExcel.php?bank=" + bank + "&companysalarymasterId=" + companysalarymasterId + "&salarymonthId=" + salarymonthId;
                                                         window.open(strURL, '_blank');

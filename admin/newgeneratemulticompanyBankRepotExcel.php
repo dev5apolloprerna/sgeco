@@ -14,13 +14,20 @@ $spreadsheet = new Spreadsheet();
 include('../config.php');
 include_once 'companyReportAdvance.php';
 
+if (empty($_REQUEST['bank'])) {
+    http_response_code(400);
+    exit('Please select Bank.');
+}
+
 if ($_REQUEST['companysalarymasterId'] != NULL && $_REQUEST['salarymonthId'] != NULL) {
     $where = " and multicompany.companysalarymasterId = " . $_REQUEST['companysalarymasterId'] . " " and "  
         salarymaster.month = " . $_REQUEST['salarymonthId'] . " ";
 }
 $where1 = "";
 if ($_REQUEST['bank'] != NULL) {
-    if ($_REQUEST['bank'] == 3) {
+    if ($_REQUEST['bank'] === 'all') {
+        $where1 .= " and multicompany.pay_cash='0'";
+    } else if ($_REQUEST['bank'] == 3) {
         $where1 .= " and employee.bankid not in (1,2) and multicompany.pay_cash='0'";
         //$where1 .= " and employee.bankid not in (2) and multicompany.pay_cash='0'";
     } else if ($_REQUEST['bank'] == 1 || $_REQUEST['bank'] == 2) {
@@ -54,8 +61,12 @@ if (mysqli_num_rows($result) > 0) {
     }
     $companymasterId1 = rtrim($companymasterId1, ", ");
 //    echo "SELECT * FROM `bankmaster`  where isDelete='0'  and  istatus='1' and bankmasterId='" . $_REQUEST['bank'] . "'";
-    $bank = mysqli_fetch_array(mysqli_query($dbconn, "SELECT * FROM `bankmaster`  where isDelete='0'  and  istatus='1' and bankmasterId='" . $_REQUEST['bank'] . "'"));
-    if ($_REQUEST['bank'] != 0) {
+    $bank = $_REQUEST['bank'] === 'all'
+        ? array('bankname' => 'All Bank')
+        : mysqli_fetch_array(mysqli_query($dbconn, "SELECT * FROM `bankmaster`  where isDelete='0'  and  istatus='1' and bankmasterId='" . $_REQUEST['bank'] . "'"));
+    if ($_REQUEST['bank'] === 'all') {
+        $BankName = 'All Bank';
+    } else if ($_REQUEST['bank'] != 0) {
         if ($bank['bankmasterId'] == '1' || $bank['bankmasterId'] == '2') {
             // if($bank['bankmasterId'] == 1){
             //     $BankName = "BOB";
@@ -88,7 +99,7 @@ if (mysqli_num_rows($result) > 0) {
         ->setKeywords('office php')
         ->setCategory('Report');
     
-    if ($_REQUEST['bank'] == 3 || $_REQUEST['bank'] == "") {
+    if ($_REQUEST['bank'] == 3) {
          $spreadsheet->setActiveSheetIndex(0)
             ->setCellValue('G1', 'Date: ' . date('d-m-Y'));
             $spreadsheet->getActiveSheet()->getStyle('G1:G1')->getFont()->setSize(10);
@@ -526,7 +537,7 @@ if (mysqli_num_rows($result) > 0) {
     //$spreadsheet->getDefaultStyle()->getFont()->setSize(10); // Adjust the font size as needed
     
 }
-if ($_REQUEST['bank'] == 3 || $_REQUEST['bank'] == "") {
+if ($_REQUEST['bank'] == 3) {
     
     $rowNumber++;
     $rowNumber++;

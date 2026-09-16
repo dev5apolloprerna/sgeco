@@ -7,13 +7,20 @@ include ('User_Paging.php');
 include_once 'companyReportAdvance.php';
 
 if ($_POST['action'] == 'ListUser') {
+    if (empty($_POST['bank'])) {
+        http_response_code(400);
+        echo '<div class="alert alert-warning text-center">Please select Bank.</div>';
+        exit;
+    }
 
     if ($_REQUEST['companysalarymasterId'] != NULL && $_REQUEST['salarymonthId'] != NULL) {
         $where = " and multicompany.companysalarymasterId = " . $_POST['companysalarymasterId'] . " " and "  
         salarymaster.month = " . $_POST['salarymonthId'] . " ";
 
         if ($_REQUEST['bank'] != NULL) {
-            if ($_REQUEST['bank'] == 3) {
+            if ($_REQUEST['bank'] === 'all') {
+                $where .= " and multicompany.pay_cash='0'";
+            } else if ($_REQUEST['bank'] == 3) {
                 $where .= " and employee.bankid not in (1,2)  and multicompany.pay_cash='0'";
                 //$where .= " and employee.bankid not in (2)  and multicompany.pay_cash='0'";
             } else if ($_REQUEST['bank'] == 1 || $_REQUEST['bank'] == 2) {
@@ -59,11 +66,11 @@ if (mysqli_num_rows($resultfilter) > 0) {
                 <th class="desktop">Beneficiary Account Number</th>
                 <th class="desktop">Balance</th>
                 <th class="all">Beneficiary Name</th>
-                <?php if ($_REQUEST['bank'] == 3 || $_REQUEST['bank'] == "") {  ?>
+                <?php if ($_REQUEST['bank'] == 3) {  ?>
                     <th class="desktop">Beneficiary Address</th>
                 <?php } ?>
                 <th class="desktop">IFSC Code</th>
-                <?php if ($_REQUEST['bank'] == 3 || $_REQUEST['bank'] == "") {  ?>
+                <?php if ($_REQUEST['bank'] == 3) {  ?>
                     <th class="desktop">Comm.</th>
                 <?php } ?>
             </tr>
@@ -157,11 +164,11 @@ if (mysqli_num_rows($resultfilter) > 0) {
                 <th class="desktop">Total</th>
                 <th class="desktop"><?php echo number_format($Total[0],2); ?></th>
                 <th class="all"></th>
-                <?php if ($_REQUEST['bank'] == 3 || $_REQUEST['bank'] == "") {  ?>
+                <?php if ($_REQUEST['bank'] == 3) {  ?>
                     <th class="desktop"></th>
                 <?php } ?>
                 <th class="desktop"></th>
-                <?php if ($_REQUEST['bank'] == 3 || $_REQUEST['bank'] == "") {  ?>
+                <?php if ($_REQUEST['bank'] == 3) {  ?>
                     <th class="desktop"><?php echo number_format($Total[1],2); ?></th>
                 <?php } ?>
             </tr>
@@ -169,7 +176,7 @@ if (mysqli_num_rows($resultfilter) > 0) {
     </table>
     
     <br />
-    <?php if ($_POST['bank'] == 3 || $_POST['bank'] == "") { ?>
+    <?php if ($_REQUEST['bank'] == 3) {  ?>
             <table class="table-striped table-bordered table-hover dt-responsive" width="40%" id="tableC">
                 <tr>
                     <td>Amount.</td>

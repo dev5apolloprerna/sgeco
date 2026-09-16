@@ -9,6 +9,12 @@ require_once('tcpdf/tcpdf.php');
 include('../config.php');
 include_once 'companyReportAdvance.php';
 $where = "where 1=1";
+$where1 = "";
+
+if (empty($_REQUEST['bank'])) {
+    http_response_code(400);
+    exit('Please select Bank.');
+}
 
 if ($_REQUEST['companysalarymasterId'] != NULL && $_REQUEST['salarymonthId'] != NULL) {
     $where = " and multicompany.companysalarymasterId = " . $_REQUEST['companysalarymasterId'] . " " and "  
@@ -23,7 +29,9 @@ if ($_REQUEST['companysalarymasterId'] != NULL && $_REQUEST['salarymonthId'] != 
 //}
 
 if ($_REQUEST['bank'] != NULL) {
-    if ($_REQUEST['bank'] == 3) {
+    if ($_REQUEST['bank'] === 'all') {
+        $where1 .= " and multicompany.pay_cash='0'";
+    } else if ($_REQUEST['bank'] == 3) {
         $where1 .= " and employee.bankid not in (1,2) and multicompany.pay_cash='0'";
         //$where1 .= " and employee.bankid not in (2) and multicompany.pay_cash='0'";
     } else if ($_REQUEST['bank'] == 1 || $_REQUEST['bank'] == 2) {
@@ -71,14 +79,14 @@ while ($rowapplication = mysqli_fetch_array($result)) {
 //    $mailFormat_main = str_replace("#Company#", ucfirst(urldecode($comp['companyname'])), $mailFormat_main);
     //$mailFormat_main = str_replace("#BankName#", ucfirst(urldecode($BankName)), $mailFormat_main);
     $mailFormat_main = str_replace("#date#", ucfirst(urldecode(date('d-m-Y'))), $mailFormat_main);
-    if ($_REQUEST['bank'] == 3 || $_REQUEST['bank'] == "") {
+    if ($_REQUEST['bank'] == 3) {
         $BankName = 'Other';
         $bankstyle = "display: block";
         $BankNameStyle = "width: 350px;";
         $CommBankstyle = "display: block;";
         $Comm_Bankstyle = "display: none;";
     } else {
-        $BankName = $rowapplication['BankName'];
+        $BankName = $_REQUEST['bank'] === 'all' ? 'All Bank' : $rowapplication['BankName']; // $BankName = $rowapplication['BankName'];
         $bankstyle = "display: none";
         $BankNameStyle = "width: 520px;";
         $CommBankstyle = "display: none;";
@@ -123,7 +131,7 @@ while ($rowapplication = mysqli_fetch_array($result)) {
         $mailFormat = str_replace("#Sr.No#", ucfirst(urldecode($i)), $mailFormat);
         $mailFormat = str_replace("#emp_name#", ucwords(strtolower(urldecode($rowapplication['emp_name']))), $mailFormat);
         $mailFormat = str_replace("#Balance#", ucfirst(urldecode(number_format($Balance, 2))), $mailFormat);
-        if ($_REQUEST['bank'] == 3 || $_REQUEST['bank'] == "") {
+        if ($_REQUEST['bank'] == 3) {
             $mailFormat_main = str_replace("#BankName#", ucfirst(urldecode($BankName)), $mailFormat_main);
             $mailFormat = str_replace("#BankName#", ucfirst(urldecode($rowapplication['BankName'])), $mailFormat); 
             $mailFormat = str_replace("#bankstyle#", ucfirst(urldecode($bankstyle)), $mailFormat); 
