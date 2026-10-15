@@ -33,6 +33,8 @@ try {
         $text('A4', 'Name and address of Contractor: SHREE GANESH ENGINEERING CO., FF-8, Devshruti Complex, Nr. HCG Hospital, Mithakhali, Ahmedabad - 380006');
         $text('M4', $data['company']);
         $text('M6', $data['company']);
+        $sheet->setCellValue('M8', annualComplianceTotalDays($data['rows']));
+        $sheet->getStyle('M8')->getNumberFormat()->setFormatCode('0.##');
         $totals = array(5 => 0, 6 => 0, 7 => 0, 11 => 0, 12 => 0, 13 => 0);
         foreach ($data['rows'] as $i => $row) {
             foreach (annualComplianceValues($row, $i) as $column => $value) {

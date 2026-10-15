@@ -143,17 +143,30 @@ function annualComplianceValues(array $row, $index)
     );
 }
 
+function annualComplianceTotalDays(array $rows)
+{
+    return array_sum(array_column($rows, 'days'));
+}
+
 function renderAnnualComplianceHtml(array $data)
 {
     $e = function ($s) {
         return htmlspecialchars((string) $s, ENT_QUOTES, 'UTF-8');
     };
-    $html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:serif;font-size:10px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #000;padding:4px;vertical-align:middle}h2,p{text-align:center}thead{display:table-header-group}.number{text-align:right}</style></head><body>';
-    $html .= '<h2>FORM C</h2><p>[See Rule 4 D]</p><p>Bonus paid to employees for the accounting year ending on the F.Y. April ' . $data['year'] . ' to March ' . ($data['year'] + 1) . '</p>';
-    $html .= '<p>Name and address of Contractor: SHREE GANESH ENGINEERING CO., FF-8, Devshruti Complex, Nr. HCG Hospital, Mithakhali, Ahmedabad - 380006</p>';
-    $html .= '<p>Name and address of Establishment / Principal Employer: ' . $e($data['company']) . '</p>';
-    $html .= '<p>Nature and location of work: ____________________ &nbsp; No. of working days in the year: __________</p>';
-    $html .= '<table border="1" cellpadding="3"><thead><tr>';
+    $totalDays = bonusFormCDaysNumber(annualComplianceTotalDays($data['rows']));
+    $html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:"Times New Roman",serif;font-size:11px;margin:12px}table{border-collapse:collapse;width:100%;table-layout:fixed}th,td{border:1px solid #000;padding:4px;vertical-align:middle;overflow-wrap:break-word}h2,p{text-align:center}thead{display:table-header-group}.form-heading td{border:0;text-align:center}.details td{border:0;text-align:left}.number{text-align:right}@media screen{body{min-width:1900px}.register th{height:140px}.register td{height:30px}}</style></head><body>';
+    $html .= '<table class="form-heading"><tr><td><strong>FORM C<br>[See Rule 4 D]</strong></td></tr><tr><td>Bonus paid to employees for the accounting year ending on the F.Y. April ' . $data['year'] . ' to March ' . ($data['year'] + 1) . '</td></tr></table>';
+    // Match the workbook rows A4:Q8: contractor/nature on the left,
+    // establishment, principal employer and total worked days on the right.
+    $html .= '<table class="details" cellpadding="4"><tr>'
+        . '<td width="52%" rowspan="3">Name and address of Contractor:<br>SHREE GANESH ENGINEERING CO.<br>FF-8, Devshruti Complex, Nr. HCG Hospital,<br>Mithakhali, Ahmedabad - 380006</td>'
+        . '<td width="23%" rowspan="2">Name &amp; Address of Establishment in/under which contract is carried on:</td>'
+        . '<td width="25%" rowspan="2">' . $e($data['company']) . '</td></tr><tr></tr><tr>'
+        . '<td width="23%" rowspan="2">Name &amp; Address of Principal Employer:</td>'
+        . '<td width="25%" rowspan="2">' . $e($data['company']) . '</td></tr><tr>'
+        . '<td width="52%" rowspan="2">Nature and location of work: ____________________</td></tr><tr>'
+        . '<td width="23%">No. of working days in the year</td><td width="25%">' . $e($totalDays) . '</td></tr></table>';
+    $html .= '<table class="register" border="1" cellpadding="3"><thead><tr>';
     $headers = annualComplianceHeaders();
     $widths = array(3, 10, 9, 6, 6, 4, 7, 7, 6, 6, 6, 5, 6, 6, 5, 5, 3);
     foreach ($headers as $i => $header) {
