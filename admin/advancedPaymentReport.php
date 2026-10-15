@@ -68,6 +68,7 @@ requireAdvancedPaymentReportAccess($dbconn);
                                                 $resultCom = mysqli_query($dbconn, $queryCom) or die(mysql_error());
                                                 echo '<select class="form-control" name="bank" id="bank" required="" >';
                                                 echo "<option value='' >Select Bank </option>";
+                                                echo "<option value='all'>All Bank</option>";
                                                 while ($rowCom = mysqli_fetch_array($resultCom)) {
                                                     echo "<option value='" . $rowCom['bankmasterId'] . "'>" . $rowCom['bankname'] . "</option>";
                                                 }
@@ -104,6 +105,9 @@ requireAdvancedPaymentReportAccess($dbconn);
         }
 
         function PageLoadData(page) {
+            if (!bankIsSelected()) {
+                return false;
+            }
             $('#loading').show();
             $.post('AjaxAdvancedPaymentReport.php', reportParameters() + '&action=ListUser&Page=' + page, function(html) {
                 $('#PlaceUsersDataHere').html(html);
@@ -115,7 +119,18 @@ requireAdvancedPaymentReportAccess($dbconn);
         }
 
         function exportReport(url) {
+            if (!bankIsSelected()) {
+                return false;
+            }
             window.open(url + '?' + reportParameters(), '_blank');
+        }
+        function bankIsSelected() {
+            if ($('#bank').val()) {
+                return true;
+            }
+            alert('Please select Bank.');
+            $('#bank').focus();
+            return false;
         }
         $('#frmSearch').on('submit', function(event) {
             event.preventDefault();

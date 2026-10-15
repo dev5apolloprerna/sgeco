@@ -9,6 +9,7 @@ requireAdvancedPaymentReportAccess($dbconn);
 if (!isset($_POST['action']) || $_POST['action'] !== 'ListUser') {
     exit;
 }
+requireAdvancedPaymentReportBankSelection($_POST);
 $filters = advancedPaymentReportFilters($dbconn, $_POST);
 $bankFormat = advancedPaymentReportUsesBankFormat($filters);
 $where = advancedPaymentReportWhere($dbconn, $filters);

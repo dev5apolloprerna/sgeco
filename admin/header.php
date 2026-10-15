@@ -291,7 +291,13 @@ $advanced = array("advancedmaster.php", "AddAdvancedDetails.php", 'viewAdvancedD
                                     </li>
                                     <li>
                                         <a href="<?php echo $web_url; ?>admin/OtherReport.php" class="nav-link">
-                                            Other Report
+                                            <!-- Other Report -->
+                                             Monthly Complaince Report
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="<?php echo $web_url; ?>admin/AnnualComplianceReport.php" class="nav-link">
+                                            Anual Complaince Report
                                         </a>
                                     </li>
                                     <li>

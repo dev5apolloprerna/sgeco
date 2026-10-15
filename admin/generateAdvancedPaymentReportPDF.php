@@ -7,6 +7,7 @@ include('IsLogin.php');
 include_once 'advancedPaymentReportData.php';
 requireAdvancedPaymentReportAccess($dbconn);
 
+requireAdvancedPaymentReportBankSelection($_GET);
 $filters = advancedPaymentReportFilters($dbconn, $_GET);
 $result = mysqli_query($dbconn, advancedPaymentReportQuery(advancedPaymentReportWhere($dbconn, $filters)));
 function advancedPaymentPdfLookupName($dbconn, $table, $idColumn, $nameColumn, $id, $fallback)
@@ -27,7 +28,7 @@ function advancedPaymentPdfEscape($value)
 }
 
 $companyName = advancedPaymentPdfLookupName($dbconn, 'companymaster', 'companymasterId', 'companyname', $filters['companyId'], 'All Companies');
-$bankName = advancedPaymentPdfLookupName($dbconn, 'bankmaster', 'bankmasterId', 'bankname', $filters['bankId'], 'All Banks');
+$bankName = advancedPaymentPdfLookupName($dbconn, 'bankmaster', 'bankmasterId', 'bankname', $filters['bankId'], 'All Bank');
 $monthLabel = advancedPaymentReportMonthLabel($filters);
 $bankFormat = advancedPaymentReportUsesBankFormat($filters);
 $showTransferNote = advancedPaymentReportShowsTransferNote($filters);

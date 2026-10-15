@@ -18,6 +18,7 @@ use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
+requireAdvancedPaymentReportBankSelection($_GET);
 $filters = advancedPaymentReportFilters($dbconn, $_GET);
 $result = mysqli_query($dbconn, advancedPaymentReportQuery(advancedPaymentReportWhere($dbconn, $filters)));
 
@@ -34,7 +35,7 @@ function advancedPaymentReportLookupName($dbconn, $table, $idColumn, $nameColumn
 }
 
 $companyName = advancedPaymentReportLookupName($dbconn, 'companymaster', 'companymasterId', 'companyname', $filters['companyId'], 'All Companies');
-$bankName = advancedPaymentReportLookupName($dbconn, 'bankmaster', 'bankmasterId', 'bankname', $filters['bankId'], 'All Banks');
+$bankName = advancedPaymentReportLookupName($dbconn, 'bankmaster', 'bankmasterId', 'bankname', $filters['bankId'], 'All Bank');
 $monthLabel = advancedPaymentReportMonthLabel($filters);
 $bankFormat = advancedPaymentReportUsesBankFormat($filters);
 $showTransferNote = advancedPaymentReportShowsTransferNote($filters);

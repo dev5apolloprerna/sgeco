@@ -18,7 +18,9 @@ function requireAdvancedPaymentReportAccess($dbconn)
 function advancedPaymentReportFilters($dbconn, $source)
 {
     $companyId = isset($source['Company']) ? (int) $source['Company'] : 0;
-    $bankId = isset($source['bank']) ? (int) $source['bank'] : 0;
+    $bankValue = isset($source['bank']) ? trim((string) $source['bank']) : '';
+    $allBanks = $bankValue === 'all';
+    $bankId = $allBanks ? 0 : (int) $bankValue;
     $month = isset($source['month']) ? trim($source['month']) : '';
     $year = isset($source['Year']) ? trim($source['Year']) : '';
     $fromDate = isset($source['fromDate']) ? trim($source['fromDate']) : '';
@@ -45,7 +47,18 @@ function advancedPaymentReportFilters($dbconn, $source)
         $toDate = $temporaryDate;
     }
 
-    return array('companyId' => $companyId, 'bankId' => $bankId, 'month' => $month, 'year' => $year, 'fromDate' => $fromDate, 'toDate' => $toDate);
+    return array('companyId' => $companyId, 'bankId' => $bankId, 'allBanks' => $allBanks, 'month' => $month, 'year' => $year, 'fromDate' => $fromDate, 'toDate' => $toDate);
+}
+
+function requireAdvancedPaymentReportBankSelection($source)
+{
+    if (isset($source['bank']) && trim((string) $source['bank']) !== '') {
+        return;
+    }
+
+    http_response_code(400);
+    echo 'Please select Bank.';
+    exit;
 }
 
 function advancedPaymentReportWhere($dbconn, $filters)
@@ -74,7 +87,7 @@ function advancedPaymentReportWhere($dbconn, $filters)
 
 function advancedPaymentReportUsesBankFormat($filters)
 {
-    return $filters['bankId'] === 1 || $filters['bankId'] === 2;
+    return $filters['allBanks'] || $filters['bankId'] === 1 || $filters['bankId'] === 2;
 }
 
 function advancedPaymentReportShowsTransferNote($filters)
