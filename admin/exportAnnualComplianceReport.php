@@ -76,13 +76,21 @@ try {
     }
     $html = renderAnnualComplianceHtml($data);
     if ($format === 'pdf') {
-        // TCPDF can turn the shared HTML border into a heavy table frame.
-        // Use a fine PDF grid and explicitly borderless heading cells.
-        $html = str_replace('border:1px solid #000', 'border:0.35pt solid #000', $html);
-        $html = str_replace('class="register" border="1"', 'class="register" border="0" cellspacing="0"', $html);
-        $html = preg_replace_callback('/<table class="(?:form-heading|details)"[^>]*>.*?<\/table>/s', function ($match) {
-            $table = preg_replace('/<table\b/', '<table border="0" cellspacing="0" style="border:0"', $match[0], 1);
-            return preg_replace('/<td\b/', '<td style="border:0"', $table);
+        // Use explicit cell borders: TCPDF does not consistently resolve the
+        // shared stylesheet's border overrides on the merged heading cells.
+        $html = preg_replace('/border(?:-[a-z]+)*\s*:[^;}]+;?/i', '', $html);
+        $html = preg_replace_callback('/<(table|td|th)\b([^>]*)>/i', function ($match) {
+            $tag = strtolower($match[1]);
+            $attributes = preg_replace('/\s+(?:border|cellspacing)\s*=\s*(?:"[^"]*"|\'[^\']*\'|[^\s>]+)/i', '', $match[2]);
+            $borderStyle = $tag === 'table' ? 'border-collapse:collapse;' : 'border:0.35pt solid #000;';
+            if (preg_match('/\bstyle\s*=\s*(["\'])(.*?)\1/is', $attributes)) {
+                $attributes = preg_replace_callback('/\bstyle\s*=\s*(["\'])(.*?)\1/is', function ($style) use ($borderStyle) {
+                    return 'style=' . $style[1] . $style[2] . ';' . $borderStyle . $style[1];
+                }, $attributes);
+            } else {
+                $attributes .= ' style="' . $borderStyle . '"';
+            }
+            return '<' . $tag . $attributes . ($tag === 'table' ? ' border="0" cellspacing="0"' : '') . '>';
         }, $html);
         require_once __DIR__ . '/tcpdf/tcpdf.php';
         $pdf = new TCPDF('L', 'mm', 'A3', true, 'UTF-8', false);
