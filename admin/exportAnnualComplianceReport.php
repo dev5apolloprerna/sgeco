@@ -76,6 +76,14 @@ try {
     }
     $html = renderAnnualComplianceHtml($data);
     if ($format === 'pdf') {
+        // TCPDF can turn the shared HTML border into a heavy table frame.
+        // Use a fine PDF grid and explicitly borderless heading cells.
+        $html = str_replace('border:1px solid #000', 'border:0.35pt solid #000', $html);
+        $html = str_replace('class="register" border="1"', 'class="register" border="0" cellspacing="0"', $html);
+        $html = preg_replace_callback('/<table class="(?:form-heading|details)"[^>]*>.*?<\/table>/s', function ($match) {
+            $table = preg_replace('/<table\b/', '<table border="0" cellspacing="0" style="border:0"', $match[0], 1);
+            return preg_replace('/<td\b/', '<td style="border:0"', $table);
+        }, $html);
         require_once __DIR__ . '/tcpdf/tcpdf.php';
         $pdf = new TCPDF('L', 'mm', 'A3', true, 'UTF-8', false);
         $pdf->setPrintHeader(false);
@@ -83,6 +91,7 @@ try {
         $pdf->SetTitle('Annual Compliance Report — Form C');
         $pdf->SetMargins(5, 5, 5);
         $pdf->SetAutoPageBreak(true, 5);
+        $pdf->SetLineWidth(0.1);
         $pdf->SetFont('helvetica', '', 8);
         $pdf->AddPage();
         $pdf->writeHTML($html);
